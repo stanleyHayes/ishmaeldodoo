@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import type { Role } from "../../auth/domain/roles";
-import type { ProtocolNoteInput } from "@amanor/contracts";
+import { httpsUrlSchema, type ProtocolNoteInput } from "@amanor/contracts";
 import {
   classifyCapacity,
   type CapacityAssessment,
@@ -62,7 +62,7 @@ export const engagementRequestInputSchema = z
         .trim()
         .length(2)
         .transform((value) => value.toUpperCase()),
-      website: z.url().max(500).optional(),
+      website: httpsUrlSchema.max(500).optional(),
       convenors: z.string().trim().max(1_000).optional(),
     }),
     requester: z.object({

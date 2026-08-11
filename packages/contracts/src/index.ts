@@ -4,7 +4,13 @@ export type {
   ApiOperations,
 } from "./generated/api-operations.js";
 
-export const httpsUrlSchema = z.url({ protocol: /^https$/u });
+export const httpsUrlSchema = z.url({ protocol: /^https$/u }).refine(
+  (value) => {
+    const url = new URL(value);
+    return url.username === "" && url.password === "";
+  },
+  { message: "URL must not contain embedded credentials" },
+);
 
 export const apiErrorSchema = z.object({
   statusCode: z.number().int(),

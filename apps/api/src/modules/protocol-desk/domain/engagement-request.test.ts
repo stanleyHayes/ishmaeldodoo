@@ -80,6 +80,27 @@ describe("Protocol Desk request aggregate", () => {
     });
   });
 
+  it("rejects unsafe or credential-bearing organisation websites", () => {
+    for (const website of [
+      "http://forum.example",
+      "javascript:alert(1)",
+      "https://operator@forum.example/private",
+      "https://operator:secret@forum.example/private",
+    ]) {
+      expect(
+        () =>
+          createRequest(
+            {
+              ...validInput,
+              organisation: { ...validInput.organisation, website },
+            },
+            1,
+          ),
+        website,
+      ).toThrow();
+    }
+  });
+
   it("rejects honorarium data through the domain for official capacity", () => {
     expect(() =>
       createRequest({ ...validInput, capacity: "official" }, 1),

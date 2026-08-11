@@ -64,7 +64,7 @@ describe("authentication-method contracts", () => {
 });
 
 describe("public HTTPS URL contract", () => {
-  it("accepts HTTPS and rejects executable, embedded, legacy and plaintext schemes", () => {
+  it("accepts credential-free HTTPS and rejects unsafe schemes or embedded credentials", () => {
     expect(
       httpsUrlSchema.safeParse("https://example.test/evidence").success,
     ).toBe(true);
@@ -73,6 +73,9 @@ describe("public HTTPS URL contract", () => {
       "data:text/html,<script>alert(1)</script>",
       "ftp://example.test/archive",
       "http://example.test/plaintext",
+      "https://operator@example.test/private",
+      "https://operator:secret@example.test/private",
+      "https://operator%40example.test:secret@example.test/private",
     ])
       expect(httpsUrlSchema.safeParse(value).success, value).toBe(false);
   });

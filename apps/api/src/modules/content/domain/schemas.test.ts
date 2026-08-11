@@ -636,6 +636,8 @@ describe("CMS content schemas", () => {
       "data:text/html,<script>alert(1)</script>",
       "ftp://example.test/archive",
       "http://example.test/plaintext",
+      "https://operator@example.test/private",
+      "https://operator:secret@example.test/private",
     ]) {
       expect(
         publishableSchemas.identity.safeParse({

@@ -17,9 +17,12 @@ versions reported are deliberately held at the latest supported major:
 | TypeScript |          6.0.3 |                  7.0.2 | `typescript-eslint@8.67.0`, also used by `eslint-config-next@16.3.0`, publishes `typescript >=4.8.4 <6.1.0`. TypeScript 7 is outside that range.                                                                                   |
 
 These are compatibility holds, not permanent pins. Dependabot checks npm and
-GitHub Actions weekly. Compatible patch and minor updates are grouped; majors
-remain individually reviewable. When the blocking packages publish support,
-upgrade the held major in one reviewed change and run the complete root gate.
+GitHub Actions weekly. Compatible patch and minor updates are grouped; unrelated
+majors remain individually reviewable. The known-incompatible ESLint,
+`@eslint/js` and TypeScript major lines are ignored so the npm update lane does
+not create an internally split toolchain or fail while resolving a rejected
+update. When the blocking packages publish support, remove the matching ignore,
+update this evidence and upgrade the held major in one reviewed change.
 
 ## Required evidence for dependency changes
 

@@ -7,6 +7,7 @@ const dependabot = parse(await readFile(".github/dependabot.yml", "utf8"));
 assert.equal(dependabot.version, 2, "Dependabot must use schema version 2");
 
 const updates = Array.isArray(dependabot.updates) ? dependabot.updates : [];
+let npmUpdate;
 for (const ecosystem of ["npm", "github-actions"]) {
   const update = updates.find(
     (entry) => entry?.["package-ecosystem"] === ecosystem,
@@ -22,13 +23,28 @@ for (const ecosystem of ["npm", "github-actions"]) {
     "weekly",
     `${ecosystem} updates must run weekly`,
   );
+  if (ecosystem === "npm") npmUpdate = update;
 }
+
+const majorHoldNames = new Set(
+  (npmUpdate?.ignore ?? [])
+    .filter((entry) =>
+      entry?.["update-types"]?.includes("version-update:semver-major"),
+    )
+    .map((entry) => entry["dependency-name"]),
+);
+assert.deepEqual(
+  majorHoldNames,
+  new Set(["eslint", "@eslint/js", "typescript"]),
+  "Dependabot major holds must match the reviewed incompatible toolchain",
+);
 
 const policy = await readFile("docs/quality/dependency-currency.md", "utf8");
 for (const evidence of [
   /\|\s*ESLint\s*\|\s*9\.39\.5\s*\|\s*10\.8\.1\s*\|/u,
   /\|\s*TypeScript\s*\|\s*6\.0\.3\s*\|\s*7\.0\.2\s*\|/u,
   /typescript >=4\.8\.4 <6\.1\.0/u,
+  /known-incompatible ESLint,/u,
   /no forced or legacy peer-dependency mode/u,
 ])
   assert.ok(

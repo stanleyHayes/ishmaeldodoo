@@ -29,6 +29,7 @@ export async function POST(request: Request) {
       `${webEnvironment.PUBLIC_API_BASE_URL}/public/contact-enquiries`,
       {
         method: "POST",
+        redirect: "error",
         headers: {
           "Content-Type": "application/json",
           ...correlationRequestHeaders(correlation),

@@ -23,6 +23,7 @@ export async function GET(request: Request): Promise<Response> {
   );
   try {
     const upstream = await fetch(url, {
+      redirect: "error",
       headers: {
         Accept: "application/json",
         ...serviceAuthHeaders(url, publicServiceAuth, "GET", correlation),

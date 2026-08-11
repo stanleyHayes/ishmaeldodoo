@@ -30,6 +30,7 @@ export async function POST(request: Request): Promise<Response> {
       `${webEnvironment.PUBLIC_API_BASE_URL}/public/living-dossier`,
       {
         method: "POST",
+        redirect: "error",
         headers: {
           "Content-Type": "application/json",
           Accept: "application/pdf",

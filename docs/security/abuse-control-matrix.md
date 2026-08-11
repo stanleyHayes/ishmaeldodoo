@@ -18,5 +18,5 @@ This is the application-layer evidence record for AMANOR-118. Edge WAF and bot c
 - Configure Cloudflare WAF managed rules and route-specific rate policies against the deployed origins.
 - Configure Turnstile or the approved bot provider on public forms. Provider failure must route the submission to manual review instead of silently dropping or automatically rejecting a legitimate request.
 - Execute credential-stuffing, distributed-IP, large-body, slow-request and bot-provider-outage drills in staging.
-- Confirm alert delivery, proxy-trust configuration and real client-IP preservation behind the production edge.
+- Confirm alert delivery and execute the Render/Vercel deployment runbook's two-source, 31-spoof-header client-IP preservation drill through both final and direct API hostnames; retain privacy-safe status/count evidence only.
 - Obtain independent security review and close every high or critical finding.

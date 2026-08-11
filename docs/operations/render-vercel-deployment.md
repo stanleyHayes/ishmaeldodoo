@@ -18,6 +18,19 @@ The Blueprint prompts for every `sync: false` value on first creation. Never put
 
 The API image installs system Chromium for governed Press Kit, Living Dossier and Protocol Note PDF generation. It continues to run as the non-root `node` user. `CHROME_NO_SANDBOX=true` is limited to the Render container boundary and must be revisited if Render exposes a supported Chromium sandbox.
 
+### Trusted proxy and client-IP acceptance
+
+Render's public load balancer is the only network hop that can reach the service's bound public port, so the Blueprint fixes `TRUST_PROXY_HOPS=1`. Do not increase it for a Cloudflare/custom-domain layer without a captured provider path proving that Render exposes an additional trusted address to Express. The provider-adapter gate rejects a missing, zero or multi-hop Render value; local direct HTTP remains at the API default of zero trusted hops.
+
+Before staging acceptance, prove both preservation and spoof resistance against the deployed API:
+
+1. From one controlled source address, send 31 invalid login requests with unique valid-looking email addresses and 31 varied spoofed `X-Forwarded-For` values. Request 31 must return `429` with a bounded `Retry-After`; changing the supplied header must not reset the IP bucket.
+2. Repeat from a second controlled source address after clearing the dedicated staging limiter collection. Its first request must receive a fresh allowance, proving distinct real clients are not collapsed into the proxy address.
+3. Repeat through the final custom/Cloudflare hostname and the direct `onrender.com` hostname. Both paths must produce the same result before the direct hostname is restricted at the edge; otherwise stop launch and correct the trust topology.
+4. Retain only timestamps, path label, response status, remaining count and `Retry-After`. Do not retain raw source addresses, spoof values, submitted emails, cookies or authorization data.
+
+This drill validates the provider path; local unit tests and a configured hop count do not. Keep Cloudflare WAF enforcement external to the application rate limit so neither control silently substitutes for the other.
+
 ### Migration promotion gate
 
 Create a separate MongoDB migration identity and store `MONGODB_MIGRATION_URI` only in the protected release environment that executes:

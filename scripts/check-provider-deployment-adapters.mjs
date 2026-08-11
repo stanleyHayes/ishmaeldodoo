@@ -76,6 +76,11 @@ for (const forbidden of [
     `${forbidden} must not enter the long-running API service`,
   );
 assert.equal(apiEnv.get("RUN_MIGRATIONS")?.value, "false");
+assert.equal(
+  apiEnv.get("TRUST_PROXY_HOPS")?.value,
+  "1",
+  "Render public traffic must preserve exactly one trusted load-balancer hop",
+);
 assert.equal(apiEnv.get("ROOM_ENABLED")?.value, "false");
 assert.equal(apiEnv.get("WEBAUTHN_ENABLED")?.value, "false");
 assert.deepEqual(
@@ -115,6 +120,7 @@ for (const phrase of [
   "Render API service remains manually promoted",
   "Deployment Protection",
   "Cloudinary uploads originate from local files",
+  "31 varied spoofed `X-Forwarded-For` values",
 ])
   assert.ok(guide.includes(phrase), `Deployment guide is missing: ${phrase}`);
 

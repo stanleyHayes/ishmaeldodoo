@@ -6,15 +6,22 @@ const roots = [
   "apps/web/src/app/api",
   "apps/web/src/lib",
   "apps/admin/src/lib",
+  "apps/api/src",
 ];
+const ignoredSourcePattern = /(?:^|\.)(?:test|spec)\.[^.]+$/u;
 
 async function sourceFiles(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
   const nested = await Promise.all(
     entries.map(async (entry) => {
       const path = join(directory, entry.name);
-      if (entry.isDirectory()) return sourceFiles(path);
-      return entry.isFile() && /\.(?:ts|tsx)$/u.test(entry.name) ? [path] : [];
+      if (entry.isDirectory())
+        return entry.name === "__fixtures__" ? [] : sourceFiles(path);
+      return entry.isFile() &&
+        /\.(?:ts|tsx)$/u.test(entry.name) &&
+        !ignoredSourcePattern.test(entry.name)
+        ? [path]
+        : [];
     }),
   );
   return nested.flat();
@@ -40,8 +47,8 @@ const fetchCount = outboundSources.reduce(
 );
 assert.equal(
   fetchCount,
-  24,
-  "The frontend outbound-fetch inventory changed; review the new or removed destination boundary",
+  33,
+  "The production outbound-fetch inventory changed; review the new or removed destination boundary",
 );
 
 for (const { path, source } of outboundSources) {
@@ -59,5 +66,5 @@ for (const { path, source } of outboundSources) {
 }
 
 process.stdout.write(
-  `All ${fetchCount} Web and Admin outbound fetch sites reject redirects; removal fixtures failed closed.\n`,
+  `All ${fetchCount} Web, Admin and API outbound fetch sites reject redirects; removal fixtures failed closed.\n`,
 );

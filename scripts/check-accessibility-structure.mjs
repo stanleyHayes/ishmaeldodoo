@@ -1,5 +1,5 @@
-import { readFileSync } from "node:fs";
-import { execFileSync } from "node:child_process";
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 
 function assertFocusableMainTargets(source, label, minimum = 1) {
   const targets = [
@@ -16,22 +16,19 @@ function assertFocusableMainTargets(source, label, minimum = 1) {
   return targets.length;
 }
 
-const files = execFileSync(
-  "rg",
-  [
-    "-l",
-    'id="main-content"',
-    "apps/web/src",
-    "--glob",
-    "*.tsx",
-    "--glob",
-    "!*.test.tsx",
-  ],
-  { encoding: "utf8" },
-)
-  .trim()
-  .split("\n")
-  .filter(Boolean);
+function sourceFiles(directory) {
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const path = join(directory, entry.name);
+    if (entry.isDirectory()) return sourceFiles(path);
+    if (!entry.isFile() || !entry.name.endsWith(".tsx")) return [];
+    if (entry.name.endsWith(".test.tsx")) return [];
+    return readFileSync(path, "utf8").includes('id="main-content"')
+      ? [path]
+      : [];
+  });
+}
+
+const files = sourceFiles("apps/web/src");
 const source = files.map((file) => readFileSync(file, "utf8")).join("\n");
 const count = assertFocusableMainTargets(source, "Public application", 13);
 

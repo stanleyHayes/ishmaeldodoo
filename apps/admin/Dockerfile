@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.7
-FROM node:22.18.0-bookworm-slim AS build
+FROM node:22.23.1-bookworm-slim AS build
 ARG NEXT_PUBLIC_API_BASE_URL=http://localhost:4000/v1
 ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
 ARG NEXT_PUBLIC_AMANOR_DEPLOYMENT_ENV=local
@@ -14,7 +14,7 @@ COPY apps/admin apps/admin
 COPY packages/contracts packages/contracts
 RUN npm run build --workspace @amanor/contracts && npm run build --workspace @amanor/admin
 
-FROM node:22.18.0-bookworm-slim AS runtime
+FROM node:22.23.1-bookworm-slim AS runtime
 ENV NODE_ENV=production PORT=3001 HOSTNAME=0.0.0.0
 WORKDIR /workspace
 RUN apt-get update && apt-get upgrade -y --no-install-recommends && rm -rf /var/lib/apt/lists/* \

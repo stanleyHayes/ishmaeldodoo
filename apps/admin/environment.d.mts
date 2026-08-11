@@ -1,8 +1,5 @@
 export type AdminDeploymentEnvironment =
-  | "local"
-  | "preview"
-  | "staging"
-  | "production";
+  "local" | "preview" | "staging" | "production";
 export type AdminEnvironment = Readonly<{
   deploymentEnvironment: AdminDeploymentEnvironment;
   apiBaseUrl: string;

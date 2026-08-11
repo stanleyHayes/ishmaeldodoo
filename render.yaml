@@ -1,0 +1,109 @@
+# yaml-language-server: $schema=https://render.com/schema/render.yaml.json
+services:
+  - type: web
+    name: amanor-api
+    runtime: docker
+    plan: starter
+    region: frankfurt
+    branch: main
+    autoDeployTrigger: off
+    dockerContext: .
+    dockerfilePath: ./apps/api/Dockerfile
+    healthCheckPath: /v1/health/ready
+    maxShutdownDelaySeconds: 30
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: RUN_MIGRATIONS
+        value: "false"
+      - key: TRUST_PROXY_HOPS
+        value: "1"
+      - key: ADMIN_ORIGIN
+        sync: false
+      - key: PUBLIC_WEB_ORIGIN
+        sync: false
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_ISSUER
+        sync: false
+      - key: JWT_AUDIENCE
+        value: amanor-admin
+      - key: JWT_KEY_ID
+        sync: false
+      - key: JWT_PRIVATE_KEY_PEM
+        sync: false
+      - key: JWT_PUBLIC_KEY_PEM
+        sync: false
+      - key: JWT_VERIFICATION_KEYS
+        sync: false
+      - key: SESSION_PEPPER
+        generateValue: true
+      - key: SESSION_RETIRING_PEPPERS
+        value: "[]"
+      - key: MFA_ENCRYPTION_KEY
+        sync: false
+      - key: MFA_RETIRING_ENCRYPTION_KEYS
+        value: "[]"
+      - key: RATE_LIMIT_PEPPER
+        generateValue: true
+      - key: WEB_REVALIDATION_URL
+        sync: false
+      - key: REVALIDATION_WEBHOOK_KEYS
+        sync: false
+      - key: REVALIDATION_ACTIVE_KEY_ID
+        sync: false
+      - key: REVALIDATION_AUDIENCE
+        value: amanor-public-web
+      - key: PUBLIC_WEB_SERVICE_KEYS
+        sync: false
+      - key: PUBLIC_WEB_SERVICE_AUDIENCE
+        value: amanor-public-api
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: PROTOCOL_DECISION_DERIVATION_KEY
+        generateValue: true
+      - key: PRESS_CONTACT_EMAIL
+        sync: false
+      - key: GENERAL_CONTACT_EMAIL
+        sync: false
+      - key: METRICS_BEARER_TOKEN
+        generateValue: true
+      - key: CHROME_EXECUTABLE_PATH
+        value: /usr/bin/chromium
+      - key: CHROME_NO_SANDBOX
+        value: "true"
+      - key: ROOM_ENABLED
+        value: "false"
+      - key: WEBAUTHN_ENABLED
+        value: "false"
+
+  - type: cron
+    name: amanor-retention
+    runtime: docker
+    plan: starter
+    region: frankfurt
+    branch: main
+    autoDeployTrigger: checksPass
+    schedule: "17 2 * * *"
+    dockerContext: .
+    dockerfilePath: ./apps/api/Dockerfile
+    dockerCommand: node apps/api/dist/retention.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_RETENTION_URI
+        sync: false
+      - key: CLOUDINARY_RETENTION_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_RETENTION_API_KEY
+        sync: false
+      - key: CLOUDINARY_RETENTION_API_SECRET
+        sync: false

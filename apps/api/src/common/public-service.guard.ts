@@ -3,6 +3,7 @@ import {
   CanActivate,
   ExecutionContext,
   Injectable,
+  Optional,
   UnauthorizedException,
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
@@ -36,7 +37,7 @@ function equal(left: string, right: string): boolean {
 
 @Injectable()
 export class PublicServiceGuard implements CanActivate {
-  constructor(private readonly configuration?: ConfigService) {}
+  constructor(@Optional() private readonly configuration?: ConfigService) {}
 
   canActivate(context: ExecutionContext): boolean {
     if (!this.configuration) {

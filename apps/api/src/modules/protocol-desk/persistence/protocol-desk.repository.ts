@@ -852,8 +852,7 @@ export class ProtocolDeskRepository {
   ): Promise<Readonly<{ reference: string; state: RequestState }>> {
     const session = await this.connection.startSession();
     let result:
-      | Readonly<{ reference: string; state: RequestState }>
-      | undefined;
+      Readonly<{ reference: string; state: RequestState }> | undefined;
     try {
       await session.withTransaction(async () => {
         const {
@@ -954,8 +953,7 @@ export class ProtocolDeskRepository {
   ): Promise<Readonly<Partial<Record<PrincipalDecisionAction, string>>>> {
     const session = await this.connection.startSession();
     let tokens:
-      | Readonly<Partial<Record<PrincipalDecisionAction, string>>>
-      | undefined;
+      Readonly<Partial<Record<PrincipalDecisionAction, string>>> | undefined;
     try {
       await session.withTransaction(async () => {
         const { requests, decisionCapabilities, principalDecisionDeliveries } =

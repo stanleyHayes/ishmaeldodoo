@@ -111,11 +111,9 @@ export function ProtocolDeskWorkspace({
     const next: Partial<ProtocolDeskQueueQuery> = {};
     const q = String(data.get("q") ?? "").trim();
     const state = String(data.get("state") ?? "") as
-      | ProtocolDeskQueueQuery["state"]
-      | "";
+      ProtocolDeskQueueQuery["state"] | "";
     const flag = String(data.get("flag") ?? "") as
-      | ProtocolDeskQueueQuery["flag"]
-      | "";
+      ProtocolDeskQueueQuery["flag"] | "";
     if (q) next.q = q;
     if (state) next.state = state;
     if (flag) next.flag = flag;

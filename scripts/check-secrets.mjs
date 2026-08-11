@@ -48,7 +48,15 @@ async function files(directory) {
     if (entry.isDirectory() && ignoredDirectories.has(entry.name)) continue;
     const path = join(directory, entry.name);
     if (entry.isDirectory()) found.push(...(await files(path)));
-    else if (entry.isFile() && scannableExtensions.has(extname(entry.name)))
+    // Any .env variant is scanned regardless of what `extname` makes of it:
+    // `.env.production` reports an extension of ".production" and would
+    // otherwise be skipped, which is exactly the file most likely to hold a
+    // real private key.
+    else if (
+      entry.isFile() &&
+      (scannableExtensions.has(extname(entry.name)) ||
+        entry.name.startsWith(".env"))
+    )
       found.push(path);
   }
   return found;
@@ -93,7 +101,10 @@ function gitIgnoredPaths(candidates) {
   if (candidates.length === 0) return new Set();
   const result = spawnSync(
     "git",
-    ["check-ignore", "--stdin", "-z", "--no-index"],
+    // Deliberately without --no-index. A file force-added to the index is
+    // tracked and will be committed even though it matches an ignore rule;
+    // --no-index would report it as ignored and skip the very case that leaks.
+    ["check-ignore", "--stdin", "-z"],
     {
       cwd: root,
       input: `${candidates.join("\0")}\0`,

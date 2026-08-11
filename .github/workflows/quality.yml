@@ -46,6 +46,7 @@ jobs:
           filters: |
             api:
               - 'apps/api/**'
+              - 'render.yaml'
               - 'packages/contracts/**'
               - 'apps/api/Dockerfile'
               - '.dockerignore'

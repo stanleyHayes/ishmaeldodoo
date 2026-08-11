@@ -1286,11 +1286,9 @@ integration("MongoDB replica-set integration", () => {
     }
     expect(provider).toHaveBeenCalledTimes(2);
     const firstDelivery = provider.mock.calls[0]?.[1] as
-      | RequestInit
-      | undefined;
+      RequestInit | undefined;
     const secondDelivery = provider.mock.calls[1]?.[1] as
-      | RequestInit
-      | undefined;
+      RequestInit | undefined;
     expect(firstDelivery?.body).toBe(secondDelivery?.body);
     if (typeof secondDelivery?.body !== "string")
       throw new Error("Principal decision provider body was not serialized");

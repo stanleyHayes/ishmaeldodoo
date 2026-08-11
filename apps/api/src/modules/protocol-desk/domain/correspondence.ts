@@ -8,11 +8,7 @@ import type { EngagementRequest, RequestState } from "./engagement-request";
 export type CorrespondenceTemplate =
   (typeof protocolDeskCorrespondenceTemplates)[number];
 export type CorrespondenceStatus =
-  | "pending"
-  | "processing"
-  | "delivered"
-  | "failed"
-  | "cancelled";
+  "pending" | "processing" | "delivered" | "failed" | "cancelled";
 export type CorrespondenceJob = Readonly<{
   correspondenceId: string;
   requestId: string;

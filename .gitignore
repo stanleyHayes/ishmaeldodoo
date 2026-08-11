@@ -8,11 +8,11 @@ coverage/
 .lighthouseci/
 playwright-report/
 test-results/
+# Every .env variant is secret-bearing. Enumerating individual suffixes let
+# .env.production through: it was neither ignored here nor scanned by
+# check-secrets, because its extension is ".production".
 .env
-.env.local
-.env.*.local
-.env.*isolated*
-.env.*backup*
+.env.*
 !.env.example
 .DS_Store
 *.log

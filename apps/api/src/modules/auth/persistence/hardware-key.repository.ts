@@ -37,8 +37,7 @@ export class HardwareKeyRepository {
   constructor(@InjectConnection() connection: Connection) {
     this.ceremonies =
       (connection.models.WebAuthnChallenge as
-        | Model<HardwareKeyCeremony>
-        | undefined) ??
+        Model<HardwareKeyCeremony> | undefined) ??
       (connection.model(
         "WebAuthnChallenge",
         webAuthnChallengeSchema,
@@ -46,8 +45,7 @@ export class HardwareKeyRepository {
       ) as unknown as Model<HardwareKeyCeremony>);
     this.credentials =
       (connection.models.WebAuthnCredential as
-        | Model<HardwareKeyCredential>
-        | undefined) ??
+        Model<HardwareKeyCredential> | undefined) ??
       (connection.model(
         "WebAuthnCredential",
         webAuthnCredentialSchema,

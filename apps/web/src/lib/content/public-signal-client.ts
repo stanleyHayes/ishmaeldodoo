@@ -10,8 +10,7 @@ import {
 import { typographyForLocale } from "../i18n/french-typography";
 
 export type PublicSignalResult =
-  | { status: "available"; signal: PublicSignal }
-  | { status: "unavailable" };
+  { status: "available"; signal: PublicSignal } | { status: "unavailable" };
 type Relative<P extends string> = P extends `/v1${infer R}` ? R : never;
 const path: Relative<ApiOperations["PublicSignalsController_latest"]["path"]> =
   "/public/signals/latest";

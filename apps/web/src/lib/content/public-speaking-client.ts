@@ -10,8 +10,7 @@ import {
 import { typographyForLocale } from "../i18n/french-typography";
 
 export type PublicSpeakingResult =
-  | ({ status: "available" } & PublicSpeaking)
-  | { status: "unavailable" };
+  ({ status: "available" } & PublicSpeaking) | { status: "unavailable" };
 type Relative<P extends string> = P extends `/v1${infer R}` ? R : never;
 const path: Relative<ApiOperations["PublicSpeakingController_list"]["path"]> =
   "/public/speaking";

@@ -9,8 +9,7 @@ import {
 } from "../service-auth";
 import { typographyForLocale } from "../i18n/french-typography";
 export type PublicAtlasResult =
-  | ({ status: "available" } & PublicAtlas)
-  | { status: "unavailable" };
+  ({ status: "available" } & PublicAtlas) | { status: "unavailable" };
 type Relative<P extends string> = P extends `/v1${infer R}` ? R : never;
 const path: Relative<ApiOperations["PublicAtlasController_list"]["path"]> =
   "/public/atlas";

@@ -543,8 +543,7 @@ describe("AuthService", () => {
     const { service, repository } = await fixture();
     repository.findUserByEmail.mockResolvedValue(null);
     let persisted:
-      | Parameters<AuthRepository["createInvitedUser"]>[0]
-      | undefined;
+      Parameters<AuthRepository["createInvitedUser"]>[0] | undefined;
     repository.createInvitedUser.mockImplementation(
       (input: Parameters<AuthRepository["createInvitedUser"]>[0]) => {
         persisted = input;

@@ -10,8 +10,7 @@ import {
 import { typographyForLocale } from "../i18n/french-typography";
 
 export type PublicArchiveResult =
-  | ({ status: "available" } & PublicArchive)
-  | { status: "unavailable" };
+  ({ status: "available" } & PublicArchive) | { status: "unavailable" };
 type Relative<P extends string> = P extends `/v1${infer R}` ? R : never;
 const path: Relative<ApiOperations["PublicArchiveController_list"]["path"]> =
   "/public/archive";

@@ -49,6 +49,7 @@
     "check:analytics": "node scripts/check-product-dashboard.mjs",
     "check:release": "node scripts/check-release-process.mjs",
     "check:deployment-manifests": "node scripts/check-deployment-manifests.mjs",
+    "check:provider-adapters": "node scripts/check-provider-deployment-adapters.mjs",
     "check:environment": "node scripts/check-environment-inventory.mjs",
     "check:load": "node scripts/check-load-rehearsal.mjs",
     "check:devices": "node scripts/check-device-matrix.mjs",
@@ -60,15 +61,17 @@
     "check:security-ci": "node scripts/check-security-workflows.mjs",
     "check:format": "prettier --check .",
     "check:secrets": "node scripts/check-secrets.mjs --verify-fixtures",
-    "check": "npm run check:format && npm run check:boundaries && npm run check:public-copy && npm run check:french-typography && npm run check:contracts && npm run check:traceability && npm run check:decisions && npm run check:privacy-retention && npm run check:media-governance && npm run check:observability && npm run check:email-domain && npm run check:analytics && npm run check:release && npm run check:deployment-manifests && npm run check:environment && npm run check:load && npm run check:devices && npm run check:handover && npm run check:acceptance-evidence && npm run check:concurrency-guards && npm run check:accessibility-structure && npm run check:security && npm run check:security-ci && npm run check:secrets && npm run typecheck && npm run lint && npm run test:coverage && npm run build && npm run check:frontend-bundles && npm run check:standard-script-budget && npm run check:sahel-budget"
+    "check": "npm run check:format && npm run check:boundaries && npm run check:public-copy && npm run check:french-typography && npm run check:contracts && npm run check:traceability && npm run check:decisions && npm run check:privacy-retention && npm run check:media-governance && npm run check:observability && npm run check:email-domain && npm run check:analytics && npm run check:release && npm run check:deployment-manifests && npm run check:provider-adapters && npm run check:environment && npm run check:load && npm run check:devices && npm run check:handover && npm run check:acceptance-evidence && npm run check:concurrency-guards && npm run check:accessibility-structure && npm run check:security && npm run check:security-ci && npm run check:secrets && npm run typecheck && npm run lint && npm run test:coverage && npm run build && npm run check:frontend-bundles && npm run check:standard-script-budget && npm run check:sahel-budget"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.12.1",
     "@lhci/cli": "0.15.1",
     "@playwright/test": "1.62.1",
     "@vitest/coverage-v8": "4.1.10",
-    "prettier": "3.8.2",
-    "typescript": "6.0.3"
+    "eslint": "9.39.5",
+    "prettier": "^3.9.6",
+    "typescript": "6.0.3",
+    "yaml": "^2.9.0"
   },
   "overrides": {
     "@nestjs/swagger@11.4.6": {

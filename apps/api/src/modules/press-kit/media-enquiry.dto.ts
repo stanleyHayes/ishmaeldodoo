@@ -33,6 +33,5 @@ export class MediaEnquiryDto {
   @Length(20, 4000)
   message!: string;
   @ApiProperty({ enum: ["en-GB", "fr-FR"] }) @IsIn(["en-GB", "fr-FR"]) locale!:
-    | "en-GB"
-    | "fr-FR";
+    "en-GB" | "fr-FR";
 }

@@ -1,0 +1,75 @@
+# Render and Vercel deployment preparation
+
+- Status: provider adapters complete; accounts, domains, secrets and first deployments not yet provisioned
+- Repository: `stanleyHayes/ishmaeldodoo`
+- Render adapter: `render.yaml`
+- Vercel adapters: `apps/web/vercel.json` and `apps/admin/vercel.json`
+
+The three applications remain separate release units. Render runs only the NestJS API and the isolated retention cron. Vercel uses two projects for the public Web and Admin/CMS. MongoDB remains an external MongoDB service; Render does not substitute PostgreSQL for it.
+
+## Render Blueprint
+
+Create a Blueprint from the repository-root `render.yaml`. It provisions:
+
+- `amanor-api`: Docker Web Service in Frankfurt, built from `apps/api/Dockerfile`, with readiness at `/v1/health/ready`, a 30-second graceful shutdown window and `RUN_MIGRATIONS=false`;
+- `amanor-retention`: separate daily Docker cron running `node apps/api/dist/retention.js` with only its MongoDB and Cloudinary retention credentials.
+
+The Blueprint prompts for every `sync: false` value on first creation. Never put values into `render.yaml`. Use a production MongoDB replica-set URI with TLS and least-privilege application grants for `MONGODB_URI`. The long-running API intentionally receives neither `MONGODB_MIGRATION_URI` nor retention credentials.
+
+The API image installs system Chromium for governed Press Kit, Living Dossier and Protocol Note PDF generation. It continues to run as the non-root `node` user. `CHROME_NO_SANDBOX=true` is limited to the Render container boundary and must be revisited if Render exposes a supported Chromium sandbox.
+
+### Migration promotion gate
+
+Create a separate MongoDB migration identity and store `MONGODB_MIGRATION_URI` only in the protected release environment that executes:
+
+```sh
+npm ci --ignore-scripts
+npm run build --workspace @amanor/contracts
+npm run build --workspace @amanor/api
+npm run migrate --workspace @amanor/api
+```
+
+Run this once for the exact commit after backup/recovery-point evidence and before manually promoting the matching Render API deploy. Do not add `preDeployCommand` with the migration URI: Render service environment variables remain available to the long-running service and would collapse the required credential boundary. For that reason the Render API service remains manually promoted even though GitHub CI is mandatory.
+
+## Public Web on Vercel
+
+Create a Vercel project from the GitHub repository with:
+
+- Root Directory: `apps/web`
+- Framework Preset: Next.js
+- Include source files outside the Root Directory: enabled, so the npm workspace and `packages/contracts` are available
+- Node.js: 22.x
+- Production Branch: `main`
+- Deployment Protection: enabled for Preview; staging must also be protected and `PUBLIC_INDEXING_ENABLED=false`
+
+Configure each environment separately. Required production settings are `PUBLIC_API_BASE_URL`, `AMANOR_DEPLOYMENT_ENV`, `PUBLIC_WEB_BASE_URL`, `REVALIDATION_WEBHOOK_KEYS`, `REVALIDATION_AUDIENCE`, `PUBLIC_SERVICE_KEY_ID`, `PUBLIC_SERVICE_SECRET`, `PUBLIC_SERVICE_AUDIENCE`, `PUBLIC_INDEXING_ENABLED`, `LEAFLET_TILE_URL` and `LEAFLET_TILE_ATTRIBUTION`. Configure analytics only after S04 approval. Configure Room trust-anchor build values only after its Security/Legal release gates.
+
+`PUBLIC_API_BASE_URL` must be the Render API HTTPS origin ending in `/v1`. `PUBLIC_WEB_BASE_URL` must be the exact Vercel/custom origin for the current environment. The service-auth and revalidation key rings must match their API verification/signing counterparts without copying values into Git or build logs.
+
+## Admin/CMS on Vercel
+
+Create a second Vercel project from the same repository with:
+
+- Root Directory: `apps/admin`
+- Framework Preset: Next.js
+- Include source files outside the Root Directory: enabled
+- Node.js: 22.x
+- Production Branch: `main`
+- Deployment Protection: enabled for every non-production deployment
+
+Set only `NEXT_PUBLIC_AMANOR_DEPLOYMENT_ENV` and `NEXT_PUBLIC_API_BASE_URL`. The Admin application receives no secrets. The API URL must be the exact HTTPS Render origin ending in `/v1`; the same Admin origin must be supplied to Render as `ADMIN_ORIGIN` for credentialed CORS, Origin/CSRF enforcement and WebAuthn.
+
+## Domain and cross-deployment order
+
+1. Resolve D01 and provision the API, public Web and Admin domains.
+2. Create separate MongoDB application, migration and retention users.
+3. Create the Render Blueprint with WebAuthn and Room disabled.
+4. Create both Vercel projects and environment-specific variables.
+5. Replace Render `PUBLIC_WEB_ORIGIN`, `ADMIN_ORIGIN`, `WEB_REVALIDATION_URL` and `JWT_ISSUER` with the final HTTPS origins.
+6. Run the isolated migration command, then manually promote the exact Render commit.
+7. Deploy Admin and Web, run the seven-check remote smoke suite and verify credentialed Admin login from the exact origin.
+8. Verify local-file Cloudinary ingestion end to end. Cloudinary uploads originate from local files through the Admin workflow; no profile or content image URL field may be introduced.
+9. Enable WebAuthn only after RP, origin, authenticator and custody approval. Keep Room disabled until its separate cryptographic release gates pass.
+10. Record immutable release identifiers, smoke output, rollback targets and approvals in the release-candidate record.
+
+Provider dashboards and environment-variable evidence must contain names/status only, never secret values. A successful Blueprint sync or Vercel build is not staging acceptance until remote smoke, migrations, provider integrations, rollback and the required reviews pass.

@@ -1,7 +1,7 @@
 import { createHmac, randomUUID } from "node:crypto";
 import { ConfigService } from "@nestjs/config";
 import { UnauthorizedException, type ExecutionContext } from "@nestjs/common";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { PublicServiceGuard } from "./public-service.guard";
 
 const currentSecret = "current-service-secret-with-more-than-32-bytes";
@@ -62,6 +62,37 @@ function guard() {
 }
 
 describe("PublicServiceGuard", () => {
+  afterEach(() => vi.unstubAllEnvs());
+
+  it("permits missing development configuration but fails closed in production", () => {
+    vi.stubEnv("NODE_ENV", "development");
+    expect(new PublicServiceGuard().canActivate({} as ExecutionContext)).toBe(
+      true,
+    );
+
+    vi.stubEnv("NODE_ENV", "production");
+    expect(() =>
+      new PublicServiceGuard().canActivate({} as ExecutionContext),
+    ).toThrow(UnauthorizedException);
+  });
+
+  it("permits an unconfigured development service and rejects malformed keys", () => {
+    const development = new PublicServiceGuard(
+      new ConfigService({ NODE_ENV: "development" }),
+    );
+    expect(development.canActivate({} as ExecutionContext)).toBe(true);
+
+    const malformed = new PublicServiceGuard(
+      new ConfigService({
+        NODE_ENV: "production",
+        PUBLIC_WEB_SERVICE_KEYS: "not-json",
+      }),
+    );
+    expect(() => malformed.canActivate({} as ExecutionContext)).toThrow(
+      UnauthorizedException,
+    );
+  });
+
   it("accepts both current and previous keys during rotation", () => {
     expect(
       guard().canActivate(context(headers("current", currentSecret))),

@@ -28,11 +28,7 @@ export const audienceDoorLabels: Readonly<
   },
 };
 export type AdaptiveBlock =
-  | "record"
-  | "atlas"
-  | "current"
-  | "signal"
-  | "invitation";
+  "record" | "atlas" | "current" | "signal" | "invitation";
 
 export const audienceCookieName = "amanor-audience";
 export const audienceStorageName = "amanor-audience";

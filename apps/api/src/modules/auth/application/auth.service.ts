@@ -67,8 +67,7 @@ export class AuthService {
     email: string,
     password: string,
     verificationInput:
-      | string
-      | Readonly<{ mfaCode?: string; recoveryCode?: string }>,
+      string | Readonly<{ mfaCode?: string; recoveryCode?: string }>,
     now = new Date(),
   ): Promise<AuthenticatedSession> {
     const canonicalEmail = email.trim().toLowerCase();

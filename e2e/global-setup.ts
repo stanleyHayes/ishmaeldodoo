@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import type { JsonWebKey } from "node:crypto";
+import type { webcrypto } from "node:crypto";
 import { signRoomKeyManifest } from "@amanor/contracts";
 import { encryptMfaSecret } from "../apps/api/src/modules/auth/domain/mfa";
 import { hashPassword } from "../apps/api/src/modules/auth/domain/password";
@@ -138,7 +138,7 @@ export default async function globalSetup(): Promise<void> {
   const now = new Date();
   const trustAnchorPrivateJwk = JSON.parse(
     process.env.E2E_ROOM_TRUST_ANCHOR_PRIVATE_JWK ?? "null",
-  ) as JsonWebKey | null;
+  ) as webcrypto.JsonWebKey | null;
   const recipientPublicKey = process.env.E2E_ROOM_RECIPIENT_PUBLIC_KEY;
   if (!trustAnchorPrivateJwk || !recipientPublicKey) {
     throw new Error("The E2E Room cryptographic fixture is unavailable");

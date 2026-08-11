@@ -53,8 +53,15 @@ export class RoomAccessGuard implements CanActivate {
     //    `amr`. The default is `hwk`, which the platform does not yet issue, so
     //    this fails closed until hardware-key MFA lands under AMANOR-116.
     const { requiredAuthenticationMethods } = this.configuration.read();
-    const present = new Set(claims.authenticationMethods);
-    if (!requiredAuthenticationMethods.every((method) => present.has(method))) {
+    // `amr` arrives as free-form strings from the token; the required set is a
+    // closed union. Comparing as strings keeps the check honest without
+    // asserting that an attacker-supplied claim is already well typed.
+    const present = new Set<string>(claims.authenticationMethods);
+    if (
+      !requiredAuthenticationMethods.every((method) =>
+        present.has(method as string),
+      )
+    ) {
       return denied();
     }
 

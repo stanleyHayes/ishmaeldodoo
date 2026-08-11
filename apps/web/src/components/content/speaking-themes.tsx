@@ -249,6 +249,15 @@ function ThemeCard({
                       >
                         {copy.loadMedia}
                       </Link>
+                      {item.relatedArchive ? (
+                        <Link
+                          href={`${localizePath("/archive", locale)}#${item.relatedArchive}`}
+                        >
+                          {locale === "fr-FR"
+                            ? "Transcription et contexte"
+                            : "Transcript and context"}
+                        </Link>
+                      ) : null}
                     </div>
                   ) : mediaById[item.assetId]?.resourceType === item.kind ? (
                     <figure className={styles.mediaItem}>

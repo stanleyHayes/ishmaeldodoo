@@ -101,6 +101,7 @@ export default defineConfig({
         SESSION_PEPPER: "e2e-session-pepper-at-least-thirty-two-bytes",
         MFA_ENCRYPTION_KEY: e2eMfaKey,
         RATE_LIMIT_PEPPER: "e2e-rate-limit-pepper-at-least-thirty-two-bytes",
+        CHROME_NO_SANDBOX: "true",
         API_TLS_PRIVATE_KEY_PEM: tlsPrivateKey,
         API_TLS_CERTIFICATE_PEM: tlsCertificate,
       },

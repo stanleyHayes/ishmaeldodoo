@@ -227,6 +227,9 @@ describe("SpeakingThemes", () => {
       "href",
       "/api/sahel?enabled=0&return=%2Fspeaking%23public-value",
     );
+    expect(
+      screen.getByRole("link", { name: "Transcript and context" }),
+    ).toHaveAttribute("href", "/archive#regional-forum");
 
     rerender(
       <SpeakingThemes

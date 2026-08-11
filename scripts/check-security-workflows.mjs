@@ -14,6 +14,7 @@ for (const invariant of [
   "languages: ${{ matrix.language }}",
   "build-mode: none",
   "queries: security-extended",
+  "actions/checkout@v7",
   "github/codeql-action/init@v4",
   "github/codeql-action/analyze@v4",
 ])
@@ -23,6 +24,18 @@ assert.ok(
   codeql.includes("fail-fast: false"),
   "One CodeQL language failure must not suppress the other analysis result",
 );
+
+for (const runtimeAction of [
+  "actions/checkout@v7",
+  "actions/setup-node@v7",
+  "actions/upload-artifact@v7",
+  "dorny/paths-filter@v4",
+  "gitleaks/gitleaks-action@v3",
+])
+  assert.ok(
+    quality.includes(runtimeAction),
+    `Quality workflow lost current Node 24 action ${runtimeAction}`,
+  );
 
 for (const image of ["api", "web", "admin"]) {
   const file = `amanor-${image}.sarif`;
@@ -38,7 +51,7 @@ for (const image of ["api", "web", "admin"]) {
 }
 
 assert.equal(
-  (quality.match(/uses: anchore\/scan-action@v6/gu) ?? []).length,
+  (quality.match(/uses: anchore\/scan-action@v7/gu) ?? []).length,
   3,
   "All three independently deployed images require vulnerability scans",
 );

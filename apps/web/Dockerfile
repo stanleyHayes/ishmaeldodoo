@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.7
-FROM node:22.23.1-bookworm-slim AS build
+FROM node:24.18.0-bookworm-slim AS build
 WORKDIR /workspace
 COPY package.json package-lock.json ./
 COPY apps/web/package.json apps/web/package.json
@@ -10,7 +10,7 @@ COPY apps/web apps/web
 COPY packages/contracts packages/contracts
 RUN npm run build --workspace @amanor/contracts && npm run build --workspace @amanor/web
 
-FROM node:22.23.1-bookworm-slim AS runtime
+FROM node:24.18.0-bookworm-slim AS runtime
 ENV NODE_ENV=production PORT=3000 HOSTNAME=0.0.0.0
 WORKDIR /workspace
 RUN apt-get update && apt-get upgrade -y --no-install-recommends && rm -rf /var/lib/apt/lists/* \

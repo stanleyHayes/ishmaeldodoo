@@ -21,7 +21,7 @@
     "check:privacy-retention": "node scripts/check-privacy-retention.mjs",
     "check:media-governance": "node scripts/check-media-governance.mjs",
     "build": "npm run build --workspace @amanor/contracts && npm run build --workspace @amanor/admin --workspace @amanor/api --workspace @amanor/web",
-    "typecheck": "npm run typecheck --workspaces --if-present && tsc -p tsconfig.e2e.json",
+    "typecheck": "npm run build --workspace @amanor/contracts && npm run typecheck --workspaces --if-present && tsc -p tsconfig.e2e.json",
     "lint": "npm run lint --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "test:coverage": "npm run test:coverage --workspaces --if-present",

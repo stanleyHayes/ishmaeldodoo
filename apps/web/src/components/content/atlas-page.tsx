@@ -76,8 +76,15 @@ export function AtlasPage({
             </div>
             <div>
               {result.translation.stale && fr ? (
-                <p className="translation-notice">
-                  Traduction en cours de révision.
+                <p className="translation-notice" role="status">
+                  Traduction en cours de révision. Texte source mis à jour le{" "}
+                  {result.translation.sourceUpdatedAt
+                    ? result.translation.sourceUpdatedAt.toLocaleDateString(
+                        "fr-FR",
+                        { timeZone: "UTC" },
+                      )
+                    : "date non disponible"}
+                  .
                 </p>
               ) : null}
               <AtlasTable

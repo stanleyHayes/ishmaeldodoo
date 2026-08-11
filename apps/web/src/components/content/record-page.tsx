@@ -201,7 +201,14 @@ export function RecordPage({
       result.status === "available" &&
       result.content.translation.stale ? (
         <p className="translation-notice" role="status">
-          Traduction en cours de révision.
+          Traduction en cours de révision. Texte source mis à jour le{" "}
+          {result.content.translation.sourceUpdatedAt
+            ? result.content.translation.sourceUpdatedAt.toLocaleDateString(
+                "fr-FR",
+                { timeZone: "UTC" },
+              )
+            : "date non disponible"}
+          .
         </p>
       ) : null}
       <header className="record-hero">

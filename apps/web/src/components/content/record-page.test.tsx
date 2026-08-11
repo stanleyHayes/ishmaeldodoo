@@ -54,6 +54,42 @@ const result: PublicContentResult = {
 };
 
 describe("RecordPage", () => {
+  it("discloses a dated stale-translation state only in French", () => {
+    const staleResult = {
+      ...result,
+      content: {
+        ...(result.status === "available" ? result.content : {}),
+        locale: "fr-FR",
+        translation: {
+          stale: true,
+          sourceUpdatedAt: new Date("2026-08-09T00:00:00.000Z"),
+        },
+      },
+    } as PublicContentResult;
+
+    const { rerender } = render(
+      <RecordPage
+        result={staleResult}
+        atlas={[]}
+        locale="fr-FR"
+        ledger="diplomatic"
+        lite
+      />,
+    );
+    expect(screen.getByRole("status")).toHaveTextContent("09/08/2026");
+
+    rerender(
+      <RecordPage
+        result={staleResult}
+        atlas={[]}
+        locale="en-GB"
+        ledger="diplomatic"
+        lite
+      />,
+    );
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
+
   it("renders the four acts, sticky progress semantics and claim-level sources", () => {
     render(
       <RecordPage

@@ -47,7 +47,9 @@ describe("InvitationAcceptance", () => {
         mfaCode: "123456",
       }),
     );
-    expect(screen.getByRole("status")).toHaveTextContent(/setup is complete/iu);
+    expect(
+      await screen.findByText(/account setup is complete/iu),
+    ).toBeInTheDocument();
     expect(screen.getByLabelText("Recovery codes")).toHaveTextContent(
       "ABCD-2345-EFGH-6789",
     );

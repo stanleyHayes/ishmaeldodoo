@@ -1,6 +1,7 @@
 **/.next/**
 .raven/**
 **/coverage/**
+.lighthouseci/**
 **/dist/**
 node_modules/**
 tmp/**

@@ -9,15 +9,21 @@ const expectedRoutes = new Set([
   "http://localhost:3310/record/atlas/table?lite=1",
   "http://localhost:3310/press?lite=1",
 ]);
+const reportsPerRoute = 3;
+const routeCounts = new Map([...expectedRoutes].map((route) => [route, 0]));
 
-if (manifest.length !== expectedRoutes.size) {
-  throw new Error(`Expected ${expectedRoutes.size} Lighthouse reports`);
+if (manifest.length !== expectedRoutes.size * reportsPerRoute) {
+  throw new Error(
+    `Expected ${reportsPerRoute} Lighthouse reports for each of ${expectedRoutes.size} routes`,
+  );
 }
 
 for (const entry of manifest) {
-  if (!expectedRoutes.delete(entry.url)) {
+  const currentCount = routeCounts.get(entry.url);
+  if (currentCount === undefined) {
     throw new Error(`Unexpected Lighthouse route: ${entry.url}`);
   }
+  routeCounts.set(entry.url, currentCount + 1);
   const report = JSON.parse(await readFile(entry.jsonPath, "utf8"));
   const script = report.audits["resource-summary"].details.items.find(
     (item) => item.resourceType === "script",
@@ -41,6 +47,14 @@ for (const entry of manifest) {
   if (failed.length) {
     throw new Error(
       `${entry.url} failed Lighthouse DoD checks: ${failed.join(", ")}; script=${script?.transferSize ?? "missing"} bytes`,
+    );
+  }
+}
+
+for (const [route, count] of routeCounts) {
+  if (count !== reportsPerRoute) {
+    throw new Error(
+      `Expected ${reportsPerRoute} Lighthouse reports for ${route}; received ${count}`,
     );
   }
 }

@@ -36,6 +36,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     await Promise.race([
       fetch(endpoint, {
         method: "POST",
+        redirect: "error",
         headers: {
           "Content-Type": "application/json",
           "User-Agent": "AMANOR analytics proxy",

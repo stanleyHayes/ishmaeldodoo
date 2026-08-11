@@ -107,6 +107,7 @@ describe("CalendarSyncWorker", () => {
       configuration.CALENDAR_API_URL,
       expect.objectContaining({
         method: "POST",
+        redirect: "error",
         headers: expect.objectContaining({
           Authorization: `Bearer ${configuration.CALENDAR_API_TOKEN}`,
           "Idempotency-Key": "protocol-desk:request-1",

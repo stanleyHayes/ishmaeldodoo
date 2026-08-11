@@ -90,6 +90,7 @@ export class ContactEnquiryWorker
     try {
       const response = await fetch("https://api.resend.com/emails", {
         method: "POST",
+        redirect: "error",
         headers: {
           Authorization: `Bearer ${this.config.getOrThrow<string>("RESEND_API_KEY")}`,
           "Content-Type": "application/json",

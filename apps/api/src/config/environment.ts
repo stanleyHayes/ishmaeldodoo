@@ -305,6 +305,24 @@ export function validateEnvironment(
       "CALENDAR_API_URL, CALENDAR_API_TOKEN and CALENDAR_ID must be configured together",
     );
   }
+  if (validated.CALENDAR_API_URL)
+    assertOutboundEndpoint("CALENDAR_API_URL", validated.CALENDAR_API_URL, {
+      requireHttps: true,
+    });
+  if (validated.WEB_REVALIDATION_URL) {
+    const revalidationUrl = assertOutboundEndpoint(
+      "WEB_REVALIDATION_URL",
+      validated.WEB_REVALIDATION_URL,
+      { requireHttps: validated.NODE_ENV === "production" },
+    );
+    if (
+      revalidationUrl.origin !== new URL(validated.PUBLIC_WEB_ORIGIN).origin ||
+      revalidationUrl.pathname !== "/api/revalidate"
+    )
+      throw new Error(
+        "WEB_REVALIDATION_URL must target PUBLIC_WEB_ORIGIN at /api/revalidate",
+      );
+  }
   if (validated.NODE_ENV === "production" && !validated.MONGODB_URI) {
     throw new Error("MONGODB_URI is required in production");
   }
@@ -564,4 +582,29 @@ function assertDeploymentOrigin(
     throw new Error(`${key} requires HTTPS except for non-production loopback`);
   if (nodeEnvironment === "production" && loopback)
     throw new Error(`${key} must not use loopback in production`);
+}
+
+function assertOutboundEndpoint(
+  key: "CALENDAR_API_URL" | "WEB_REVALIDATION_URL",
+  value: string,
+  options: Readonly<{ requireHttps: boolean }>,
+): URL {
+  const url = new URL(value);
+  if (
+    url.username ||
+    url.password ||
+    url.port ||
+    url.search ||
+    url.hash ||
+    !["http:", "https:"].includes(url.protocol)
+  )
+    throw new Error(`${key} contains prohibited URL parts`);
+  if (options.requireHttps && url.protocol !== "https:")
+    throw new Error(`${key} must use HTTPS`);
+  if (
+    url.protocol === "http:" &&
+    !["localhost", "127.0.0.1", "[::1]"].includes(url.hostname)
+  )
+    throw new Error(`${key} permits plaintext only on loopback`);
+  return url;
 }

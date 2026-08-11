@@ -52,10 +52,10 @@ describe("RevalidationOutboxService degradation", () => {
       .mockResolvedValueOnce({ ...job, attempts: 3 })
       .mockResolvedValueOnce(null);
     const collection = vi.fn().mockReturnValue({ findOneAndUpdate, updateOne });
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue(new Response(null, { status: 409 })),
-    );
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(new Response(null, { status: 409 }));
+    vi.stubGlobal("fetch", fetchMock);
     const worker = new RevalidationOutboxService(
       { db: { collection } } as never,
       new ConfigService({
@@ -70,6 +70,10 @@ describe("RevalidationOutboxService degradation", () => {
 
     await worker.drain();
 
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://www.example.test/api/revalidate",
+      expect.objectContaining({ redirect: "error" }),
+    );
     expect(updateOne).toHaveBeenCalledWith(
       { _id: "job-id", status: "processing" },
       expect.objectContaining({

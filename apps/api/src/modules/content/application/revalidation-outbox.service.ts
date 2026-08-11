@@ -118,6 +118,7 @@ export class RevalidationOutboxService
           ),
         },
         body: rawBody,
+        redirect: "error",
         signal: AbortSignal.timeout(5_000),
       });
       if (!response.ok && response.status !== 409)

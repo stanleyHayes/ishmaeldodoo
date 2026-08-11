@@ -59,6 +59,7 @@ describe("analytics route", () => {
         .status,
     ).toBe(204);
     const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(init.redirect).toBe("error");
     const payload = JSON.parse(String(init.body)) as Record<string, unknown>;
     expect(payload).toEqual({
       domain: "www.example.test",

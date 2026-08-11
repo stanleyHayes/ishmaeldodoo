@@ -113,6 +113,7 @@ export class AuthNotificationWorker
       const message = messages[job.type];
       const response = await fetch("https://api.resend.com/emails", {
         method: "POST",
+        redirect: "error",
         headers: {
           Authorization: `Bearer ${this.configuration.getOrThrow<string>("RESEND_API_KEY")}`,
           "Content-Type": "application/json",

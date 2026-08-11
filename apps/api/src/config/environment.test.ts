@@ -188,6 +188,36 @@ describe("API environment", () => {
     expect(() =>
       validateEnvironment({ ...configured, CALENDAR_API_URL: "http://unsafe" }),
     ).toThrow(/environment/u);
+    for (const CALENDAR_API_URL of [
+      "https://operator:secret@calendar.example.test/events",
+      "https://calendar.example.test:8443/events",
+      "https://calendar.example.test/events?token=secret",
+      "https://calendar.example.test/events#fragment",
+    ])
+      expect(() =>
+        validateEnvironment({ ...configured, CALENDAR_API_URL }),
+      ).toThrow(/prohibited URL parts/u);
+  });
+
+  it("binds revalidation delivery to the exact public Web endpoint", () => {
+    expect(
+      validateEnvironment({
+        PUBLIC_WEB_ORIGIN: "https://www.example.test",
+        WEB_REVALIDATION_URL: "https://www.example.test/api/revalidate",
+      }).WEB_REVALIDATION_URL,
+    ).toBe("https://www.example.test/api/revalidate");
+    for (const WEB_REVALIDATION_URL of [
+      "https://other.example.test/api/revalidate",
+      "https://www.example.test/other",
+      "https://operator:secret@www.example.test/api/revalidate",
+      "https://www.example.test/api/revalidate?token=secret",
+    ])
+      expect(() =>
+        validateEnvironment({
+          PUBLIC_WEB_ORIGIN: "https://www.example.test",
+          WEB_REVALIDATION_URL,
+        }),
+      ).toThrow(/PUBLIC_WEB_ORIGIN|prohibited URL parts/u);
   });
 
   it("validates rotatable service and revalidation key rings", () => {

@@ -55,6 +55,7 @@ describe("ContactEnquiryWorker", () => {
     expect(delivery).toHaveBeenCalledWith(
       "https://api.resend.com/emails",
       expect.objectContaining({
+        redirect: "error",
         headers: expect.objectContaining({
           "Idempotency-Key": "GC-2026-ABC12345",
         }),

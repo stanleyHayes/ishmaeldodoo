@@ -113,6 +113,7 @@ export class CalendarSyncWorker
             "Idempotency-Key": payload.idempotencyKey,
           },
           body: JSON.stringify(payload),
+          redirect: "error",
           signal: AbortSignal.timeout(10_000),
         },
       );

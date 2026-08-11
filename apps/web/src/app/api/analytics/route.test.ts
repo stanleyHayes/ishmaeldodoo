@@ -1,6 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+
+vi.mock("server-only", () => ({}));
+
 import { POST } from "./route";
 import { POST as consent } from "./consent/route";
+import { webEnvironment } from "../../../lib/env";
 
 const event = {
   name: "atlas_record_opened",
@@ -22,8 +26,8 @@ const request = (body: unknown, headers: Record<string, string> = {}) =>
 describe("analytics route", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
-    delete process.env.ANALYTICS_EVENT_ENDPOINT;
-    delete process.env.ANALYTICS_SITE_ID;
+    webEnvironment.ANALYTICS_EVENT_ENDPOINT = undefined;
+    webEnvironment.ANALYTICS_SITE_ID = undefined;
   });
 
   it("silently declines tracking without explicit consent", async () => {
@@ -49,9 +53,9 @@ describe("analytics route", () => {
   });
 
   it("forwards only allowlisted dimensions and never blocks on provider failure", async () => {
-    process.env.ANALYTICS_EVENT_ENDPOINT =
+    webEnvironment.ANALYTICS_EVENT_ENDPOINT =
       "https://analytics.example.test/api/event";
-    process.env.ANALYTICS_SITE_ID = "www.example.test";
+    webEnvironment.ANALYTICS_SITE_ID = "www.example.test";
     const fetchMock = vi.fn().mockRejectedValue(new Error("offline"));
     vi.stubGlobal("fetch", fetchMock);
     expect(
@@ -72,9 +76,9 @@ describe("analytics route", () => {
 
   it("returns after the deadline when the provider ignores abort", async () => {
     vi.useFakeTimers();
-    process.env.ANALYTICS_EVENT_ENDPOINT =
+    webEnvironment.ANALYTICS_EVENT_ENDPOINT =
       "https://analytics.example.test/api/event";
-    process.env.ANALYTICS_SITE_ID = "www.example.test";
+    webEnvironment.ANALYTICS_SITE_ID = "www.example.test";
     vi.stubGlobal(
       "fetch",
       vi.fn(() => new Promise(() => undefined)),

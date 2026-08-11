@@ -2,6 +2,11 @@ import "server-only";
 import { z } from "zod";
 
 const loopbackHosts = new Set(["localhost", "127.0.0.1", "[::1]"]);
+const optionalEnvironmentString = <T extends z.ZodType>(schema: T) =>
+  z.preprocess(
+    (value) => (value === "" || value === undefined ? undefined : value),
+    schema.optional(),
+  );
 
 const webEnvironmentSchema = z
   .object({
@@ -19,6 +24,10 @@ const webEnvironmentSchema = z
     PUBLIC_SERVICE_SECRET: z.string().min(32).optional(),
     PUBLIC_SERVICE_AUDIENCE: z.string().min(1).default("amanor-public-api"),
     PUBLIC_INDEXING_ENABLED: z.enum(["true", "false"]).default("false"),
+    ANALYTICS_EVENT_ENDPOINT: optionalEnvironmentString(z.url()),
+    ANALYTICS_SITE_ID: optionalEnvironmentString(
+      z.string().trim().min(1).max(253),
+    ),
     LEAFLET_TILE_URL: z
       .url()
       .default("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"),
@@ -99,6 +108,53 @@ const webEnvironmentSchema = z
         path: ["PUBLIC_API_BASE_URL"],
         message: "Public Web and API must use distinct origins",
       });
+    if (
+      Boolean(value.ANALYTICS_EVENT_ENDPOINT) !==
+      Boolean(value.ANALYTICS_SITE_ID)
+    )
+      context.addIssue({
+        code: "custom",
+        message:
+          "ANALYTICS_EVENT_ENDPOINT and ANALYTICS_SITE_ID must be configured together",
+      });
+    if (value.ANALYTICS_EVENT_ENDPOINT) {
+      const analyticsUrl = new URL(value.ANALYTICS_EVENT_ENDPOINT);
+      if (
+        analyticsUrl.username ||
+        analyticsUrl.password ||
+        analyticsUrl.port ||
+        analyticsUrl.search ||
+        analyticsUrl.hash
+      )
+        context.addIssue({
+          code: "custom",
+          path: ["ANALYTICS_EVENT_ENDPOINT"],
+          message: "ANALYTICS_EVENT_ENDPOINT contains prohibited URL parts",
+        });
+      if (
+        analyticsUrl.protocol !== "https:" &&
+        !(
+          value.AMANOR_DEPLOYMENT_ENV === "local" &&
+          analyticsUrl.protocol === "http:" &&
+          loopbackHosts.has(analyticsUrl.hostname)
+        )
+      )
+        context.addIssue({
+          code: "custom",
+          path: ["ANALYTICS_EVENT_ENDPOINT"],
+          message:
+            "Analytics requires HTTPS except for loopback local development",
+        });
+      if (
+        value.AMANOR_DEPLOYMENT_ENV !== "local" &&
+        loopbackHosts.has(analyticsUrl.hostname)
+      )
+        context.addIssue({
+          code: "custom",
+          path: ["ANALYTICS_EVENT_ENDPOINT"],
+          message: "Non-local analytics must not use a loopback endpoint",
+        });
+    }
   });
 
 export function parseWebEnvironment(

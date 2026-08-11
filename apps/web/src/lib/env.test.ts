@@ -89,4 +89,56 @@ describe("public Web deployment environment", () => {
       }),
     ).toThrow(pattern);
   });
+
+  it("keeps analytics disabled for blank templates and validates an approved pair", () => {
+    expect(
+      parseWebEnvironment({
+        ANALYTICS_EVENT_ENDPOINT: "",
+        ANALYTICS_SITE_ID: "",
+      }),
+    ).toEqual(
+      expect.objectContaining({
+        ANALYTICS_EVENT_ENDPOINT: undefined,
+        ANALYTICS_SITE_ID: undefined,
+      }),
+    );
+    expect(
+      parseWebEnvironment({
+        ANALYTICS_EVENT_ENDPOINT: "https://analytics.example.test/api/event",
+        ANALYTICS_SITE_ID: "www.example.test",
+      }),
+    ).toEqual(
+      expect.objectContaining({
+        ANALYTICS_EVENT_ENDPOINT: "https://analytics.example.test/api/event",
+        ANALYTICS_SITE_ID: "www.example.test",
+      }),
+    );
+  });
+
+  it.each([
+    ["missing site ID", "https://analytics.example.test/api/event", undefined],
+    ["missing endpoint", undefined, "www.example.test"],
+    [
+      "credential-bearing endpoint",
+      "https://operator:secret@analytics.example.test/event",
+      "www.example.test",
+    ],
+    [
+      "query-bearing endpoint",
+      "https://analytics.example.test/event?token=secret",
+      "www.example.test",
+    ],
+    [
+      "plaintext provider",
+      "http://analytics.example.test/event",
+      "www.example.test",
+    ],
+  ])("rejects analytics configuration with %s", (_name, endpoint, siteId) => {
+    expect(() =>
+      parseWebEnvironment({
+        ANALYTICS_EVENT_ENDPOINT: endpoint,
+        ANALYTICS_SITE_ID: siteId,
+      }),
+    ).toThrow(/ANALYTICS|Analytics/u);
+  });
 });

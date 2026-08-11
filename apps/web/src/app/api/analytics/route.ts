@@ -3,6 +3,7 @@ import {
   analyticsEventSchema,
   hasAnalyticsConsent,
 } from "../../../lib/analytics";
+import { webEnvironment } from "../../../lib/env";
 
 const noContent = (): NextResponse =>
   new NextResponse(null, {
@@ -27,8 +28,8 @@ export async function POST(request: Request): Promise<NextResponse> {
   }
   const parsed = analyticsEventSchema.safeParse(payload);
   if (!parsed.success) return new NextResponse(null, { status: 400 });
-  const endpoint = process.env.ANALYTICS_EVENT_ENDPOINT;
-  const domain = process.env.ANALYTICS_SITE_ID;
+  const endpoint = webEnvironment.ANALYTICS_EVENT_ENDPOINT;
+  const domain = webEnvironment.ANALYTICS_SITE_ID;
   if (!endpoint || !domain) return noContent();
   const controller = new AbortController();
   let timeout: ReturnType<typeof setTimeout> | undefined;

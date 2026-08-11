@@ -7,6 +7,9 @@ The repository uses separate controls with distinct evidence:
 - CodeQL scans all JavaScript and TypeScript plus GitHub Actions workflow code on pull requests, pushes to `main`, manual dispatch and a weekly schedule. The two analyses run independently, use GitHub's extended security query suite and publish findings to code scanning.
 - Gitleaks checks the complete Git history for committed credentials.
 - `npm audit --omit=dev --audit-level=high` blocks high or critical production dependency findings.
+- Dependabot checks npm and GitHub Actions weekly. The root dependency-policy
+  gate requires a peer-valid ESLint/TypeScript graph and preserves the reviewed
+  compatibility holds documented in `docs/quality/dependency-currency.md`.
 - Anchore generates an SPDX SBOM and scans each independently deployed API, public Web and Admin/CMS image. A fixable high or critical finding fails its image job. Each SARIF report is uploaded to code scanning and retained for 90 days.
 - Project-owned policy gates exercise secret signatures, deployment boundaries, CSP/origin controls, unsafe inputs and security invariants. These complement SAST; they do not replace it.
 

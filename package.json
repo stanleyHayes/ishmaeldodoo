@@ -16,6 +16,7 @@
     "openapi:generate:replica": "UPDATE_OPENAPI_ARTIFACT=true node scripts/run-api-replica-tests.mjs",
     "contracts:generate": "node scripts/generate-api-types.mjs generate",
     "check:contracts": "node scripts/openapi-artifact.mjs validate && node scripts/generate-api-types.mjs check",
+    "check:dependency-policy": "node scripts/check-dependency-policy.mjs",
     "check:traceability": "node scripts/check-traceability.mjs",
     "check:decisions": "node scripts/check-decision-register.mjs",
     "check:privacy-retention": "node scripts/check-privacy-retention.mjs",
@@ -61,7 +62,7 @@
     "check:security-ci": "node scripts/check-security-workflows.mjs",
     "check:format": "prettier --check .",
     "check:secrets": "node scripts/check-secrets.mjs --verify-fixtures",
-    "check": "npm run check:format && npm run check:boundaries && npm run check:public-copy && npm run check:french-typography && npm run check:contracts && npm run check:traceability && npm run check:decisions && npm run check:privacy-retention && npm run check:media-governance && npm run check:observability && npm run check:email-domain && npm run check:analytics && npm run check:release && npm run check:deployment-manifests && npm run check:provider-adapters && npm run check:environment && npm run check:load && npm run check:devices && npm run check:handover && npm run check:acceptance-evidence && npm run check:concurrency-guards && npm run check:accessibility-structure && npm run check:security && npm run check:security-ci && npm run check:secrets && npm run typecheck && npm run lint && npm run test:coverage && npm run build && npm run check:frontend-bundles && npm run check:standard-script-budget && npm run check:sahel-budget"
+    "check": "npm run check:format && npm run check:dependency-policy && npm run check:boundaries && npm run check:public-copy && npm run check:french-typography && npm run check:contracts && npm run check:traceability && npm run check:decisions && npm run check:privacy-retention && npm run check:media-governance && npm run check:observability && npm run check:email-domain && npm run check:analytics && npm run check:release && npm run check:deployment-manifests && npm run check:provider-adapters && npm run check:environment && npm run check:load && npm run check:devices && npm run check:handover && npm run check:acceptance-evidence && npm run check:concurrency-guards && npm run check:accessibility-structure && npm run check:security && npm run check:security-ci && npm run check:secrets && npm run typecheck && npm run lint && npm run test:coverage && npm run build && npm run check:frontend-bundles && npm run check:standard-script-budget && npm run check:sahel-budget"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.12.1",

@@ -2,7 +2,11 @@ import assert from "node:assert/strict";
 import { readdir, readFile } from "node:fs/promises";
 import { join, relative } from "node:path";
 
-const roots = ["apps/web/src/app/api", "apps/web/src/lib"];
+const roots = [
+  "apps/web/src/app/api",
+  "apps/web/src/lib",
+  "apps/admin/src/lib",
+];
 
 async function sourceFiles(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
@@ -22,21 +26,25 @@ function preservesDestination(source) {
   return fetches.length > 0 && redirectGuards.length === fetches.length;
 }
 
-const outboundRoutes = [];
+const outboundSources = [];
 const files = (await Promise.all(roots.map(sourceFiles))).flat();
 for (const path of files) {
   const source = await readFile(path, "utf8");
   if (!source.includes("fetch(")) continue;
-  outboundRoutes.push({ path, source });
+  outboundSources.push({ path, source });
 }
 
+const fetchCount = outboundSources.reduce(
+  (total, { source }) => total + (source.match(/\bfetch\s*\(/gu) ?? []).length,
+  0,
+);
 assert.equal(
-  outboundRoutes.length,
-  18,
-  "The public Web outbound-fetch inventory changed; review the new or removed destination boundary",
+  fetchCount,
+  24,
+  "The frontend outbound-fetch inventory changed; review the new or removed destination boundary",
 );
 
-for (const { path, source } of outboundRoutes) {
+for (const { path, source } of outboundSources) {
   const displayPath = relative(process.cwd(), path);
   assert.ok(
     preservesDestination(source),
@@ -51,5 +59,5 @@ for (const { path, source } of outboundRoutes) {
 }
 
 process.stdout.write(
-  `All ${outboundRoutes.length} public Web outbound fetch sites reject redirects; removal fixtures failed closed.\n`,
+  `All ${fetchCount} Web and Admin outbound fetch sites reject redirects; removal fixtures failed closed.\n`,
 );

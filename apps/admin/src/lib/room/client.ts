@@ -37,6 +37,7 @@ async function refresh(): Promise<void> {
   }
   const response = await fetch(`${adminApiBaseUrl()}/auth/refresh`, {
     method: "POST",
+    redirect: "error",
     credentials: "include",
     headers: { "X-CSRF-Token": current.csrfToken },
   });
@@ -89,6 +90,7 @@ async function roomRequest(
 
   const response = await fetch(`${adminApiBaseUrl()}/room${path}`, {
     ...init,
+    redirect: "error",
     headers,
     credentials: "include",
     cache: "no-store",

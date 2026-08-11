@@ -172,6 +172,7 @@ async function refreshAccessToken(): Promise<void> {
     );
   const response = await fetch(`${adminApiBaseUrl()}${authPaths.refresh}`, {
     method: "POST",
+    redirect: "error",
     credentials: "include",
     headers: correlatedHeaders({ "X-CSRF-Token": current.csrfToken }),
   });
@@ -218,6 +219,7 @@ async function request(
   }
   const response = await fetch(`${adminApiBaseUrl()}${path}`, {
     ...init,
+    redirect: "error",
     headers,
     credentials: "include",
   });
@@ -233,6 +235,7 @@ export async function login(input: LoginRequest): Promise<AuthSessionResponse> {
   const validated = loginRequestSchema.parse(input);
   const response = await fetch(`${adminApiBaseUrl()}${authPaths.login}`, {
     method: "POST",
+    redirect: "error",
     credentials: "include",
     headers: correlatedHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify(validated),
@@ -700,7 +703,11 @@ export async function uploadMediaAsset(
   body.set("signature", signed.signature);
   body.set("overwrite", String(signed.overwrite));
   body.set("unique_filename", String(signed.uniqueFilename));
-  const upload = await fetch(signed.uploadUrl, { method: "POST", body });
+  const upload = await fetch(signed.uploadUrl, {
+    method: "POST",
+    redirect: "error",
+    body,
+  });
   if (!upload.ok)
     throw new ApiClientError(
       "Cloudinary rejected the upload",

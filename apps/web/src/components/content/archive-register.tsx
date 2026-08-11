@@ -98,6 +98,17 @@ export function ArchiveRegister({
           </p>
         </div>
       </header>
+      {french && archive.translation.stale ? (
+        <p className="translation-notice" role="status">
+          Traduction en cours de révision. Texte source mis à jour le{" "}
+          {archive.translation.sourceUpdatedAt
+            ? archive.translation.sourceUpdatedAt.toLocaleDateString("fr-FR", {
+                timeZone: "UTC",
+              })
+            : "date non disponible"}
+          .
+        </p>
+      ) : null}
       <form action={route} method="get" className="archive-filters">
         <label>
           <span>{french ? "Rechercher" : "Search"}</span>

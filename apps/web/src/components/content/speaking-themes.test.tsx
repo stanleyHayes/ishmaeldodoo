@@ -146,6 +146,37 @@ describe("SpeakingThemes", () => {
     expect(screen.getByText("2 published themes")).toBeInTheDocument();
   });
 
+  it("discloses a dated stale-translation state only in French", () => {
+    const stale = {
+      ...speaking,
+      translation: {
+        stale: true,
+        sourceUpdatedAt: new Date("2026-08-09T00:00:00.000Z"),
+      },
+    } satisfies PublicSpeaking;
+    const { rerender } = render(
+      <SpeakingThemes
+        speaking={stale}
+        locale="fr-FR"
+        baseUrl="https://amanor.example"
+      />,
+    );
+    expect(
+      screen.getByText(/Traduction en cours de révision/),
+    ).toHaveTextContent("09/08/2026");
+
+    rerender(
+      <SpeakingThemes
+        speaking={stale}
+        locale="en-GB"
+        baseUrl="https://amanor.example"
+      />,
+    );
+    expect(
+      screen.queryByText(/Traduction en cours de révision/),
+    ).not.toBeInTheDocument();
+  });
+
   it("localizes canonical event and source URLs and fails closed on incomplete history", () => {
     const incomplete = {
       ...speaking,

@@ -104,6 +104,37 @@ describe("ArchiveRegister", () => {
     ]);
   });
 
+  it("discloses a dated stale-translation state only in French", () => {
+    const staleArchive = {
+      ...archive,
+      translation: {
+        stale: true,
+        sourceUpdatedAt: new Date("2026-08-09T00:00:00.000Z"),
+      },
+    };
+    const { rerender } = render(
+      <ArchiveRegister
+        archive={staleArchive}
+        locale="fr-FR"
+        baseUrl="https://amanor.example"
+      />,
+    );
+    expect(
+      screen.getByText(/Traduction en cours de révision/),
+    ).toHaveTextContent("09/08/2026");
+
+    rerender(
+      <ArchiveRegister
+        archive={staleArchive}
+        locale="en-GB"
+        baseUrl="https://amanor.example"
+      />,
+    );
+    expect(
+      screen.queryByText(/Traduction en cours de révision/),
+    ).not.toBeInTheDocument();
+  });
+
   it("searches transcript text, exposes timestamp context and renders sourced corrections", () => {
     render(
       <ArchiveRegister

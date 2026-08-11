@@ -348,6 +348,17 @@ export function SpeakingThemes({
           <p>{copy.intro}</p>
         </div>
       </header>
+      {locale === "fr-FR" && speaking.translation.stale ? (
+        <p className="translation-notice" role="status">
+          Traduction en cours de révision. Texte source mis à jour le{" "}
+          {speaking.translation.sourceUpdatedAt
+            ? speaking.translation.sourceUpdatedAt.toLocaleDateString("fr-FR", {
+                timeZone: "UTC",
+              })
+            : "date non disponible"}
+          .
+        </p>
+      ) : null}
       <form action={path} method="get" className="speaking-filters">
         <label>
           {copy.format}

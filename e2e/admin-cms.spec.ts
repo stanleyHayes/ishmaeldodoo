@@ -485,8 +485,11 @@ test("operates a screened Protocol Desk request through review, decision and arc
   await expect(
     page.getByRole("button", { name: "Retry delivery" }),
   ).toHaveCount(0);
+  const calendarJob = page
+    .getByRole("listitem")
+    .filter({ hasText: "Calendar event" });
   await page.getByRole("button", { name: "Retry calendar sync" }).click();
-  await expect(page.getByText("pending · 0 attempts")).toBeVisible();
+  await expect(calendarJob).toContainText("pending · 0 attempts");
   await expect(
     page.getByText("Calendar synchronization retry requested", {
       exact: true,

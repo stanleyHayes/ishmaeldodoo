@@ -92,7 +92,11 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium firefox webkit
+        run: |
+          npx playwright install --with-deps chromium firefox webkit
+          sudo apt-get install -y --no-install-recommends poppler-utils
+          chrome_path=$(node -e "process.stdout.write(require('playwright').chromium.executablePath())")
+          printf 'CHROME_EXECUTABLE_PATH=%s\n' "$chrome_path" >> "$GITHUB_ENV"
 
       - name: Audit production dependencies
         run: npm audit --omit=dev --audit-level=high

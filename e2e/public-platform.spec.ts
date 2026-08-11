@@ -242,14 +242,18 @@ test("defers governed speaking video until a Sahel visitor opts in", async ({
   await expect(page.locator("html")).toHaveAttribute("data-mode", "sahel");
 
   const video = page.locator("video");
-  await expect(page.getByRole("button", { name: "Load video" })).toBeVisible();
+  const standardModeOptIn = page.getByRole("link", {
+    name: "Load this media in standard mode",
+  });
+  await expect(standardModeOptIn).toBeVisible();
   await expect(video).toHaveCount(0);
   await expect(page.getByText("Regional forum excerpt").first()).toBeVisible();
   await expect(
     page.getByRole("link", { name: "Transcript and context" }),
   ).toHaveAttribute("href", "/archive#regional-broadcast");
 
-  await page.getByRole("button", { name: "Load video" }).click();
+  await standardModeOptIn.click();
+  await expect(page.locator("html")).not.toHaveAttribute("data-mode", "sahel");
   await expect(video).toHaveAttribute(
     "src",
     "https://media.example.test/forum-2026.mp4",

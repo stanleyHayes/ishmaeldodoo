@@ -26,6 +26,10 @@ const canonicalValues = [
     pattern: /Dr\.\s+Ishmael\s+Dodoo/iu,
   },
   {
+    label: "canonical short name",
+    pattern: /(?<!Dr\.\s)(?<!Dr\s)Ishmael\s+Dodoo/iu,
+  },
+  {
     label: "canonical familiar name",
     pattern: /Dr\.\s+Ish\b/iu,
   },

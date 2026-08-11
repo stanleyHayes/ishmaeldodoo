@@ -241,14 +241,13 @@ function ThemeCard({
                   {lite ? (
                     <div className="lite-media-placeholder">
                       <p>{item.caption}</p>
-                      <Link
+                      <a
                         href={`/api/sahel?enabled=0&return=${encodeURIComponent(
                           `${localizePath("/speaking", locale)}#${theme.slug}`,
                         )}`}
-                        prefetch={false}
                       >
                         {copy.loadMedia}
-                      </Link>
+                      </a>
                       {item.relatedArchive ? (
                         <Link
                           href={`${localizePath("/archive", locale)}#${item.relatedArchive}`}

@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.7
-FROM node:26.5.0-bookworm-slim AS build
+FROM node:26.5.1-bookworm-slim AS build
 WORKDIR /workspace
 COPY package.json package-lock.json ./
 COPY apps/api/package.json apps/api/package.json
@@ -11,7 +11,7 @@ COPY packages/contracts packages/contracts
 RUN npm run build --workspace @amanor/contracts && npm run build --workspace @amanor/api \
   && npm prune --omit=dev --workspace @amanor/api --workspace @amanor/contracts --include-workspace-root=false
 
-FROM node:26.5.0-bookworm-slim AS runtime
+FROM node:26.5.1-bookworm-slim AS runtime
 ENV NODE_ENV=production \
     PORT=4000 \
     RUN_MIGRATIONS=false

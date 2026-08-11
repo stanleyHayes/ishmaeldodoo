@@ -10,7 +10,9 @@ module.exports = {
         "http://localhost:3310/record/atlas/table?lite=1",
         "http://localhost:3310/press?lite=1",
       ],
-      numberOfRuns: 1,
+      // Lighthouse scores use the median of repeated runs to avoid treating a
+      // transient shared-runner scheduling spike as a product regression.
+      numberOfRuns: 3,
       settings: {
         chromeFlags: "--headless --no-sandbox --disable-dev-shm-usage",
         preset: "desktop",

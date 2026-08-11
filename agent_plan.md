@@ -827,6 +827,8 @@ Before editing, an agent must add one row here and change the corresponding task
 
 | 11 Aug 2026 | AMANOR-134 environment-independent API coverage margin | The hosted workspace gate correctly omitted the optional MongoDB integration fixture and exposed that its 63% API line threshold had only been satisfied locally when a developer test URI was present. Deterministic unit suites now exercise the database-backed HMAC rate limiter and confidential-Room quota guard, including peppered identifiers, window math, quota exhaustion, retry guidance and fail-closed database errors | The focused API coverage run passes 389 tests plus 23 environment-skipped at 63.62% lines without changing the 63% threshold. API strict typecheck, zero-warning lint and repository formatting pass. Hosted clean-checkout confirmation remains required on the replacement commit | Codex |
 
+| 11 Aug 2026 | AMANOR-030 clean-checkout Admin build configuration | The hosted workspace rerun passed the corrected API coverage floor and then proved the Admin production build intentionally fails closed without its public API endpoint. Quality CI now supplies the same non-secret reserved example origin already used by container verification, allowing configuration validation and production compilation without inventing a staging/production domain or weakening runtime validation | The value ends exactly at `/v1`, contains no credentials/query/fragment and exists only as a CI job variable. The replacement hosted workspace and CodeQL executions remain required | Codex |
+
 ## 18. Immediate next actions
 
 1. Principal/Product Lead reviews and approves this plan as the backlog baseline.

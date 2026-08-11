@@ -27,6 +27,7 @@ export function createPublicSignalClient(
     url.searchParams.set("locale", locale);
     try {
       const response = await fetch(url, {
+        redirect: "error",
         headers: {
           Accept: "application/json",
           ...serviceAuthHeaders(url, configuration.serviceAuth),

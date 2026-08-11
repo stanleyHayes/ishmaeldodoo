@@ -15,6 +15,7 @@ export async function claimRevalidation(
   try {
     const response = await fetch(url, {
       method: "POST",
+      redirect: "error",
       headers: serviceAuthHeaders(url, publicServiceAuth, "POST"),
       cache: "no-store",
       signal: AbortSignal.timeout(3_000),

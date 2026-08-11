@@ -2,15 +2,15 @@ import assert from "node:assert/strict";
 import { readdir, readFile } from "node:fs/promises";
 import { join, relative } from "node:path";
 
-const apiRoot = "apps/web/src/app/api";
+const roots = ["apps/web/src/app/api", "apps/web/src/lib"];
 
-async function routeFiles(directory) {
+async function sourceFiles(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
   const nested = await Promise.all(
     entries.map(async (entry) => {
       const path = join(directory, entry.name);
-      if (entry.isDirectory()) return routeFiles(path);
-      return entry.isFile() && entry.name === "route.ts" ? [path] : [];
+      if (entry.isDirectory()) return sourceFiles(path);
+      return entry.isFile() && /\.(?:ts|tsx)$/u.test(entry.name) ? [path] : [];
     }),
   );
   return nested.flat();
@@ -23,7 +23,8 @@ function preservesDestination(source) {
 }
 
 const outboundRoutes = [];
-for (const path of await routeFiles(apiRoot)) {
+const files = (await Promise.all(roots.map(sourceFiles))).flat();
+for (const path of files) {
   const source = await readFile(path, "utf8");
   if (!source.includes("fetch(")) continue;
   outboundRoutes.push({ path, source });
@@ -31,8 +32,8 @@ for (const path of await routeFiles(apiRoot)) {
 
 assert.equal(
   outboundRoutes.length,
-  9,
-  "The public Web outbound-route inventory changed; review the new or removed destination boundary",
+  18,
+  "The public Web outbound-fetch inventory changed; review the new or removed destination boundary",
 );
 
 for (const { path, source } of outboundRoutes) {
@@ -50,5 +51,5 @@ for (const { path, source } of outboundRoutes) {
 }
 
 process.stdout.write(
-  `All ${outboundRoutes.length} public Web outbound routes reject redirects; removal fixtures failed closed.\n`,
+  `All ${outboundRoutes.length} public Web outbound fetch sites reject redirects; removal fixtures failed closed.\n`,
 );

@@ -5,6 +5,7 @@ export async function trackAnalyticsEvent(
 ): Promise<void> {
   await fetch("/api/analytics", {
     method: "POST",
+    redirect: "error",
     headers: { "Content-Type": "application/json" },
     credentials: "same-origin",
     keepalive: true,

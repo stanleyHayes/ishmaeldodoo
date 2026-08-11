@@ -42,6 +42,7 @@ export function createPublicSourcesClient(
     if (input.cursor) url.searchParams.set("cursor", input.cursor);
     try {
       const response = await fetch(url, {
+        redirect: "error",
         headers: {
           Accept: "application/json",
           ...serviceAuthHeaders(url, configuration.serviceAuth),

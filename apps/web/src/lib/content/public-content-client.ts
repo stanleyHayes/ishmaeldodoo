@@ -49,6 +49,7 @@ export function createPublicContentClient(
     const url = new URL(`${baseUrl}${path}`);
     url.searchParams.set("locale", input.locale);
     const init: NextFetchInit = {
+      redirect: "error",
       headers: {
         Accept: "application/json",
         ...serviceAuthHeaders(url, configuration.serviceAuth),

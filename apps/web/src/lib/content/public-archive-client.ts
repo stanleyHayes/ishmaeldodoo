@@ -32,6 +32,7 @@ export function createPublicArchiveClient(
     if (filters.type) url.searchParams.set("type", filters.type);
     try {
       const response = await fetch(url, {
+        redirect: "error",
         headers: {
           Accept: "application/json",
           ...serviceAuthHeaders(url, configuration.serviceAuth),

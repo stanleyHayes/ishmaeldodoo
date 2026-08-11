@@ -630,6 +630,37 @@ describe("CMS content schemas", () => {
     ).toBe(false);
   });
 
+  it("rejects non-HTTPS authored identity, Archive and Source URLs", () => {
+    for (const unsafeUrl of [
+      "javascript:alert(1)",
+      "data:text/html,<script>alert(1)</script>",
+      "ftp://example.test/archive",
+      "http://example.test/plaintext",
+    ]) {
+      expect(
+        publishableSchemas.identity.safeParse({
+          ...fixtures.identity,
+          sameAs: [unsafeUrl],
+        }).success,
+        `identity ${unsafeUrl}`,
+      ).toBe(false);
+      expect(
+        publishableSchemas.archiveItem.safeParse({
+          ...fixtures.archiveItem,
+          mediaUrl: unsafeUrl,
+        }).success,
+        `archive ${unsafeUrl}`,
+      ).toBe(false);
+      expect(
+        publishableSchemas.source.safeParse({
+          ...fixtures.source,
+          url: unsafeUrl,
+        }).success,
+        `source ${unsafeUrl}`,
+      ).toBe(false);
+    }
+  });
+
   it("enforces Signal length, tag count and coherent ledger resolution", () => {
     expect(
       publishableSchemas.signal.safeParse({

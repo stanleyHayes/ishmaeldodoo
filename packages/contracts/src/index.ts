@@ -4,6 +4,8 @@ export type {
   ApiOperations,
 } from "./generated/api-operations.js";
 
+export const httpsUrlSchema = z.url({ protocol: /^https$/u });
+
 export const apiErrorSchema = z.object({
   statusCode: z.number().int(),
   code: z.string(),
@@ -67,7 +69,7 @@ export const protocolDeskRequestSchema = z
         "other",
       ]),
       country: z.string().length(2),
-      website: z.url().max(500).optional(),
+      website: httpsUrlSchema.max(500).optional(),
       convenors: z.string().max(1_000).optional(),
     }),
     requester: z.object({
@@ -608,7 +610,7 @@ export const publicSourceSchema = z.object({
   ref: z.string().min(1),
   title: z.string().min(1),
   publisher: z.string().min(1),
-  url: z.url().optional(),
+  url: httpsUrlSchema.optional(),
   accessedAt: z.coerce.date(),
   type: z.enum(["cv", "press", "official", "firstParty"]),
 });
@@ -668,7 +670,7 @@ export const signedMediaUploadSchema = z.object({
   folder: z.string().startsWith("amanor/"),
   resourceType: z.enum(mediaResourceTypes),
   signature: z.string().min(1),
-  uploadUrl: z.url(),
+  uploadUrl: httpsUrlSchema,
   overwrite: z.literal(false),
   uniqueFilename: z.literal(true),
 });
@@ -702,7 +704,7 @@ export const mediaCompleteRequestSchema = z.object({
 });
 export const mediaAssetSchema = mediaCompleteRequestSchema.extend({
   assetId: z.string().uuid(),
-  secureUrl: z.url(),
+  secureUrl: httpsUrlSchema,
   format: z.string(),
   bytes: z.number().int().nonnegative(),
   width: z.number().int().positive().optional(),
@@ -807,7 +809,7 @@ export type SourceAuditReport = z.infer<typeof sourceAuditReportSchema>;
 
 export const publicMediaSchema = z.object({
   assetId: z.string().uuid(),
-  secureUrl: z.url(),
+  secureUrl: httpsUrlSchema,
   resourceType: z.enum(mediaResourceTypes),
   format: z.string().min(1),
   width: z.number().int().positive().optional(),
@@ -939,7 +941,7 @@ export const publicArchiveItemSchema = z.object({
   venue: z.string().optional(),
   city: z.string().optional(),
   country: z.string().optional(),
-  mediaUrl: z.url().optional(),
+  mediaUrl: httpsUrlSchema.optional(),
   transcript: z.string().optional(),
   transcriptStatus: z.enum(["machine", "corrected"]),
   transcriptSegments: z

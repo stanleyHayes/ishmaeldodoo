@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { httpsUrlSchema } from "@amanor/contracts";
 import { locales, localizedTextSchema, type Locale } from "./types";
 
 const sourceReferenceSchema = z.string().trim().min(1);
@@ -61,7 +62,7 @@ export const identitySchema = z
     bio300: localizedTextSchema,
     bio300SourceRefs: z.array(sourceReferenceSchema).min(1),
     portraits: z.array(z.string().uuid()).max(3),
-    sameAs: z.array(z.url()).optional(),
+    sameAs: z.array(httpsUrlSchema).optional(),
     alumniOf: z.array(z.string().trim().min(1)).optional(),
     knowsAbout: z.array(z.string().trim().min(1)).optional(),
     disambiguation: localizedTextSchema.optional(),
@@ -280,7 +281,7 @@ export const archiveItemSchema = z
     country: z.string().trim().optional(),
     date: z.coerce.date(),
     language: z.enum(["en", "fr"]),
-    mediaUrl: z.url().optional(),
+    mediaUrl: httpsUrlSchema.optional(),
     transcript: localizedTextSchema,
     transcriptStatus: z.enum(["machine", "corrected"]),
     transcriptSegments: z
@@ -400,7 +401,7 @@ export const sourceSchema = z.object({
   ref: z.string().trim().min(1),
   title: z.string().trim().min(1),
   publisher: z.string().trim().min(1),
-  url: z.url().optional(),
+  url: httpsUrlSchema.optional(),
   accessedAt: z.coerce.date(),
   type: z.enum(["cv", "press", "official", "firstParty"]),
   notes: z.string().trim().optional(),

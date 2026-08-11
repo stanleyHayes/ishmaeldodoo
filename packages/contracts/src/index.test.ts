@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   adminSessionSchema,
   authenticationMethods,
+  httpsUrlSchema,
   resolveDateRangedRecord,
 } from "./index";
 
@@ -59,5 +60,20 @@ describe("authentication-method contracts", () => {
         authenticationMethods: ["pwd", "pwd"],
       }).success,
     ).toBe(false);
+  });
+});
+
+describe("public HTTPS URL contract", () => {
+  it("accepts HTTPS and rejects executable, embedded, legacy and plaintext schemes", () => {
+    expect(
+      httpsUrlSchema.safeParse("https://example.test/evidence").success,
+    ).toBe(true);
+    for (const value of [
+      "javascript:alert(1)",
+      "data:text/html,<script>alert(1)</script>",
+      "ftp://example.test/archive",
+      "http://example.test/plaintext",
+    ])
+      expect(httpsUrlSchema.safeParse(value).success, value).toBe(false);
   });
 });

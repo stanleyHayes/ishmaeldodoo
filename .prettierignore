@@ -1,0 +1,11 @@
+**/.next/**
+.raven/**
+**/coverage/**
+**/dist/**
+node_modules/**
+tmp/**
+playwright-report/**
+test-results/**
+agent_plan.md
+packages/contracts/openapi/amanor-v1.json
+packages/contracts/src/generated/**

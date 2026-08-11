@@ -1,0 +1,32 @@
+# Project AMANOR decision workshop
+
+- Controlled register: `decision-register.json`
+- Status: Awaiting authorized stakeholders
+- Scope: D01-D11 and S01-S07
+
+This packet converts the unresolved launch decisions into one attributable record. It does not authorize Codex, an engineer or an unsigned meeting note to decide on behalf of the Principal, Legal, Privacy, Security, Product or Operations.
+
+## How to decide
+
+For each record, an authorized stakeholder must:
+
+1. choose exactly one value already listed in `options`;
+2. set `status` to `approved` or `deferred`;
+3. put the accountable person's name and role in `decider`;
+4. record an ISO `decidedAt` date no earlier than the register update date;
+5. explain the exact choice, names, domains, cadence, wording, scope or provider account in `decisionDetail` without recording credentials or personal contact details;
+6. link a signed minute, approval record, contract, registrar record or policy in `evidence`;
+7. obtain every authority named by the record, using a co-signed evidence record where more than one authority is listed.
+
+`pending` records must retain null decision fields. `deferred` is a formal scope decision, not an informal delay: its detail and evidence must state whether affected work is removed from launch, moved post-launch or blocks release. Changing a status in this repository without the evidence does not resolve the blocker; `npm run check:decisions` rejects it.
+
+## Workshop order
+
+1. D11 with the Principal, Product and Engineering because every measured standard route currently misses the original 120 KiB initial-script ceiling. Choose whether the confirmed App Router baseline keeps that ceiling through a no-JavaScript delivery design, accepts a signed revised ceiling, or changes public rendering architecture. The measured 147.8-154.6 KiB representative baseline is evidence, not approval.
+2. D01 domain, D07 Desk Officer, D08 counterparty stewardship and D09 honorarium policy because they gate launch-critical deployment and Protocol Desk operation.
+3. S01-S06 provider and operational custody choices because they gate staging, external testing and production evidence.
+4. D03 Doctrine/Positions, D02 Signal/Foresight, D06 Office Hours, D04 Selah and D10 archive use to bind launch versus post-launch scope.
+5. D05 only with approved Legal wording or an explicit omission decision.
+6. S07 video delivery after content rights and low-bandwidth behavior are confirmed.
+
+After the signed evidence is attached, update the corresponding `AMANOR-*` rows in `agent_plan.md`; do not mark an implementation task done merely because its prerequisite was decided.

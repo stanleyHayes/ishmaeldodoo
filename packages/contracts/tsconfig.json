@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2022", "DOM"],
+    "module": "Node16",
+    "moduleResolution": "Node16",
+    "declaration": true,
+    "emitDeclarationOnly": false,
+    "outDir": "dist",
+    "rootDir": "src",
+    "isolatedModules": false
+  },
+  "include": ["src/**/*.ts"],
+  "//": "Tests must not be emitted: compiled specs in dist are picked up by vitest as CommonJS and fail to import it, and they have no business in a published contract package.",
+  "exclude": ["src/**/*.test.ts"]
+}

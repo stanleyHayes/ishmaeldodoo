@@ -1,0 +1,8 @@
+# Replace these reserved domains only after D01 confirms production domains.
+targets:
+  - service: amanor-web
+    url: https://www.ishmaeldodoo.example/
+  - service: amanor-admin
+    url: https://admin.ishmaeldodoo.example/
+  - service: amanor-api
+    url: https://api.ishmaeldodoo.example/v1/health/ready

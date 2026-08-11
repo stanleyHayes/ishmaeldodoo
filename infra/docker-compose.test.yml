@@ -1,0 +1,24 @@
+services:
+  mongo-test:
+    image: mongo:8.0
+    entrypoint: ["/bin/bash", "/opt/amanor/mongo-test-entrypoint.sh"]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: amanor_test_admin
+      MONGO_INITDB_ROOT_PASSWORD: amanor_test_admin_password
+    volumes:
+      - ./mongo-test-entrypoint.sh:/opt/amanor/mongo-test-entrypoint.sh:ro
+      - ./mongo-test-keyfile:/opt/amanor/mongo-test-keyfile:ro
+    ports:
+      - "127.0.0.1:27028:27017"
+    tmpfs:
+      - /data/db
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'mongosh --quiet --username amanor_test_admin --password amanor_test_admin_password --authenticationDatabase admin --eval ''try { quit(rs.status().ok ? 0 : 1) } catch (e) { quit(rs.initiate({_id:"rs0",members:[{_id:0,host:"localhost:27017"}]}).ok ? 0 : 1) }''',
+        ]
+      interval: 5s
+      timeout: 30s
+      retries: 24
+      start_period: 5s

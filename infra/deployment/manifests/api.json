@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "name": "api",
+  "releaseUnit": "amanor-api",
+  "image": "registry.example.invalid/amanor-api@sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "container": {
+    "port": 4000,
+    "runAsUser": 1000,
+    "readOnlyRootFilesystem": true,
+    "writableTmpfs": ["/tmp"],
+    "terminationGracePeriodSeconds": 30
+  },
+  "health": {
+    "liveness": {
+      "path": "/v1/health/live",
+      "initialDelaySeconds": 10,
+      "periodSeconds": 30
+    },
+    "readiness": {
+      "path": "/v1/health/ready",
+      "initialDelaySeconds": 5,
+      "periodSeconds": 10
+    }
+  },
+  "publicBuildVariables": [],
+  "secretClasses": [
+    "mongodb_application",
+    "mongodb_room",
+    "jwt_signing",
+    "session_pepper",
+    "mfa_encryption",
+    "public_service_verification",
+    "revalidation_signing",
+    "cloudinary",
+    "email_provider",
+    "calendar_provider",
+    "metrics_access",
+    "telemetry_export",
+    "webauthn_relying_party"
+  ],
+  "jobs": [
+    {
+      "name": "migration",
+      "command": ["node", "apps/api/dist/migrate.js"],
+      "secretClasses": ["mongodb_migration"],
+      "schedule": "release-only",
+      "concurrency": "forbid"
+    },
+    {
+      "name": "retention",
+      "command": ["node", "apps/api/dist/retention.js"],
+      "secretClasses": ["mongodb_retention", "cloudinary_retention"],
+      "schedule": "provider-managed",
+      "concurrency": "forbid"
+    }
+  ],
+  "rollback": { "independent": true, "strategy": "prior-image-digest" }
+}

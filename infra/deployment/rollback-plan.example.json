@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "environment": "staging",
+  "maximumSeconds": 900,
+  "webUrl": "https://staging.example.test",
+  "adminUrl": "https://admin.staging.example.test",
+  "apiUrl": "https://api.staging.example.test",
+  "deployables": [
+    {
+      "name": "api",
+      "candidateRelease": "api-candidate-digest",
+      "rollbackTarget": "api-prior-digest",
+      "pauseJobsCommand": ["provider-cli", "jobs", "pause", "amanor-api"],
+      "rollbackCommand": [
+        "provider-cli",
+        "rollback",
+        "amanor-api",
+        "api-prior-digest"
+      ],
+      "verifyCommand": ["provider-cli", "release", "current", "amanor-api"],
+      "resumeJobsCommand": ["provider-cli", "jobs", "resume", "amanor-api"]
+    },
+    {
+      "name": "admin",
+      "candidateRelease": "admin-candidate-digest",
+      "rollbackTarget": "admin-prior-digest",
+      "rollbackCommand": [
+        "provider-cli",
+        "rollback",
+        "amanor-admin",
+        "admin-prior-digest"
+      ],
+      "verifyCommand": ["provider-cli", "release", "current", "amanor-admin"]
+    },
+    {
+      "name": "web",
+      "candidateRelease": "web-candidate-digest",
+      "rollbackTarget": "web-prior-digest",
+      "rollbackCommand": [
+        "provider-cli",
+        "rollback",
+        "amanor-web",
+        "web-prior-digest"
+      ],
+      "verifyCommand": ["provider-cli", "release", "current", "amanor-web"]
+    }
+  ]
+}

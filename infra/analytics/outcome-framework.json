@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "baseline": "production_launch",
+  "reportingTimezone": "Africa/Accra",
+  "cadence": {
+    "monthlyDigest": {
+      "dueBusinessDaysAfterMonthEnd": 5,
+      "ownerRole": "product_lead",
+      "approverRole": "principal",
+      "questionIds": ["record_reach", "desk_health", "youth_pipeline"]
+    },
+    "quarterlyReview": {
+      "dueBusinessDaysAfterQuarterEnd": 10,
+      "ownerRole": "product_lead",
+      "approverRole": "principal"
+    },
+    "monthSixReport": {
+      "dueBusinessDaysAfterPeriodEnd": 15,
+      "ownerRole": "product_lead",
+      "approverRole": "principal"
+    }
+  },
+  "outcomes": [
+    {
+      "id": "canonical_source",
+      "measure": "share_of_top_10_search_results_owned_or_influenced",
+      "target": { "operator": "gte", "value": 60, "unit": "percent" },
+      "method": "documented_manual_search_audit"
+    },
+    {
+      "id": "canonical_title",
+      "measure": "new_articles_using_canonical_title_after_month_3",
+      "target": { "operator": "gte", "value": 75, "unit": "percent" },
+      "method": "documented_manual_media_audit"
+    },
+    {
+      "id": "managed_speaking_requests",
+      "measure": "qualified_protocol_desk_requests_and_48_hour_triage_share",
+      "target": {
+        "requests": { "operator": "gte", "value": 40, "unit": "count" },
+        "triagedWithin48Hours": {
+          "operator": "gte",
+          "value": 90,
+          "unit": "percent"
+        }
+      },
+      "method": "aggregate_protocol_desk_report"
+    },
+    {
+      "id": "partner_self_service",
+      "measure": "press_kit_and_speaker_pack_downloads",
+      "target": { "operator": "gte", "value": 300, "unit": "count" },
+      "method": "consent_qualified_analytics_aggregate"
+    },
+    {
+      "id": "atlas_legibility",
+      "measure": "median_atlas_time",
+      "target": { "operator": "gte", "value": 150, "unit": "seconds" },
+      "method": "unavailable_until_privacy_approved_duration_instrumentation"
+    },
+    {
+      "id": "youth_conversion",
+      "measure": "office_hours_ballot_entries_per_cycle",
+      "target": { "operator": "gte", "value": 150, "unit": "count" },
+      "method": "unavailable_until_office_hours_launch"
+    },
+    {
+      "id": "bilingual_reach",
+      "measure": "french_language_sessions_share",
+      "target": { "operator": "gte", "value": 12, "unit": "percent" },
+      "method": "consent_qualified_pageview_share"
+    },
+    {
+      "id": "confidential_trust",
+      "measure": "room_enquiries_and_security_incidents",
+      "target": {
+        "enquiries": { "operator": "gte", "value": 10, "unit": "count" },
+        "securityIncidents": { "operator": "eq", "value": 0, "unit": "count" }
+      },
+      "method": "unavailable_until_room_launch_and_security_approval"
+    }
+  ]
+}

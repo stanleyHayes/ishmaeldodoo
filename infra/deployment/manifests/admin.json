@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "name": "admin",
+  "releaseUnit": "amanor-admin",
+  "image": "registry.example.invalid/amanor-admin@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "container": {
+    "port": 3001,
+    "runAsUser": 1000,
+    "readOnlyRootFilesystem": true,
+    "writableTmpfs": ["/tmp", "/workspace/apps/admin/.next/cache"]
+  },
+  "health": {
+    "liveness": { "path": "/", "initialDelaySeconds": 10, "periodSeconds": 30 },
+    "readiness": { "path": "/", "initialDelaySeconds": 5, "periodSeconds": 10 }
+  },
+  "publicBuildVariables": [
+    "NEXT_PUBLIC_AMANOR_DEPLOYMENT_ENV",
+    "NEXT_PUBLIC_API_BASE_URL"
+  ],
+  "secretClasses": [],
+  "jobs": [],
+  "rollback": { "independent": true, "strategy": "prior-image-digest" }
+}

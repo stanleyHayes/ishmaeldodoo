@@ -1,0 +1,35 @@
+name: AMANOR feature
+description: Implement a traceable Project AMANOR story or task.
+title: "AMANOR-000 "
+labels: ["feature"]
+body:
+  - type: input
+    id: plan_id
+    attributes:
+      label: Plan ID
+      placeholder: AMANOR-000
+    validations:
+      required: true
+  - type: textarea
+    id: story
+    attributes:
+      label: User story and business value
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Include localisation, accessibility, Sahel Mode, security, privacy, source, consent, and failure states where applicable.
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies and decisions
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Required verification evidence
+    validations:
+      required: true

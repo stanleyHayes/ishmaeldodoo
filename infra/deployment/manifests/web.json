@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "name": "web",
+  "releaseUnit": "amanor-web",
+  "image": "registry.example.invalid/amanor-web@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "container": {
+    "port": 3000,
+    "runAsUser": 1000,
+    "readOnlyRootFilesystem": true,
+    "writableTmpfs": ["/tmp", "/workspace/apps/web/.next/cache"]
+  },
+  "health": {
+    "liveness": { "path": "/", "initialDelaySeconds": 10, "periodSeconds": 30 },
+    "readiness": { "path": "/", "initialDelaySeconds": 5, "periodSeconds": 10 }
+  },
+  "publicBuildVariables": [
+    "NEXT_PUBLIC_ROOM_TRUST_ANCHOR_KEY_ID",
+    "NEXT_PUBLIC_ROOM_TRUST_ANCHOR_PUBLIC_KEY"
+  ],
+  "secretClasses": [
+    "public_service_signing",
+    "revalidation_verification",
+    "analytics_provider"
+  ],
+  "jobs": [],
+  "rollback": { "independent": true, "strategy": "prior-image-digest" }
+}

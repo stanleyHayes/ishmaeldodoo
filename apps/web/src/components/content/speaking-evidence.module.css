@@ -1,0 +1,83 @@
+.history,
+.media {
+  margin-top: 2rem;
+  border-top: 0.0625rem solid var(--rule);
+  padding-top: 1rem;
+}
+
+.history > ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.history > ol > li {
+  display: grid;
+  grid-template-columns: minmax(7rem, 0.2fr) minmax(0, 1fr) auto;
+  gap: 1rem;
+  padding-block: 1rem;
+  border-top: 0.0625rem solid var(--rule);
+}
+
+.history time,
+.history > ol > li > span {
+  color: var(--muted);
+  font-family: var(--font-data);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+}
+
+.history li div {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.history .sourceLine {
+  grid-column: 2 / -1;
+}
+
+.media > div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.mediaItem {
+  margin: 0;
+}
+
+.mediaItem img {
+  object-fit: cover;
+  object-position: var(--media-focal, 50% 50%);
+}
+
+.mediaItem img,
+.mediaItem video {
+  width: 100%;
+  height: auto;
+  background: var(--surface);
+}
+
+.mediaItem figcaption {
+  display: grid;
+  gap: 0.35rem;
+  padding-top: 0.75rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.mediaItem figcaption a {
+  color: var(--accent-deep);
+  font-weight: 600;
+}
+
+@media (max-width: 47.9375rem) {
+  .history > ol > li,
+  .media > div {
+    grid-template-columns: 1fr;
+  }
+
+  .history .sourceLine {
+    grid-column: auto;
+  }
+}

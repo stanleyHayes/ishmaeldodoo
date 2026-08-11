@@ -1,0 +1,19 @@
+scrape_configs:
+  - job_name: amanor-uptime
+    metrics_path: /probe
+    params:
+      module: [amanor_http_2xx]
+    static_configs:
+      - targets: [https://www.ishmaeldodoo.example/]
+        labels: { service: amanor-web }
+      - targets: [https://admin.ishmaeldodoo.example/]
+        labels: { service: amanor-admin }
+      - targets: [https://api.ishmaeldodoo.example/v1/health/ready]
+        labels: { service: amanor-api }
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115

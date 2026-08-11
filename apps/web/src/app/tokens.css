@@ -1,0 +1,46 @@
+:root {
+  color-scheme: light;
+  --ink: #111318;
+  --paper: #fbfaf8;
+  --accent: #0b4f6c;
+  --accent-deep: #062f41;
+  --gold: #b08d3f;
+  --sahel: #c1663b;
+  --muted: #5b6472;
+  --rule: #e2ded7;
+  --surface: #f2efea;
+  --night-ink: #e8e6e1;
+  --night-paper: #0e1114;
+  --signal: #2e7d5b;
+  --caution: #8c3a2e;
+  --focus: var(--accent);
+  --font-display: "Newsreader Variable", Georgia, serif;
+  --font-body: "Inter Tight Variable", Arial, sans-serif;
+  --font-data: "IBM Plex Mono", monospace;
+  --content-max: 80rem;
+  --page-gutter: clamp(1.25rem, 5.625vw, 4.5rem);
+  --nav-height: 4.5rem;
+  --motion-fast: 160ms;
+  --motion-panel: 240ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+[data-theme="night"] {
+  color-scheme: dark;
+  --ink: #e8e6e1;
+  --paper: #0e1114;
+  --accent: #79b6cf;
+  --accent-deep: #a7d3e5;
+  --muted: #a8afb8;
+  --rule: #343a40;
+  --surface: #191e23;
+  --focus: #79b6cf;
+}
+
+[data-mode="sahel"] {
+  --font-display: Georgia, "Times New Roman", serif;
+  --font-body: Arial, Helvetica, sans-serif;
+  --font-data: ui-monospace, "Courier New", monospace;
+  --motion-fast: 0ms;
+  --motion-panel: 0ms;
+}

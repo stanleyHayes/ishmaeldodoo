@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "title": "Project AMANOR product outcomes",
+  "defaultWindow": "30d",
+  "timezone": "Africa/Accra",
+  "privacy": {
+    "minimumGroupSize": 10,
+    "suppressedValue": null,
+    "allowedDimensions": ["route", "locale", "audience", "mode"],
+    "forbidRawEventExport": true
+  },
+  "panels": [
+    {
+      "id": "reach",
+      "outcome": "reach",
+      "title": "Consent-qualified page views",
+      "source": "analytics",
+      "events": ["pageview"],
+      "measure": "count",
+      "groupBy": ["locale", "route"],
+      "minimumGroupSize": 10
+    },
+    {
+      "id": "desk-funnel",
+      "outcome": "desk_funnel",
+      "title": "Protocol Desk completion funnel",
+      "source": "analytics",
+      "events": ["protocol_desk_started", "protocol_desk_completed"],
+      "measure": "completed_divided_by_started",
+      "groupBy": ["locale", "mode"],
+      "minimumGroupSize": 10,
+      "zeroDenominator": null
+    },
+    {
+      "id": "desk-sla",
+      "outcome": "desk_sla",
+      "title": "Protocol Desk open SLA escalations",
+      "source": "prometheus",
+      "series": "amanor_protocol_desk_open_escalations",
+      "measure": "current_sum_by_type",
+      "groupBy": [],
+      "minimumGroupSize": 0
+    },
+    {
+      "id": "press-kit",
+      "outcome": "press_kit",
+      "title": "Press Kit requests",
+      "source": "analytics",
+      "events": ["press_kit_requested"],
+      "measure": "count",
+      "groupBy": ["locale", "mode"],
+      "minimumGroupSize": 10
+    },
+    {
+      "id": "atlas",
+      "outcome": "atlas",
+      "title": "Atlas exploration",
+      "source": "analytics",
+      "events": ["atlas_filter_applied", "atlas_record_opened"],
+      "measure": "count_by_event",
+      "groupBy": ["locale", "audience", "mode"],
+      "minimumGroupSize": 10
+    },
+    {
+      "id": "signals",
+      "outcome": "signals",
+      "title": "Signals readership",
+      "source": "analytics",
+      "events": ["pageview"],
+      "routeFilter": ["/signals", "/fr/signals"],
+      "measure": "count",
+      "groupBy": ["locale", "mode"],
+      "minimumGroupSize": 10
+    },
+    {
+      "id": "office-hours",
+      "outcome": "office_hours",
+      "title": "Office Hours readership",
+      "source": "analytics",
+      "events": ["pageview"],
+      "routeFilter": ["/office-hours", "/fr/office-hours"],
+      "measure": "count",
+      "groupBy": ["locale", "mode"],
+      "minimumGroupSize": 10
+    },
+    {
+      "id": "sahel-mode",
+      "outcome": "sahel_mode",
+      "title": "Sahel Mode activation and page views",
+      "source": "analytics",
+      "events": ["sahel_mode_enabled", "pageview"],
+      "measure": "activation_count_and_sahel_share",
+      "groupBy": ["locale"],
+      "minimumGroupSize": 10,
+      "zeroDenominator": null
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "deployables": ["web", "admin", "api"],
+  "environments": {
+    "local": {
+      "isolatedData": true,
+      "httpsRequired": false,
+      "edgeProtectionRequired": false,
+      "publicIndexing": false,
+      "persistent": false
+    },
+    "preview": {
+      "isolatedData": true,
+      "httpsRequired": true,
+      "edgeProtectionRequired": true,
+      "publicIndexing": false,
+      "persistent": false
+    },
+    "staging": {
+      "isolatedData": true,
+      "httpsRequired": true,
+      "edgeProtectionRequired": true,
+      "publicIndexing": false,
+      "persistent": true
+    },
+    "production": {
+      "isolatedData": true,
+      "httpsRequired": true,
+      "edgeProtectionRequired": false,
+      "publicIndexing": true,
+      "persistent": true
+    }
+  },
+  "requiredSecretClasses": {
+    "web": [
+      "public_service_signing",
+      "revalidation_verification",
+      "analytics_provider"
+    ],
+    "admin": [],
+    "api": [
+      "mongodb_application",
+      "mongodb_migration",
+      "mongodb_retention",
+      "mongodb_room",
+      "jwt_signing",
+      "session_pepper",
+      "mfa_encryption",
+      "public_service_verification",
+      "revalidation_signing",
+      "cloudinary",
+      "cloudinary_retention",
+      "email_provider",
+      "calendar_provider",
+      "metrics_access",
+      "telemetry_export",
+      "webauthn_relying_party"
+    ]
+  },
+  "releaseRules": {
+    "distinctOrigins": true,
+    "immutableRevision": true,
+    "databaseMigrationSeparateJob": true,
+    "contentDeployIndependent": true,
+    "independentRollback": true,
+    "timedRollbackEvidence": true,
+    "oneApprovingReview": true,
+    "greenPipeline": true
+  }
+}

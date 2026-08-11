@@ -1,0 +1,147 @@
+groups:
+  - name: amanor-api
+    interval: 30s
+    rules:
+      - alert: AmanorApiHighErrorRate
+        expr: |
+          sum(rate(amanor_http_request_duration_seconds_count{status="5xx"}[5m]))
+          /
+          clamp_min(sum(rate(amanor_http_request_duration_seconds_count[5m])), 0.001)
+          > 0.05
+        for: 10m
+        labels:
+          severity: page
+          service: amanor-api
+        annotations:
+          summary: AMANOR API 5xx ratio exceeds 5 percent
+          runbook_url: docs/operations/observability.md#alert-drill-and-response
+      - alert: AmanorApiHighLatency
+        expr: |
+          histogram_quantile(0.95,
+            sum by (le) (rate(amanor_http_request_duration_seconds_bucket[5m]))
+          ) > 1
+        for: 10m
+        labels:
+          severity: ticket
+          service: amanor-api
+        annotations:
+          summary: AMANOR API p95 latency exceeds one second
+          runbook_url: docs/operations/observability.md#alert-drill-and-response
+      - alert: AmanorApiMetricsMissing
+        expr: absent(amanor_http_request_duration_seconds_count) == 1
+        for: 5m
+        labels:
+          severity: page
+          service: amanor-api
+        annotations:
+          summary: AMANOR API metrics scrape is missing
+          runbook_url: docs/operations/observability.md#alert-drill-and-response
+      - alert: AmanorTelemetryExportFailure
+        expr: |
+          (amanor_telemetry_export_configured == 1)
+          and
+          (amanor_telemetry_export_healthy == 0)
+        for: 2m
+        labels:
+          severity: ticket
+          service: amanor-api
+        annotations:
+          summary: AMANOR API trace export is failing
+          runbook_url: docs/operations/observability.md#alert-drill-and-response
+      - alert: AmanorProtocolDeskResponseSlaOverdue
+        expr: amanor_protocol_desk_open_escalations{type="initial_response_overdue"} > 0
+        for: 5m
+        labels:
+          severity: ticket
+          service: amanor-api
+        annotations:
+          summary: Protocol Desk has an overdue 48-hour requester response
+          runbook_url: docs/operations/protocol-desk-sla.md#response
+      - alert: AmanorProtocolDeskDeliveryFailure
+        expr: amanor_protocol_desk_open_escalations{type="delivery_failure"} > 0
+        for: 2m
+        labels:
+          severity: page
+          service: amanor-api
+        annotations:
+          summary: Protocol Desk correspondence delivery is repeatedly failing
+          runbook_url: docs/operations/protocol-desk-sla.md#response
+      - alert: AmanorProtocolDeskCalendarSyncFailure
+        expr: amanor_protocol_desk_calendar_sync_jobs{status="failed"} > 0
+        for: 2m
+        labels:
+          severity: page
+          service: amanor-api
+        annotations:
+          summary: Protocol Desk calendar synchronization is failing
+          runbook_url: docs/operations/calendar-synchronization.md#retry-and-reconciliation
+      - alert: AmanorPrincipalDecisionDeliveryFailure
+        expr: amanor_protocol_desk_principal_decision_deliveries{status="failed"} > 0
+        for: 2m
+        labels:
+          severity: page
+          service: amanor-api
+        annotations:
+          summary: Principal decision delivery is failing
+          runbook_url: docs/operations/protocol-correspondence.md#principal-decision-alert-response
+      - alert: AmanorRoomRetentionDeletionFailure
+        expr: amanor_room_retention_failed > 0
+        for: 2m
+        labels:
+          severity: page
+          service: amanor-api
+        annotations:
+          summary: The Room has an encrypted enquiry that could not be deleted
+          runbook_url: docs/security/room-operations.md#incidents
+      - alert: AmanorRoomRetentionOverdue
+        expr: amanor_room_retention_oldest_overdue_seconds > 4500
+        for: 5m
+        labels:
+          severity: page
+          service: amanor-api
+        annotations:
+          summary: The Room has a deletion more than 75 minutes overdue
+          runbook_url: docs/security/room-operations.md#incidents
+      - alert: AmanorRoomRetentionScanFailure
+        expr: amanor_room_retention_scan_healthy == 0
+        for: 5m
+        labels:
+          severity: page
+          service: amanor-api
+        annotations:
+          summary: The Room retention scan is failing
+          runbook_url: docs/security/room-operations.md#incidents
+      - alert: AmanorPersonalDataRetentionOverdue
+        expr: max(amanor_personal_data_retention_oldest_overdue_seconds) > 7200
+        for: 5m
+        labels:
+          severity: page
+          service: amanor-api
+        annotations:
+          summary: A TTL-backed personal-data record is more than two hours overdue
+          runbook_url: docs/operations/ttl-retention-monitoring.md#alert-response
+      - alert: AmanorPersonalDataRetentionScanFailure
+        expr: amanor_personal_data_retention_scan_healthy == 0
+        for: 5m
+        labels:
+          severity: page
+          service: amanor-api
+        annotations:
+          summary: The personal-data TTL retention scan is failing
+          runbook_url: docs/operations/ttl-retention-monitoring.md#alert-response
+      - alert: AmanorDeploymentUnavailable
+        expr: probe_success{job="amanor-uptime"} == 0
+        for: 3m
+        labels:
+          severity: page
+        annotations:
+          summary: "AMANOR deployment {{ $labels.service }} is unavailable"
+          runbook_url: docs/operations/observability.md#alert-drill-and-response
+      - alert: AmanorTlsCertificateExpiring
+        expr: probe_ssl_earliest_cert_expiry{job="amanor-uptime"} - time() < 1209600
+        for: 1h
+        labels:
+          severity: ticket
+        annotations:
+          summary: "AMANOR deployment {{ $labels.service }} TLS certificate expires within 14 days"
+          runbook_url: docs/operations/observability.md#alert-drill-and-response

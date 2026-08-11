@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "environment": "staging",
+  "origin": "https://staging.example.invalid",
+  "productionOrigin": "https://www.example.invalid",
+  "productionLike": true,
+  "allowProduction": false,
+  "baseline": {
+    "kind": "pending",
+    "requestsPerSecond": 0,
+    "sourceReference": "Not measured or approved",
+    "observedAt": "Not recorded"
+  },
+  "surge": {
+    "multiplier": 100,
+    "requestsPerSecond": 0,
+    "durationSeconds": 900
+  },
+  "traffic": [
+    { "method": "GET", "path": "/", "weightPercent": 30 },
+    { "method": "GET", "path": "/record", "weightPercent": 20 },
+    { "method": "GET", "path": "/record/atlas", "weightPercent": 15 },
+    { "method": "GET", "path": "/press", "weightPercent": 15 },
+    { "method": "GET", "path": "/speaking", "weightPercent": 10 },
+    { "method": "GET", "path": "/fr", "weightPercent": 10 }
+  ],
+  "protocolDesk": {
+    "method": "POST",
+    "path": "/api/protocol-desk",
+    "intervalSeconds": 60,
+    "fixtureClassification": "synthetic-no-real-person",
+    "cleanupOwner": "Not assigned"
+  },
+  "thresholds": {
+    "errorRatePercent": 1,
+    "publicP95Milliseconds": 1800,
+    "protocolP95Milliseconds": 15000,
+    "protocolSuccessPercent": 100
+  }
+}

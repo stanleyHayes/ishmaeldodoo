@@ -1,0 +1,171 @@
+{
+  "annotations": { "list": [] },
+  "editable": false,
+  "panels": [
+    {
+      "id": 1,
+      "title": "Requests per second",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum(rate(amanor_http_request_duration_seconds_count[5m]))",
+          "legendFormat": "all"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "5xx ratio",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum(rate(amanor_http_request_duration_seconds_count{status=\"5xx\"}[5m])) / clamp_min(sum(rate(amanor_http_request_duration_seconds_count[5m])), 0.001)",
+          "legendFormat": "5xx"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "p95 latency",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(amanor_http_request_duration_seconds_bucket[5m])))",
+          "legendFormat": "p95"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Traffic by normalized route",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum by (route) (rate(amanor_http_request_duration_seconds_count[5m]))",
+          "legendFormat": "{{route}}"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Independent deployment uptime",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "min by (service) (probe_success{job=\"amanor-uptime\"})",
+          "legendFormat": "{{service}}"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "TLS certificate days remaining",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "min by (service) ((probe_ssl_earliest_cert_expiry{job=\"amanor-uptime\"} - time()) / 86400)",
+          "legendFormat": "{{service}}"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Protocol Desk open SLA escalations",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum by (type) (amanor_protocol_desk_open_escalations)",
+          "legendFormat": "{{type}}"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Protocol Desk calendar synchronization",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum by (status) (amanor_protocol_desk_calendar_sync_jobs)",
+          "legendFormat": "{{status}}"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "title": "Principal decision delivery",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum by (status) (amanor_protocol_desk_principal_decision_deliveries)",
+          "legendFormat": "{{status}}"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "The Room retention health",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "amanor_room_retention_due",
+          "legendFormat": "due"
+        },
+        {
+          "expr": "amanor_room_retention_failed",
+          "legendFormat": "failed"
+        },
+        {
+          "expr": "amanor_room_retention_oldest_overdue_seconds",
+          "legendFormat": "oldest overdue seconds"
+        },
+        {
+          "expr": "amanor_room_retention_scan_healthy",
+          "legendFormat": "scan healthy"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "title": "TTL personal-data retention health",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum by (record_class) (amanor_personal_data_retention_due)",
+          "legendFormat": "{{record_class}} due"
+        },
+        {
+          "expr": "max by (record_class) (amanor_personal_data_retention_oldest_overdue_seconds)",
+          "legendFormat": "{{record_class}} oldest overdue seconds"
+        },
+        {
+          "expr": "amanor_personal_data_retention_scan_healthy",
+          "legendFormat": "scan healthy"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "title": "Trace export health",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "amanor_telemetry_export_configured",
+          "legendFormat": "configured"
+        },
+        {
+          "expr": "amanor_telemetry_export_healthy",
+          "legendFormat": "healthy"
+        }
+      ]
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 41,
+  "tags": ["amanor", "api", "production"],
+  "templating": { "list": [] },
+  "time": { "from": "now-6h", "to": "now" },
+  "timezone": "browser",
+  "title": "AMANOR API service health",
+  "uid": "amanor-api-health",
+  "version": 1
+}

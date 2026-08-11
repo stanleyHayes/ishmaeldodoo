@@ -1,0 +1,309 @@
+{
+  "schemaVersion": 1,
+  "registerStatus": "awaiting-stakeholders",
+  "updatedAt": "2026-08-11",
+  "decisions": [
+    {
+      "id": "D01",
+      "title": "Primary domain and defensive registrations",
+      "authority": ["principal"],
+      "status": "pending",
+      "options": [
+        "approve-proposed-domain",
+        "supply-alternative-domain",
+        "defer-launch"
+      ],
+      "selected": null,
+      "decisionDetail": null,
+      "decider": null,
+      "decidedAt": null,
+      "evidence": null,
+      "affectedTasks": ["AMANOR-014", "AMANOR-029", "AMANOR-121", "AMANOR-147"]
+    },
+    {
+      "id": "D02",
+      "title": "Immutable Foresight Ledger within the Signal Board",
+      "authority": ["principal"],
+      "status": "pending",
+      "options": [
+        "ship-signal-board-with-ledger",
+        "ship-signal-board-without-ledger",
+        "defer-signal-board"
+      ],
+      "selected": null,
+      "decisionDetail": null,
+      "decider": null,
+      "decidedAt": null,
+      "evidence": null,
+      "affectedTasks": ["AMANOR-015", "AMANOR-056", "AMANOR-072"]
+    },
+    {
+      "id": "D03",
+      "title": "Doctrine Engine or curated Positions page",
+      "authority": ["principal"],
+      "status": "pending",
+      "options": [
+        "curated-positions",
+        "retrieval-grounded-doctrine-engine",
+        "defer-feature"
+      ],
+      "selected": null,
+      "decisionDetail": null,
+      "decider": null,
+      "decidedAt": null,
+      "evidence": null,
+      "affectedTasks": ["AMANOR-016", "AMANOR-058", "AMANOR-071", "AMANOR-140"]
+    },
+    {
+      "id": "D04",
+      "title": "Selah launch scope",
+      "authority": ["principal"],
+      "status": "pending",
+      "options": ["ship-at-launch", "ship-post-launch", "do-not-ship"],
+      "selected": null,
+      "decisionDetail": null,
+      "decider": null,
+      "decidedAt": null,
+      "evidence": null,
+      "affectedTasks": ["AMANOR-017", "AMANOR-062", "AMANOR-076", "AMANOR-107"]
+    },
+    {
+      "id": "D05",
+      "title": "Green Horizon Ventures prominence and wording",
+      "authority": ["principal", "legal"],
+      "status": "pending",
+      "options": ["prominent-approved-copy", "limited-approved-copy", "omit"],
+      "selected": null,
+      "decisionDetail": null,
+      "decider": null,
+      "decidedAt": null,
+      "evidence": null,
+      "affectedTasks": ["AMANOR-018", "AMANOR-051", "AMANOR-052"]
+    },
+    {
+      "id": "D06",
+      "title": "Recurring Office Hours commitment",
+      "authority": ["principal"],
+      "status": "pending",
+      "options": [
+        "approve-recurring-programme",
+        "approve-time-bounded-pilot",
+        "do-not-ship"
+      ],
+      "selected": null,
+      "decisionDetail": null,
+      "decider": null,
+      "decidedAt": null,
+      "evidence": null,
+      "affectedTasks": ["AMANOR-019", "AMANOR-061", "AMANOR-074", "AMANOR-009"]
+    },
+    {
+      "id": "D07",
+      "title": "Desk Officer appointment and authority",
+      "authority": ["principal"],
+      "status": "pending",
+      "options": [
+        "appoint-with-proposed-matrix",
+        "appoint-with-amended-matrix",
+        "no-launch-owner"
+      ],
+      "selected": null,
+      "decisionDetail": null,
+      "decider": null,
+      "decidedAt": null,
+      "evidence": null,
+      "affectedTasks": ["AMANOR-020", "AMANOR-073", "AMANOR-086", "AMANOR-091"]
+    },
+    {
+      "id": "D08",
+      "title": "Counterparty watch-list steward and review cadence",
+      "authority": ["principal", "legal"],
+      "status": "pending",
+      "options": [
+        "approve-named-steward-and-cadence",
+        "approve-external-compliance-owner",
+        "do-not-operate-desk"
+      ],
+      "selected": null,
+      "decisionDetail": null,
+      "decider": null,
+      "decidedAt": null,
+      "evidence": null,
+      "affectedTasks": ["AMANOR-021", "AMANOR-042", "AMANOR-085"]
+    },
+    {
+      "id": "D09",
+      "title": "Personal-capacity honorarium policy",
+      "authority": ["principal", "legal"],
+      "status": "pending",
+      "options": [
+        "approve-proposed-policy",
+        "approve-amended-policy",
+        "prohibit-honoraria",
+        "do-not-operate-desk"
+      ],
+      "selected": null,
+      "decisionDetail": null,
+      "decider": null,
+      "decidedAt": null,
+      "evidence": null,
+      "affectedTasks": ["AMANOR-022", "AMANOR-073", "AMANOR-084", "AMANOR-085"]
+    },
+    {
+      "id": "D10",
+      "title": "Personal field archive and photography use",
+      "authority": ["principal"],
+      "status": "pending",
+      "options": [
+        "approve-with-rights-register",
+        "approve-limited-selection",
+        "do-not-use"
+      ],
+      "selected": null,
+      "decisionDetail": null,
+      "decider": null,
+      "decidedAt": null,
+      "evidence": null,
+      "affectedTasks": [
+        "AMANOR-023",
+        "AMANOR-052",
+        "AMANOR-099",
+        "AMANOR-100",
+        "AMANOR-105"
+      ]
+    },
+    {
+      "id": "D11",
+      "title": "Next.js App Router initial-JavaScript budget resolution",
+      "authority": ["principal", "product", "engineering"],
+      "status": "pending",
+      "options": [
+        "retain-app-router-and-approve-no-js-delivery",
+        "retain-app-router-and-approve-revised-budget",
+        "change-public-rendering-architecture"
+      ],
+      "selected": null,
+      "decisionDetail": null,
+      "decider": null,
+      "decidedAt": null,
+      "evidence": null,
+      "affectedTasks": ["AMANOR-026", "AMANOR-139", "AMANOR-179"]
+    },
+    {
+      "id": "S01",
+      "title": "Hosting and edge providers",
+      "authority": ["product", "engineering", "security"],
+      "status": "pending",
+      "options": [
+        "vercel-and-cloudflare",
+        "approved-alternative",
+        "defer-deployment"
+      ],
+      "selected": null,
+      "decisionDetail": null,
+      "decider": null,
+      "decidedAt": null,
+      "evidence": null,
+      "affectedTasks": ["AMANOR-024", "AMANOR-029", "AMANOR-147"]
+    },
+    {
+      "id": "S02",
+      "title": "Transactional email provider",
+      "authority": ["product", "engineering", "security"],
+      "status": "pending",
+      "options": ["resend", "approved-alternative", "defer-email-workflows"],
+      "selected": null,
+      "decisionDetail": null,
+      "decider": null,
+      "decidedAt": null,
+      "evidence": null,
+      "affectedTasks": ["AMANOR-024", "AMANOR-088", "AMANOR-121", "AMANOR-144"]
+    },
+    {
+      "id": "S03",
+      "title": "Calendar provider and adapter",
+      "authority": ["product", "engineering", "security"],
+      "status": "pending",
+      "options": [
+        "google-workspace-adapter",
+        "microsoft-graph-adapter",
+        "approved-alternative",
+        "defer-desk-launch"
+      ],
+      "selected": null,
+      "decisionDetail": null,
+      "decider": null,
+      "decidedAt": null,
+      "evidence": null,
+      "affectedTasks": ["AMANOR-024", "AMANOR-087", "AMANOR-091", "AMANOR-140"]
+    },
+    {
+      "id": "S04",
+      "title": "Analytics provider and hosting",
+      "authority": ["product", "privacy", "engineering"],
+      "status": "pending",
+      "options": [
+        "self-hosted-plausible",
+        "approved-privacy-safe-alternative",
+        "no-analytics"
+      ],
+      "selected": null,
+      "decisionDetail": null,
+      "decider": null,
+      "decidedAt": null,
+      "evidence": null,
+      "affectedTasks": ["AMANOR-024", "AMANOR-035", "AMANOR-130", "AMANOR-131"]
+    },
+    {
+      "id": "S05",
+      "title": "Observability and incident-routing providers",
+      "authority": ["engineering", "security", "operations"],
+      "status": "pending",
+      "options": [
+        "prometheus-grafana-loki-opsgenie",
+        "approved-managed-alternative",
+        "defer-deployment"
+      ],
+      "selected": null,
+      "decisionDetail": null,
+      "decider": null,
+      "decidedAt": null,
+      "evidence": null,
+      "affectedTasks": ["AMANOR-024", "AMANOR-033", "AMANOR-090", "AMANOR-176"]
+    },
+    {
+      "id": "S06",
+      "title": "Leaflet tile provider",
+      "authority": ["product", "engineering", "privacy"],
+      "status": "pending",
+      "options": [
+        "approved-commercial-tiles",
+        "approved-self-hosted-tiles",
+        "table-only-launch"
+      ],
+      "selected": null,
+      "decisionDetail": null,
+      "decider": null,
+      "decidedAt": null,
+      "evidence": null,
+      "affectedTasks": ["AMANOR-008", "AMANOR-024", "AMANOR-053", "AMANOR-068"]
+    },
+    {
+      "id": "S07",
+      "title": "Video delivery provider",
+      "authority": ["product", "engineering", "privacy"],
+      "status": "pending",
+      "options": [
+        "cloudinary-video",
+        "approved-external-embed",
+        "archive-links-only"
+      ],
+      "selected": null,
+      "decisionDetail": null,
+      "decider": null,
+      "decidedAt": null,
+      "evidence": null,
+      "affectedTasks": ["AMANOR-024", "AMANOR-054", "AMANOR-059", "AMANOR-140"]
+    }
+  ]
+}

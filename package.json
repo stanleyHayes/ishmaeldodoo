@@ -1,0 +1,80 @@
+{
+  "name": "project-amanor",
+  "version": "0.2.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "openapi:generate": "node scripts/openapi-artifact.mjs generate",
+    "openapi:check": "node scripts/openapi-artifact.mjs check",
+    "openapi:augment": "npm run build --workspace @amanor/api && node scripts/augment-openapi.mjs",
+    "openapi:generate:replica": "UPDATE_OPENAPI_ARTIFACT=true node scripts/run-api-replica-tests.mjs",
+    "contracts:generate": "node scripts/generate-api-types.mjs generate",
+    "check:contracts": "node scripts/openapi-artifact.mjs validate && node scripts/generate-api-types.mjs check",
+    "check:traceability": "node scripts/check-traceability.mjs",
+    "check:decisions": "node scripts/check-decision-register.mjs",
+    "check:privacy-retention": "node scripts/check-privacy-retention.mjs",
+    "check:media-governance": "node scripts/check-media-governance.mjs",
+    "build": "npm run build --workspace @amanor/contracts && npm run build --workspace @amanor/admin --workspace @amanor/api --workspace @amanor/web",
+    "typecheck": "npm run typecheck --workspaces --if-present && tsc -p tsconfig.e2e.json",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "test:coverage": "npm run test:coverage --workspaces --if-present",
+    "test:e2e": "node scripts/run-e2e.mjs",
+    "test:accessibility": "node scripts/run-e2e.mjs e2e/accessibility.spec.ts",
+    "test:lighthouse": "lhci autorun && node scripts/check-lighthouse-reports.mjs",
+    "test:api-container": "node scripts/verify-api-container.mjs",
+    "test:api-replica": "node scripts/run-api-replica-tests.mjs",
+    "test:frontend-containers": "node scripts/verify-frontend-containers.mjs",
+    "test:backup-restore": "node scripts/verify-mongo-backup-restore.mjs",
+    "smoke:deployment": "node scripts/smoke-deployment.mjs",
+    "rehearse:rollback": "node scripts/rollback-rehearsal.mjs",
+    "rehearse:load": "node scripts/load-rehearsal.mjs",
+    "evidence:protocol-note": "npm run build --workspace @amanor/api && node scripts/render-protocol-note-proof.mjs",
+    "sbom:api": "node scripts/generate-api-sbom.mjs",
+    "check:boundaries": "node scripts/check-boundaries.mjs --verify-fixtures",
+    "check:frontend-bundles": "node scripts/check-frontend-bundles.mjs",
+    "check:standard-script-budget": "node scripts/check-standard-script-budget.mjs",
+    "check:public-copy": "node scripts/check-public-copy.mjs --verify-fixtures",
+    "check:french-typography": "node scripts/check-french-typography.mjs",
+    "check:sahel-budget": "node scripts/check-sahel-budget.mjs",
+    "check:observability": "node scripts/check-observability.mjs",
+    "check:email-domain": "node scripts/check-email-domain.mjs --verify-fixtures",
+    "verify:email-domain": "node scripts/check-email-domain.mjs",
+    "check:analytics": "node scripts/check-product-dashboard.mjs",
+    "check:release": "node scripts/check-release-process.mjs",
+    "check:deployment-manifests": "node scripts/check-deployment-manifests.mjs",
+    "check:environment": "node scripts/check-environment-inventory.mjs",
+    "check:load": "node scripts/check-load-rehearsal.mjs",
+    "check:devices": "node scripts/check-device-matrix.mjs",
+    "check:handover": "node scripts/check-handover.mjs",
+    "check:acceptance-evidence": "node scripts/check-acceptance-evidence.mjs",
+    "check:concurrency-guards": "node scripts/check-concurrency-guards.mjs",
+    "check:accessibility-structure": "node scripts/check-accessibility-structure.mjs",
+    "check:security": "node scripts/check-security-policy.mjs",
+    "check:security-ci": "node scripts/check-security-workflows.mjs",
+    "check:format": "prettier --check .",
+    "check:secrets": "node scripts/check-secrets.mjs --verify-fixtures",
+    "check": "npm run check:format && npm run check:boundaries && npm run check:public-copy && npm run check:french-typography && npm run check:contracts && npm run check:traceability && npm run check:decisions && npm run check:privacy-retention && npm run check:media-governance && npm run check:observability && npm run check:email-domain && npm run check:analytics && npm run check:release && npm run check:deployment-manifests && npm run check:environment && npm run check:load && npm run check:devices && npm run check:handover && npm run check:acceptance-evidence && npm run check:concurrency-guards && npm run check:accessibility-structure && npm run check:security && npm run check:security-ci && npm run check:secrets && npm run typecheck && npm run lint && npm run test:coverage && npm run build && npm run check:frontend-bundles && npm run check:standard-script-budget && npm run check:sahel-budget"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.12.1",
+    "@lhci/cli": "0.15.1",
+    "@playwright/test": "1.62.1",
+    "@vitest/coverage-v8": "4.1.10",
+    "prettier": "3.8.2",
+    "typescript": "6.0.3"
+  },
+  "overrides": {
+    "@nestjs/swagger@11.4.6": {
+      "js-yaml": "5.2.3"
+    },
+    "tmp": "0.2.7",
+    "uuid": "11.1.1"
+  }
+}

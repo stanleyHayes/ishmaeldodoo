@@ -1,0 +1,3481 @@
+{
+  "components": {
+    "schemas": {
+      "ErrorEnvelope": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "message": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "requestId": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "statusCode": {
+            "maximum": 599,
+            "minimum": 400,
+            "type": "integer"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "statusCode",
+          "code",
+          "message",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "InvitationAcceptanceResponseDto": {
+        "properties": {
+          "recoveryCodes": {
+            "description": "Single-use recovery codes displayed only in this response.",
+            "items": {
+              "pattern": "^[A-Z2-9]{4}(?:-[A-Z2-9]{4}){3}$",
+              "type": "string"
+            },
+            "maxItems": 8,
+            "minItems": 8,
+            "type": "array"
+          }
+        },
+        "required": [
+          "recoveryCodes"
+        ],
+        "type": "object"
+      },
+      "RoomCiphertext": {
+        "additionalProperties": false,
+        "properties": {
+          "deleteAfter": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "envelope": {
+            "$ref": "#/components/schemas/RoomEnvelope"
+          },
+          "receivedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reference": {
+            "pattern": "^RM-[0-9]{4}-[A-Z2-7]{16}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reference",
+          "envelope",
+          "receivedAt",
+          "deleteAfter"
+        ],
+        "type": "object"
+      },
+      "RoomDesignation": {
+        "additionalProperties": false,
+        "properties": {
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "userId": {
+            "maxLength": 64,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "userId",
+          "expiresAt"
+        ],
+        "type": "object"
+      },
+      "RoomDesignationState": {
+        "additionalProperties": false,
+        "properties": {
+          "designate": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "active": {
+                    "type": "boolean"
+                  },
+                  "expiresAt": {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  "grantedAt": {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  "userId": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "userId",
+                  "grantedAt",
+                  "expiresAt",
+                  "active"
+                ],
+                "type": "object"
+              }
+            ]
+          }
+        },
+        "required": [
+          "designate"
+        ],
+        "type": "object"
+      },
+      "RoomEnvelope": {
+        "additionalProperties": false,
+        "properties": {
+          "ciphertext": {
+            "maxLength": 12000,
+            "minLength": 24,
+            "pattern": "^[A-Za-z0-9_-]+$",
+            "type": "string"
+          },
+          "envelopeId": {
+            "pattern": "^[0-9a-f]{32}$",
+            "type": "string"
+          },
+          "envelopeVersion": {
+            "enum": [
+              1
+            ],
+            "type": "integer"
+          },
+          "ephemeralPublicKey": {
+            "maxLength": 87,
+            "minLength": 87,
+            "pattern": "^[A-Za-z0-9_-]+$",
+            "type": "string"
+          },
+          "keyEpoch": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "nonce": {
+            "maxLength": 16,
+            "minLength": 16,
+            "pattern": "^[A-Za-z0-9_-]+$",
+            "type": "string"
+          },
+          "recipientKeyId": {
+            "pattern": "^rk-[0-9a-z][0-9a-z-]{4,47}$",
+            "type": "string"
+          },
+          "suite": {
+            "enum": [
+              "ECDH-P256-HKDF-SHA256-AES256GCM"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "envelopeVersion",
+          "suite",
+          "envelopeId",
+          "recipientKeyId",
+          "keyEpoch",
+          "ephemeralPublicKey",
+          "nonce",
+          "ciphertext"
+        ],
+        "type": "object"
+      },
+      "RoomExtension": {
+        "additionalProperties": false,
+        "properties": {
+          "days": {
+            "maximum": 180,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "reason": {
+            "enum": [
+              "active_conversation",
+              "legal_hold",
+              "security_investigation"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason",
+          "days"
+        ],
+        "type": "object"
+      },
+      "RoomInboxItem": {
+        "additionalProperties": false,
+        "properties": {
+          "ciphertextBytes": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "deleteAfter": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "extensionCount": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "keyEpoch": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "locale": {
+            "enum": [
+              "en-GB",
+              "fr-FR"
+            ],
+            "type": "string"
+          },
+          "receivedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "recipientKeyId": {
+            "pattern": "^rk-[0-9a-z][0-9a-z-]{4,47}$",
+            "type": "string"
+          },
+          "reference": {
+            "pattern": "^RM-[0-9]{4}-[A-Z2-7]{16}$",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "received",
+              "read",
+              "actioned",
+              "quarantined"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "reference",
+          "state",
+          "locale",
+          "recipientKeyId",
+          "keyEpoch",
+          "receivedAt",
+          "deleteAfter",
+          "extensionCount",
+          "ciphertextBytes"
+        ],
+        "type": "object"
+      },
+      "RoomInboxPage": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/RoomInboxItem"
+            },
+            "maxItems": 50,
+            "type": "array"
+          },
+          "total": {
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ],
+        "type": "object"
+      },
+      "RoomKeyManifest": {
+        "additionalProperties": false,
+        "properties": {
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "issuedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "keys": {
+            "items": {
+              "$ref": "#/components/schemas/RoomRecipientKey"
+            },
+            "maxItems": 2,
+            "minItems": 1,
+            "type": "array"
+          },
+          "manifestVersion": {
+            "enum": [
+              1
+            ],
+            "type": "integer"
+          },
+          "signature": {
+            "additionalProperties": false,
+            "properties": {
+              "algorithm": {
+                "enum": [
+                  "ECDSA-P256-SHA256"
+                ],
+                "type": "string"
+              },
+              "keyId": {
+                "pattern": "^ta-[0-9a-z][0-9a-z-]{4,47}$",
+                "type": "string"
+              },
+              "value": {
+                "maxLength": 86,
+                "minLength": 86,
+                "pattern": "^[A-Za-z0-9_-]+$",
+                "type": "string"
+              }
+            },
+            "required": [
+              "algorithm",
+              "keyId",
+              "value"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "manifestVersion",
+          "issuedAt",
+          "expiresAt",
+          "keys",
+          "signature"
+        ],
+        "type": "object"
+      },
+      "RoomReceipt": {
+        "additionalProperties": false,
+        "properties": {
+          "deleteAfter": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reference": {
+            "pattern": "^RM-[0-9]{4}-[A-Z2-7]{16}$",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "received"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "reference",
+          "status",
+          "deleteAfter"
+        ],
+        "type": "object"
+      },
+      "RoomRecipientKey": {
+        "additionalProperties": false,
+        "properties": {
+          "algorithm": {
+            "enum": [
+              "ECDH-P256"
+            ],
+            "type": "string"
+          },
+          "epoch": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "keyId": {
+            "pattern": "^rk-[0-9a-z][0-9a-z-]{4,47}$",
+            "type": "string"
+          },
+          "notAfter": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "notBefore": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "publicKey": {
+            "maxLength": 87,
+            "minLength": 87,
+            "pattern": "^[A-Za-z0-9_-]+$",
+            "type": "string"
+          },
+          "purpose": {
+            "enum": [
+              "room-enquiry"
+            ],
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "retiring"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "keyId",
+          "epoch",
+          "algorithm",
+          "purpose",
+          "publicKey",
+          "notBefore",
+          "notAfter",
+          "status"
+        ],
+        "type": "object"
+      },
+      "RoomStateChange": {
+        "additionalProperties": false,
+        "properties": {
+          "state": {
+            "enum": [
+              "read",
+              "actioned",
+              "quarantined"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "state"
+        ],
+        "type": "object"
+      },
+      "RoomStatus": {
+        "additionalProperties": false,
+        "properties": {
+          "status": {
+            "enum": [
+              "ok"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "type": "object"
+      },
+      "RoomSubmission": {
+        "additionalProperties": false,
+        "properties": {
+          "confidentialityAcknowledged": {
+            "enum": [
+              true
+            ],
+            "type": "boolean"
+          },
+          "envelope": {
+            "$ref": "#/components/schemas/RoomEnvelope"
+          },
+          "locale": {
+            "enum": [
+              "en-GB",
+              "fr-FR"
+            ],
+            "type": "string"
+          },
+          "procurementAcknowledged": {
+            "enum": [
+              true
+            ],
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "envelope",
+          "locale",
+          "confidentialityAcknowledged",
+          "procurementAcknowledged"
+        ],
+        "type": "object"
+      },
+      "StepUpResponseDto": {
+        "properties": {
+          "accessToken": {
+            "description": "Five-minute in-memory elevated access token.",
+            "type": "string"
+          },
+          "expiresIn": {
+            "enum": [
+              300
+            ],
+            "type": "number"
+          }
+        },
+        "required": [
+          "accessToken",
+          "expiresIn"
+        ],
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "bearer": {
+        "bearerFormat": "JWT",
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "contact": {},
+    "description": "Backend contracts for the public platform, CMS and operations console.",
+    "title": "Project AMANOR API",
+    "version": "1.0"
+  },
+  "openapi": "3.0.0",
+  "paths": {
+    "/v1/auth/audit": {
+      "get": {
+        "operationId": "AuthController_authenticationAudit",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Redacted, cursor-paginated authentication security events."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "authentication"
+        ]
+      }
+    },
+    "/v1/auth/audit/integrity": {
+      "get": {
+        "operationId": "AuthController_authenticationAuditIntegrity",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Authentication audit hash-chain integrity status."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "authentication"
+        ]
+      }
+    },
+    "/v1/auth/hardware-keys": {
+      "get": {
+        "operationId": "AuthController_hardwareKeyList",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "authentication"
+        ]
+      }
+    },
+    "/v1/auth/hardware-keys/{credentialId}": {
+      "delete": {
+        "operationId": "AuthController_hardwareKeyRevoke",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "authentication"
+        ]
+      }
+    },
+    "/v1/auth/hardware-keys/authentication/options": {
+      "post": {
+        "operationId": "AuthController_hardwareKeyAuthenticationOptions",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "authentication"
+        ]
+      }
+    },
+    "/v1/auth/hardware-keys/authentication/verify": {
+      "post": {
+        "operationId": "AuthController_hardwareKeyAuthenticationVerify",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "authentication"
+        ]
+      }
+    },
+    "/v1/auth/hardware-keys/registration/options": {
+      "post": {
+        "operationId": "AuthController_hardwareKeyRegistrationOptions",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "authentication"
+        ]
+      }
+    },
+    "/v1/auth/hardware-keys/registration/verify": {
+      "post": {
+        "operationId": "AuthController_hardwareKeyRegistrationVerify",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "authentication"
+        ]
+      }
+    },
+    "/v1/auth/invitations": {
+      "post": {
+        "operationId": "AuthController_invite",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "One-time administrator invitation created."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "authentication"
+        ]
+      }
+    },
+    "/v1/auth/invitations/accept": {
+      "post": {
+        "operationId": "AuthController_acceptInvitation",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvitationAcceptanceResponseDto"
+                }
+              }
+            },
+            "description": "Password and MFA enrollment accepted; recovery codes shown once."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "authentication"
+        ]
+      }
+    },
+    "/v1/auth/invitations/setup": {
+      "post": {
+        "operationId": "AuthController_invitationSetup",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Valid invitation MFA enrollment details."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "authentication"
+        ]
+      }
+    },
+    "/v1/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Password and MFA verified; session created."
+          },
+          "401": {
+            "description": "Credentials or MFA verification failed."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "authentication"
+        ]
+      }
+    },
+    "/v1/auth/logout": {
+      "post": {
+        "operationId": "AuthController_logout",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "Current refresh-token family revoked."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "authentication"
+        ]
+      }
+    },
+    "/v1/auth/mfa/encryption-status": {
+      "get": {
+        "operationId": "AuthController_mfaEncryptionStatus",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Aggregate MFA ciphertext migration status without administrator identities or ciphertext."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "authentication"
+        ]
+      }
+    },
+    "/v1/auth/recovery-codes/rotate": {
+      "post": {
+        "operationId": "AuthController_rotateRecoveryCodes",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvitationAcceptanceResponseDto"
+                }
+              }
+            },
+            "description": "Prior recovery codes replaced and new codes shown once."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "authentication"
+        ]
+      }
+    },
+    "/v1/auth/refresh": {
+      "post": {
+        "operationId": "AuthController_refresh",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Refresh token rotated and new access token issued."
+          },
+          "401": {
+            "description": "Session, origin or CSRF proof is invalid."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "authentication"
+        ]
+      }
+    },
+    "/v1/auth/sessions": {
+      "get": {
+        "operationId": "AuthController_sessions",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Sessions belonging to the authenticated administrator."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "authentication"
+        ]
+      }
+    },
+    "/v1/auth/sessions/{sessionId}": {
+      "delete": {
+        "operationId": "AuthController_revokeSession",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "The selected session family was revoked."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "authentication"
+        ]
+      }
+    },
+    "/v1/auth/step-up": {
+      "post": {
+        "operationId": "AuthController_stepUp",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StepUpResponseDto"
+                }
+              }
+            },
+            "description": "Recent MFA verified and elevated access token issued."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "authentication"
+        ]
+      }
+    },
+    "/v1/auth/users": {
+      "get": {
+        "operationId": "AuthController_users",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Minimal administrator account inventory."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "authentication"
+        ]
+      }
+    },
+    "/v1/auth/users/{userId}/roles": {
+      "patch": {
+        "operationId": "AuthController_changeRoles",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Roles replaced and all subject sessions invalidated."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "authentication"
+        ]
+      }
+    },
+    "/v1/auth/users/{userId}/status": {
+      "patch": {
+        "operationId": "AuthController_setStatus",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Administrator status changed and all subject sessions invalidated."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "authentication"
+        ]
+      }
+    },
+    "/v1/cms/content/{documentType}": {
+      "get": {
+        "operationId": "CmsController_documents",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "A bounded page of content documents with their latest workflow state."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "cms"
+        ]
+      }
+    },
+    "/v1/cms/content/{documentType}/{documentId}/audit": {
+      "get": {
+        "operationId": "CmsController_audit",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Immutable audit history for the requested content document."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "cms"
+        ]
+      }
+    },
+    "/v1/cms/content/{documentType}/{documentId}/audit/export": {
+      "get": {
+        "operationId": "CmsController_auditExport",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Portable, hash-linked editorial audit export."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "cms"
+        ]
+      }
+    },
+    "/v1/cms/content/{documentType}/{documentId}/audit/integrity": {
+      "get": {
+        "operationId": "CmsController_auditIntegrity",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Editorial audit-chain integrity status."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "cms"
+        ]
+      }
+    },
+    "/v1/cms/content/{documentType}/{documentId}/unpublish": {
+      "post": {
+        "operationId": "CmsController_unpublish",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The locale publication was removed and audited atomically."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "cms"
+        ]
+      }
+    },
+    "/v1/cms/content/{documentType}/{documentId}/versions": {
+      "get": {
+        "operationId": "CmsController_versions",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Version history for the requested content document."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "cms"
+        ]
+      },
+      "post": {
+        "operationId": "CmsController_createDraft",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "A new immutable draft version was created."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "cms"
+        ]
+      }
+    },
+    "/v1/cms/content/{documentType}/{documentId}/versions/{version}/actions": {
+      "post": {
+        "operationId": "CmsController_transition",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The editorial workflow transition was applied atomically."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "cms"
+        ]
+      }
+    },
+    "/v1/cms/content/{documentType}/{documentId}/versions/{version}/publish": {
+      "post": {
+        "operationId": "CmsController_publish",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Approved content was published and revalidation queued."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "cms"
+        ]
+      }
+    },
+    "/v1/cms/content/{documentType}/{documentId}/versions/{version}/rollback": {
+      "post": {
+        "operationId": "CmsController_rollback",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "A previously published immutable version was restored for one locale."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "cms"
+        ]
+      }
+    },
+    "/v1/cms/content/source-audit/report": {
+      "get": {
+        "operationId": "CmsController_sourceAudit",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Complete no-sampling Source Register and published claim-reference audit."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "cms"
+        ]
+      }
+    },
+    "/v1/desk/requests": {
+      "get": {
+        "operationId": "ProtocolDeskOperatorController_queue",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "A bounded, score-ordered Protocol Desk operator queue."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "protocol-desk-operator"
+        ]
+      }
+    },
+    "/v1/desk/requests/{requestId}": {
+      "get": {
+        "operationId": "ProtocolDeskOperatorController_detail",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "protocol-desk-operator"
+        ]
+      }
+    },
+    "/v1/desk/requests/{requestId}/assignment": {
+      "post": {
+        "operationId": "ProtocolDeskOperatorController_assign",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "protocol-desk-operator"
+        ]
+      }
+    },
+    "/v1/desk/requests/{requestId}/calendar-sync/{syncId}/retry": {
+      "post": {
+        "operationId": "ProtocolDeskOperatorController_retryCalendarSync",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "protocol-desk-operator"
+        ]
+      }
+    },
+    "/v1/desk/requests/{requestId}/correspondence/{correspondenceId}/retry": {
+      "post": {
+        "operationId": "ProtocolDeskOperatorController_retryCorrespondence",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "protocol-desk-operator"
+        ]
+      }
+    },
+    "/v1/desk/requests/{requestId}/flags/{flagId}/clearance": {
+      "post": {
+        "operationId": "ProtocolDeskOperatorController_clearFlag",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "protocol-desk-operator"
+        ]
+      }
+    },
+    "/v1/desk/requests/{requestId}/notes": {
+      "post": {
+        "operationId": "ProtocolDeskOperatorController_note",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "protocol-desk-operator"
+        ]
+      }
+    },
+    "/v1/desk/requests/{requestId}/principal-decision-capabilities": {
+      "post": {
+        "operationId": "ProtocolDeskOperatorController_issuePrincipalDecisionCapability",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "protocol-desk-operator"
+        ]
+      }
+    },
+    "/v1/desk/requests/{requestId}/principal-decision-delivery/{deliveryId}/retry": {
+      "post": {
+        "operationId": "ProtocolDeskOperatorController_retryPrincipalDecisionDelivery",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "protocol-desk-operator"
+        ]
+      }
+    },
+    "/v1/desk/requests/{requestId}/protocol-note": {
+      "post": {
+        "operationId": "ProtocolDeskOperatorController_generateProtocolNote",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "protocol-desk-operator"
+        ]
+      }
+    },
+    "/v1/desk/requests/{requestId}/protocol-note/configuration": {
+      "post": {
+        "operationId": "ProtocolDeskOperatorController_configureProtocolNote",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "protocol-desk-operator"
+        ]
+      }
+    },
+    "/v1/desk/requests/{requestId}/transitions": {
+      "post": {
+        "operationId": "ProtocolDeskOperatorController_transition",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "protocol-desk-operator"
+        ]
+      }
+    },
+    "/v1/desk/requests/availability": {
+      "get": {
+        "operationId": "ProtocolDeskOperatorController_availabilityCheck",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "protocol-desk-operator"
+        ]
+      }
+    },
+    "/v1/desk/requests/operations": {
+      "get": {
+        "operationId": "ProtocolDeskOperatorController_operationalSnapshot",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "protocol-desk-operator"
+        ]
+      }
+    },
+    "/v1/health/live": {
+      "get": {
+        "operationId": "HealthController_live",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The NestJS process is alive."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/v1/health/ready": {
+      "get": {
+        "operationId": "HealthController_ready",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The API is ready for traffic."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/v1/internal/revalidation/claims/{idempotencyKey}": {
+      "post": {
+        "operationId": "RevalidationClaimController_claim",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Atomically claims a revalidation idempotency key."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "internal-revalidation"
+        ]
+      }
+    },
+    "/v1/media/assets": {
+      "get": {
+        "operationId": "MediaController_listAssets",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Bounded active governed media library for CMS operators."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "media"
+        ]
+      },
+      "post": {
+        "operationId": "MediaController_completeUpload",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Cloudinary asset independently verified and registered with governance metadata."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "media"
+        ]
+      }
+    },
+    "/v1/media/assets/{assetId}": {
+      "delete": {
+        "operationId": "MediaController_deleteAsset",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "Cloudinary asset invalidated and registry record retired."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "media"
+        ]
+      },
+      "patch": {
+        "operationId": "MediaController_updateAsset",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Governed alt text, rights, source and non-destructive focal-point metadata updated."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "media"
+        ]
+      }
+    },
+    "/v1/media/assets/inventory": {
+      "get": {
+        "operationId": "MediaController_inventory",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Complete bounded media governance inventory including gaps and publication references."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "media"
+        ]
+      }
+    },
+    "/v1/media/uploads/sign": {
+      "post": {
+        "operationId": "MediaController_signUpload",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Short-lived signed Cloudinary upload parameters without the API secret."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "media"
+        ]
+      }
+    },
+    "/v1/public/archive": {
+      "get": {
+        "operationId": "PublicArchiveController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "At most 50 published, locale-projected Archive entries."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "public-content"
+        ]
+      }
+    },
+    "/v1/public/atlas": {
+      "get": {
+        "operationId": "PublicAtlasController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "At most 60 published locale-projected Atlas nodes."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "public-content"
+        ]
+      }
+    },
+    "/v1/public/contact-enquiries": {
+      "post": {
+        "operationId": "ContactEnquiryController_create",
+        "parameters": [],
+        "responses": {
+          "202": {
+            "description": "General contact enquiry accepted for durable delivery."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "contact"
+        ]
+      }
+    },
+    "/v1/public/content/{documentType}/{documentId}": {
+      "get": {
+        "operationId": "PublicContentController_getPublished",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "A published, locale-specific content projection. Drafts are never returned."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "public-content"
+        ]
+      }
+    },
+    "/v1/public/living-dossier": {
+      "post": {
+        "operationId": "LivingDossierController_generate",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "A personalised, watermarked PDF assembled from current published CMS records."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "living-dossier"
+        ]
+      }
+    },
+    "/v1/public/media-enquiries": {
+      "post": {
+        "operationId": "MediaEnquiryController_create",
+        "parameters": [],
+        "responses": {
+          "202": {
+            "description": "Media enquiry accepted for durable delivery to the designated press contact."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "media-enquiries"
+        ]
+      }
+    },
+    "/v1/public/media/{assetId}": {
+      "get": {
+        "operationId": "PublicMediaController_asset",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Delivery-safe metadata for an active governed media asset."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "public-media"
+        ]
+      }
+    },
+    "/v1/public/press-kit": {
+      "post": {
+        "operationId": "PressKitController_generate",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "A personalised PDF or ZIP generated from the live published identity registry."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "press-kit"
+        ]
+      }
+    },
+    "/v1/public/protocol-desk/requests": {
+      "post": {
+        "operationId": "ProtocolDeskController_submit",
+        "parameters": [],
+        "responses": {
+          "202": {
+            "description": "The bilingual engagement request was durably received with an immediate reference."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "protocol-desk"
+        ]
+      }
+    },
+    "/v1/public/protocol-desk/requests/principal-decisions": {
+      "post": {
+        "operationId": "ProtocolDeskController_decide",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "protocol-desk"
+        ]
+      }
+    },
+    "/v1/public/room/enquiries": {
+      "post": {
+        "description": "Feature-gated: this operation is registered only when ROOM_ENABLED=true and key-custody prerequisites pass.",
+        "operationId": "roomSubmitEnquiry",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoomSubmission"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoomReceipt"
+                }
+              }
+            },
+            "description": "Ciphertext accepted."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "room"
+        ]
+      }
+    },
+    "/v1/public/room/key-manifest": {
+      "get": {
+        "description": "Feature-gated: this operation is registered only when ROOM_ENABLED=true and key-custody prerequisites pass.",
+        "operationId": "roomPublicKeyManifest",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoomKeyManifest"
+                }
+              }
+            },
+            "description": "Signed recipient-key manifest."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "room"
+        ]
+      }
+    },
+    "/v1/public/signals/latest": {
+      "get": {
+        "operationId": "PublicSignalsController_latest",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The most recently dated published Signal projection."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "public-content"
+        ]
+      }
+    },
+    "/v1/public/sources": {
+      "get": {
+        "operationId": "PublicSourcesController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Published Source Register entries without confidential editorial notes."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "public-content"
+        ]
+      }
+    },
+    "/v1/public/speaking": {
+      "get": {
+        "operationId": "PublicSpeakingController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "At most 50 published, locale-projected speaking themes."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "public-content"
+        ]
+      }
+    },
+    "/v1/room/designation": {
+      "delete": {
+        "description": "Feature-gated: this operation is registered only when ROOM_ENABLED=true and key-custody prerequisites pass.",
+        "operationId": "roomRevokeDesignation",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoomDesignationState"
+                }
+              }
+            },
+            "description": "Designation revoked."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "room-operator"
+        ]
+      },
+      "get": {
+        "description": "Feature-gated: this operation is registered only when ROOM_ENABLED=true and key-custody prerequisites pass.",
+        "operationId": "roomGetDesignation",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoomDesignationState"
+                }
+              }
+            },
+            "description": "Current designation state."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "room-operator"
+        ]
+      },
+      "post": {
+        "description": "Feature-gated: this operation is registered only when ROOM_ENABLED=true and key-custody prerequisites pass.",
+        "operationId": "roomGrantDesignation",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoomDesignation"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoomDesignationState"
+                }
+              }
+            },
+            "description": "Designation granted."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "room-operator"
+        ]
+      }
+    },
+    "/v1/room/enquiries": {
+      "get": {
+        "description": "Feature-gated: this operation is registered only when ROOM_ENABLED=true and key-custody prerequisites pass.",
+        "operationId": "roomListEnquiries",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoomInboxPage"
+                }
+              }
+            },
+            "description": "Metadata-only Room inbox."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "room-operator"
+        ]
+      }
+    },
+    "/v1/room/enquiries/{reference}/ciphertext": {
+      "get": {
+        "description": "Feature-gated: this operation is registered only when ROOM_ENABLED=true and key-custody prerequisites pass.",
+        "operationId": "roomGetCiphertext",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "reference",
+            "required": true,
+            "schema": {
+              "pattern": "^RM-[0-9]{4}-[A-Z2-7]{16}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoomCiphertext"
+                }
+              }
+            },
+            "description": "Ciphertext for local client decryption."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "room-operator"
+        ]
+      }
+    },
+    "/v1/room/enquiries/{reference}/extension": {
+      "post": {
+        "description": "Feature-gated: this operation is registered only when ROOM_ENABLED=true and key-custody prerequisites pass.",
+        "operationId": "roomExtendRetention",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "reference",
+            "required": true,
+            "schema": {
+              "pattern": "^RM-[0-9]{4}-[A-Z2-7]{16}$",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoomExtension"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoomReceipt"
+                }
+              }
+            },
+            "description": "Bounded retention extension recorded."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "room-operator"
+        ]
+      }
+    },
+    "/v1/room/enquiries/{reference}/state": {
+      "post": {
+        "description": "Feature-gated: this operation is registered only when ROOM_ENABLED=true and key-custody prerequisites pass.",
+        "operationId": "roomChangeState",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "reference",
+            "required": true,
+            "schema": {
+              "pattern": "^RM-[0-9]{4}-[A-Z2-7]{16}$",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoomStateChange"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoomStatus"
+                }
+              }
+            },
+            "description": "Lifecycle state recorded."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "room-operator"
+        ]
+      }
+    }
+  },
+  "servers": [],
+  "tags": []
+}

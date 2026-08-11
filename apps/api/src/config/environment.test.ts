@@ -12,12 +12,31 @@ describe("API environment", () => {
   });
 
   it("requires MongoDB in production and validates exact origins", () => {
-    expect(() => validateEnvironment({ NODE_ENV: "production" })).toThrow(
-      /MONGODB_URI/i,
-    );
+    expect(() =>
+      validateEnvironment({
+        NODE_ENV: "production",
+        ADMIN_ORIGIN: "https://admin.example.test",
+        PUBLIC_WEB_ORIGIN: "https://www.example.test",
+      }),
+    ).toThrow(/MONGODB_URI/i);
     expect(() =>
       validateEnvironment({ ADMIN_ORIGIN: "not-an-origin" }),
     ).toThrow(/environment/i);
+    for (const ADMIN_ORIGIN of [
+      "http://admin.example.test",
+      "https://user:password@admin.example.test",
+      "https://admin.example.test/path",
+      "https://admin.example.test?token=value",
+    ])
+      expect(() => validateEnvironment({ ADMIN_ORIGIN })).toThrow(
+        /origin|HTTPS/u,
+      );
+    expect(() =>
+      validateEnvironment({
+        ADMIN_ORIGIN: "https://amanor.example.test",
+        PUBLIC_WEB_ORIGIN: "https://amanor.example.test",
+      }),
+    ).toThrow(/distinct/u);
   });
 
   it("runs migrations locally but forbids API-bootstrap migrations in production", () => {
@@ -29,6 +48,8 @@ describe("API environment", () => {
         NODE_ENV: "production",
         MONGODB_URI: "mongodb://database.example/amanor",
         RUN_MIGRATIONS: "true",
+        ADMIN_ORIGIN: "https://admin.example.test",
+        PUBLIC_WEB_ORIGIN: "https://www.example.test",
       }),
     ).toThrow(/one-shot migration command/i);
   });

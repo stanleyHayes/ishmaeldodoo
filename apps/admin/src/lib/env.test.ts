@@ -26,7 +26,12 @@ describe("Admin deployment environment", () => {
         NEXT_PUBLIC_AMANOR_DEPLOYMENT_ENV: "preview",
         NEXT_PUBLIC_API_BASE_URL: "http://localhost:4000/v1",
       }),
-    ).toThrow(/non-loopback HTTPS/u);
+    ).toThrow(/loopback local development/u);
+    expect(() =>
+      parseAdminEnvironment({
+        NEXT_PUBLIC_API_BASE_URL: "http://api.example.test/v1",
+      }),
+    ).toThrow(/loopback local development/u);
   });
 
   it.each([

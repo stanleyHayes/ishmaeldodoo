@@ -95,7 +95,7 @@ assert.throws(
       NEXT_PUBLIC_AMANOR_DEPLOYMENT_ENV: "production",
       NEXT_PUBLIC_API_BASE_URL: "http://localhost:4000/v1",
     }),
-  /non-loopback HTTPS API origin/u,
+  /loopback local development/u,
   "Admin production security headers must reject a loopback HTTP API origin",
 );
 assert.throws(

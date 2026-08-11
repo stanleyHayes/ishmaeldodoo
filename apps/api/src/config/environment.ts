@@ -235,6 +235,21 @@ export function validateEnvironment(
       `Invalid API environment: ${errors.map((error) => error.toString()).join("; ")}`,
     );
   }
+  assertDeploymentOrigin(
+    "ADMIN_ORIGIN",
+    validated.ADMIN_ORIGIN,
+    validated.NODE_ENV,
+  );
+  assertDeploymentOrigin(
+    "PUBLIC_WEB_ORIGIN",
+    validated.PUBLIC_WEB_ORIGIN,
+    validated.NODE_ENV,
+  );
+  if (
+    new URL(validated.ADMIN_ORIGIN).origin ===
+    new URL(validated.PUBLIC_WEB_ORIGIN).origin
+  )
+    throw new Error("ADMIN_ORIGIN and PUBLIC_WEB_ORIGIN must be distinct");
   if (
     validated.OTEL_TRACE_SAMPLE_RATIO !== undefined &&
     (!/^0(?:\.\d+)?$|^1(?:\.0+)?$/u.test(validated.OTEL_TRACE_SAMPLE_RATIO) ||
@@ -525,4 +540,28 @@ function assertSeparateRoomDatabaseIdentity(
   if (databaseName(application) === databaseName(room)) {
     throw new Error("The Room must use a distinct MongoDB database");
   }
+}
+
+function assertDeploymentOrigin(
+  key: "ADMIN_ORIGIN" | "PUBLIC_WEB_ORIGIN",
+  value: string,
+  nodeEnvironment: string,
+): void {
+  const url = new URL(value);
+  if (
+    url.username ||
+    url.password ||
+    url.search ||
+    url.hash ||
+    url.pathname !== "/"
+  )
+    throw new Error(`${key} must be a credential-free origin`);
+  const loopback = ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname);
+  if (
+    url.protocol !== "https:" &&
+    !(nodeEnvironment !== "production" && url.protocol === "http:" && loopback)
+  )
+    throw new Error(`${key} requires HTTPS except for non-production loopback`);
+  if (nodeEnvironment === "production" && loopback)
+    throw new Error(`${key} must not use loopback in production`);
 }

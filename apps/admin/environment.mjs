@@ -29,9 +29,19 @@ export function parseAdminEnvironment(environment) {
   if (!/^\/v1\/?$/u.test(url.pathname))
     throw new Error("NEXT_PUBLIC_API_BASE_URL must end at /v1");
   if (
+    url.protocol !== "https:" &&
+    !(
+      deploymentEnvironment === "local" &&
+      url.protocol === "http:" &&
+      ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname)
+    )
+  )
+    throw new Error(
+      "Admin API URL requires HTTPS except for loopback local development",
+    );
+  if (
     deploymentEnvironment !== "local" &&
-    (url.protocol !== "https:" ||
-      ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname))
+    ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname)
   )
     throw new Error(
       "Non-local Admin deployments require a non-loopback HTTPS API origin",

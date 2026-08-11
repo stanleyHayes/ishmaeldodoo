@@ -28,6 +28,11 @@ describe("parsePublicMedia", () => {
     null,
     { ...valid, assetId: "not-a-uuid" },
     { ...valid, secureUrl: "javascript:alert(1)" },
+    { ...valid, secureUrl: "http://res.cloudinary.com/demo/portrait.jpg" },
+    {
+      ...valid,
+      secureUrl: "https://operator:secret@res.cloudinary.com/portrait.jpg",
+    },
     { ...valid, resourceType: "script" },
     { ...valid, bytes: -1 },
     { ...valid, focalPoint: { x: 2, y: 0.5 } },

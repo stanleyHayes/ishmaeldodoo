@@ -29,7 +29,10 @@ function isOptionalPositiveInteger(
 function isSafeUrl(value: unknown): value is string {
   if (typeof value !== "string") return false;
   try {
-    return ["http:", "https:"].includes(new URL(value).protocol);
+    const url = new URL(value);
+    return (
+      url.protocol === "https:" && url.username === "" && url.password === ""
+    );
   } catch {
     return false;
   }

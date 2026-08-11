@@ -19,6 +19,7 @@ import type {
   Publication,
 } from "../../content/domain/workflow";
 import { MediaService } from "../../media/application/media.service";
+import { trustedCloudinaryDeliveryUrl } from "../../media/domain/cloudinary-delivery-url";
 import {
   BrowserPdfService,
   escapeHtml,
@@ -226,10 +227,12 @@ export class ProtocolNoteService {
     urlValue: string,
     format: string,
   ): Promise<string> {
-    const url = new URL(urlValue);
-    if (url.protocol !== "https:" || !url.hostname.endsWith("cloudinary.com"))
-      throw new NotFoundException("Approved portrait is unavailable");
-    const response = await fetch(url, { signal: AbortSignal.timeout(10_000) });
+    const url = trustedCloudinaryDeliveryUrl(urlValue);
+    if (!url) throw new NotFoundException("Approved portrait is unavailable");
+    const response = await fetch(url, {
+      redirect: "error",
+      signal: AbortSignal.timeout(10_000),
+    });
     if (!response.ok)
       throw new NotFoundException("Approved portrait is unavailable");
     const bytes = Buffer.from(await response.arrayBuffer());

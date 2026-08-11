@@ -5,6 +5,7 @@ import JSZip from "jszip";
 import { z } from "zod";
 import { CmsService } from "../content/application/cms.service";
 import { MediaService } from "../media/application/media.service";
+import { trustedCloudinaryDeliveryUrl } from "../media/domain/cloudinary-delivery-url";
 import type { GeneratePressKitDto } from "./press-kit.dto";
 import { PressKitRepository } from "./press-kit.repository";
 import { BrowserPdfService, escapeHtml } from "./browser-pdf.service";
@@ -82,13 +83,10 @@ export class PressKitService {
       for (const [index, assetId] of parsed.data.portraits.entries()) {
         const asset = await this.media.publicAsset(assetId);
         if (!asset || asset.resourceType !== "image") continue;
-        const url = new URL(asset.secureUrl);
-        if (
-          url.protocol !== "https:" ||
-          !url.hostname.endsWith("cloudinary.com")
-        )
-          continue;
+        const url = trustedCloudinaryDeliveryUrl(asset.secureUrl);
+        if (!url) continue;
         const response = await fetch(url, {
+          redirect: "error",
           signal: AbortSignal.timeout(10_000),
         });
         if (response.ok)

@@ -2,6 +2,7 @@ import { Inject, Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { v2 as cloudinary } from "cloudinary";
 import type { VerifiedCloudinaryAsset } from "../domain/media";
+import { trustedCloudinaryDeliveryUrl } from "../domain/cloudinary-delivery-url";
 import { z } from "zod";
 
 export type SignedUpload = Readonly<{
@@ -20,7 +21,7 @@ const resourceResponseSchema = z.object({
   public_id: z.string().min(1),
   secure_url: z
     .url()
-    .refine((url) => url.startsWith("https://res.cloudinary.com/")),
+    .refine((url) => Boolean(trustedCloudinaryDeliveryUrl(url))),
   format: z.string().optional(),
   bytes: z.number().int().nonnegative(),
   version: z.number().int().nonnegative(),

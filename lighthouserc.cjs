@@ -14,6 +14,10 @@ module.exports = {
       settings: {
         chromeFlags: "--headless --no-sandbox --disable-dev-shm-usage",
         preset: "desktop",
+        // Lighthouse 13's desktop preset otherwise uses an ordinary Chrome UA,
+        // which makes Next stream crawler metadata after the initial head.
+        emulatedUserAgent:
+          "Mozilla/5.0 (compatible; Chrome-Lighthouse/13; +https://github.com/GoogleChrome/lighthouse)",
         // Preview and local builds are intentionally noindex; production-indexing
         // behavior is covered by the robots/sitemap contract and browser tests.
         skipAudits: ["is-crawlable"],

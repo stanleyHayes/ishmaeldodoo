@@ -34,12 +34,22 @@ const canonicalValues = [
     pattern: /Dr\.\s+Ish\b/iu,
   },
   {
-    label: "canonical current title",
+    label: "canonical current title (English)",
     pattern: /Chief\s+Partnerships?\s+Officer/iu,
   },
   {
-    label: "canonical long-form title",
+    label: "canonical current title concept (French)",
+    pattern:
+      /(?:directeur|directrice|chef|responsable)\s+(?:[\p{L}'’.-]+\s+){0,6}(?:des?\s+)?partenariats?/iu,
+  },
+  {
+    label: "canonical long-form title (English)",
     pattern: /Director\s+and\s+Head\s+of\s+Innovative\s+Finance/iu,
+  },
+  {
+    label: "canonical long-form title concept (French)",
+    pattern:
+      /direct(?:eur|rice)\s+et\s+(?:chef|responsable)(?:\s+(?:de\s+la|du|des))?\s+financ(?:e|ement)\s+innovant(?:e)?/iu,
   },
 ];
 

@@ -1,6 +1,7 @@
 import { resolveDateRangedRecord } from "@amanor/contracts";
 import type { PublicContentResult } from "../../lib/content/public-content-client";
 import { identityPayload } from "../../lib/content/identity-payload";
+import { structuredDataJson } from "../../lib/discoverability/structured-data";
 
 export function PersonStructuredData({
   result,
@@ -64,7 +65,7 @@ export function PersonStructuredData({
     <script
       type="application/ld+json"
       dangerouslySetInnerHTML={{
-        __html: JSON.stringify(graph).replaceAll("<", "\\u003c"),
+        __html: structuredDataJson(graph),
       }}
     />
   );

@@ -6,6 +6,7 @@ import {
 } from "@amanor/contracts";
 import Image from "next/image";
 import Link from "next/link";
+import { structuredDataJson } from "../../lib/discoverability/structured-data";
 import { localizePath, type SupportedLocale } from "../../lib/i18n/locale";
 import styles from "./speaking-evidence.module.css";
 
@@ -403,7 +404,7 @@ export function SpeakingThemes({
                   key={`${theme.documentId}-${entry.slug}-event`}
                   type="application/ld+json"
                   dangerouslySetInnerHTML={{
-                    __html: JSON.stringify(event).replaceAll("<", "\\u003c"),
+                    __html: structuredDataJson(event),
                   }}
                 />
               ) : null;

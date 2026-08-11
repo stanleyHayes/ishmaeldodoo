@@ -1,5 +1,6 @@
 import type { PublicArchive, PublicArchiveItem } from "@amanor/contracts";
 import Link from "next/link";
+import { structuredDataJson } from "../../lib/discoverability/structured-data";
 import type { SupportedLocale } from "../../lib/i18n/locale";
 import { QuotableTranscript } from "./quotable-transcript";
 
@@ -307,7 +308,7 @@ export function ArchiveRegister({
                   <script
                     type="application/ld+json"
                     dangerouslySetInnerHTML={{
-                      __html: JSON.stringify(structured),
+                      __html: structuredDataJson(structured),
                     }}
                   />
                 ) : null}

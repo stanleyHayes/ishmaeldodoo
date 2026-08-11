@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { EditorialPage, readPageMetadata } from "./editorial-page";
+import { Breadcrumbs, EditorialPage, readPageMetadata } from "./editorial-page";
 
 const result = {
   status: "available" as const,
@@ -31,6 +31,17 @@ const result = {
 };
 
 describe("EditorialPage", () => {
+  it("neutralizes route-derived script termination in Breadcrumb JSON-LD", () => {
+    const { container } = render(
+      <Breadcrumbs path="/record/<script>alert(1)</script>" locale="en-GB" />,
+    );
+    const script = container.querySelector(
+      'script[type="application/ld+json"]',
+    );
+    expect(script?.textContent).not.toContain("</script>");
+    expect(script?.textContent).toContain("\\u003cscript>");
+  });
+
   it("renders CMS sections, source links and breadcrumb structure", () => {
     const { container } = render(
       <EditorialPage result={result} path="/record" locale="en-GB" />,

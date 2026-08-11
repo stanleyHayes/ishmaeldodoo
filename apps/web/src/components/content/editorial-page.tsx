@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { PublicContentResult } from "../../lib/content/public-content-client";
 import type { ReactNode } from "react";
+import { structuredDataJson } from "../../lib/discoverability/structured-data";
 import { localizePath, type SupportedLocale } from "../../lib/i18n/locale";
 
 type PageSection = Readonly<{
@@ -56,10 +57,6 @@ function pagePayload(value: unknown): PagePayload | null {
   return candidate as PagePayload;
 }
 
-function structuredDataJson(value: unknown): string {
-  return JSON.stringify(value).replaceAll("<", "\\u003c");
-}
-
 export function Breadcrumbs({
   path,
   locale,
@@ -103,7 +100,7 @@ export function Breadcrumbs({
       </nav>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structured) }}
+        dangerouslySetInnerHTML={{ __html: structuredDataJson(structured) }}
       />
     </>
   );

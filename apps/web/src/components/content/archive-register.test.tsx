@@ -104,6 +104,29 @@ describe("ArchiveRegister", () => {
     ]);
   });
 
+  it("neutralizes CMS-authored script termination in Archive JSON-LD", () => {
+    const { container } = render(
+      <ArchiveRegister
+        archive={{
+          ...archive,
+          items: [
+            {
+              ...archive.items[0]!,
+              title: "Evidence </script><script>alert(1)</script>",
+            },
+          ],
+        }}
+        locale="en-GB"
+        baseUrl="https://amanor.example"
+      />,
+    );
+    const script = container.querySelector(
+      'script[type="application/ld+json"]',
+    );
+    expect(script?.textContent).not.toContain("</script>");
+    expect(script?.textContent).toContain("\\u003c/script>");
+  });
+
   it("discloses a dated stale-translation state only in French", () => {
     const staleArchive = {
       ...archive,

@@ -1,0 +1,23 @@
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Intentional adversarial signatures used to prove the local secret scanner"
+paths = ['''^scripts/check-secrets\.mjs$''']
+
+[[allowlists]]
+description = "Non-secret configuration placeholder"
+regexTarget = "secret"
+regexes = ['''^replace-with-an-es256-pkcs8-private-key$''']
+
+[[allowlists]]
+description = "W3C trace-context conformance fixtures"
+paths = [
+  '''^apps/web/src/app/api/protocol-desk/route\.test\.ts$''',
+  '''^apps/web/src/lib/request-correlation\.test\.ts$''',
+]
+
+[[allowlists]]
+description = "Architecture prose, not a credential value"
+regexTarget = "line"
+regexes = ['''Principal mailbox receives the stable PDF.*API-only 32-byte derivation secret''']

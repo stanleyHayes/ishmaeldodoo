@@ -130,4 +130,51 @@ describe("AdaptiveHome", () => {
     expect(links).toHaveLength(9);
     expect(links[0]).toHaveTextContent("Proof 9");
   });
+
+  it("bounds the latest Signal excerpt to 200 words", () => {
+    const words = Array.from({ length: 205 }, (_, index) => `word${index + 1}`);
+    render(
+      <AdaptiveHome
+        locale="en-GB"
+        audience={null}
+        atlas={atlas}
+        identity={identity}
+        signal={{ ...signal, body: words.join(" ") }}
+      />,
+    );
+    expect(screen.getByText(/word1 word2/u)).toHaveTextContent("word200…");
+    expect(screen.queryByText(/word201/u)).not.toBeInTheDocument();
+  });
+
+  it("discloses a dated stale French Signal without warning in English", () => {
+    const staleSignal: PublicSignal = {
+      ...signal,
+      translation: {
+        stale: true,
+        sourceUpdatedAt: new Date("2026-08-10T00:00:00Z"),
+      },
+    };
+    const { rerender } = render(
+      <AdaptiveHome
+        locale="fr-FR"
+        audience={null}
+        atlas={atlas}
+        identity={identity}
+        signal={staleSignal}
+      />,
+    );
+    expect(screen.getByRole("status")).toHaveTextContent(
+      /Traduction en cours de révision.*10\/08\/2026/u,
+    );
+    rerender(
+      <AdaptiveHome
+        locale="en-GB"
+        audience={null}
+        atlas={atlas}
+        identity={identity}
+        signal={staleSignal}
+      />,
+    );
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
 });

@@ -203,6 +203,18 @@ export function AdaptiveHome({
           <p className="page-kicker">
             {french ? "Dernier signal" : "Latest signal"}
           </p>
+          {french && signal.translation.stale ? (
+            <p className="translation-notice" role="status">
+              Traduction en cours de révision. Texte source mis à jour le{" "}
+              {signal.translation.sourceUpdatedAt
+                ? signal.translation.sourceUpdatedAt.toLocaleDateString(
+                    "fr-FR",
+                    { timeZone: "UTC" },
+                  )
+                : "date non disponible"}
+              .
+            </p>
+          ) : null}
           <h2 id="home-signal-heading">{signal.tags.join(" · ")}</h2>
           <p>{signalBody}</p>
           <div className="home-evidence-links">

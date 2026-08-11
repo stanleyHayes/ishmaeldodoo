@@ -140,8 +140,34 @@ function validateRecordPrintEvidence() {
       );
 }
 
+function validateP01SignalEvidence(line) {
+  const columns = columnsFor(line);
+  for (const requirement of [
+    "latest locale-specific published Signal",
+    "source-linked 200-word excerpt",
+    "dated stale-French disclosure",
+    "fail-closed omission",
+  ])
+    if (!columns[2].includes(requirement))
+      throw new Error(`P01 traceability is missing ${requirement}`);
+  for (const evidence of [
+    "apps/api/src/modules/content/http/public-signals.controller.test.ts",
+    "apps/web/src/lib/content/public-signal-client.test.ts",
+    "apps/web/src/components/content/adaptive-home.test.tsx",
+  ])
+    if (!columns[3].includes(`\`${evidence}\``))
+      throw new Error(
+        `P01 traceability is missing direct Signal evidence: ${evidence}`,
+      );
+  if (columns[4].includes("Signal projection"))
+    throw new Error(
+      "P01 still records the implemented latest Signal projection as outstanding",
+    );
+}
+
 validateF12(rows.get("F12").line);
 validateRecordPrintEvidence();
+validateP01SignalEvidence(rows.get("P01").line);
 
 const operationCount = Object.values(openApi.paths ?? {}).reduce(
   (count, item) =>
@@ -197,6 +223,26 @@ for (const [id, staleFixture] of [
   }
 }
 
+for (const staleFixture of [
+  rows
+    .get("P01")
+    .line.replace("dated stale-French disclosure", "undisclosed translation"),
+  rows
+    .get("P01")
+    .line.replace(
+      "`apps/web/src/components/content/adaptive-home.test.tsx`<br>",
+      "",
+    ),
+]) {
+  try {
+    validateP01SignalEvidence(staleFixture);
+    throw new Error("P01 Signal drift fixture unexpectedly passed");
+  } catch (error) {
+    if (error.message === "P01 Signal drift fixture unexpectedly passed")
+      throw error;
+  }
+}
+
 console.log(
-  `Traceability matrix covers all ${rows.size} P01-P13 and F01-F15 requirements; P02/F03 print and F12 complete-scope drift fixtures passed.`,
+  `Traceability matrix covers all ${rows.size} P01-P13 and F01-F15 requirements; P01 Signal, P02/F03 print and F12 complete-scope drift fixtures passed.`,
 );

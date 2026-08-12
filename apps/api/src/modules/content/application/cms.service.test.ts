@@ -548,6 +548,56 @@ describe("CmsService", () => {
     expect(repository.publishTransaction).not.toHaveBeenCalled();
   });
 
+  it("requires scholar photos to be active images in the governed scholars folder", async () => {
+    const assetId = "00000000-0000-4000-8000-000000000001";
+    const version: ContentVersion = {
+      documentType: "scholar",
+      documentId: "scholar-1",
+      version: 1,
+      state: "approved",
+      authorId: "trust-author",
+      reviewerId: "reviewer-2",
+      payload: {
+        name: "Ama",
+        country: "GH",
+        institution: "University",
+        field: localized("Economics", "Économie"),
+        cohortYear: 2024,
+        status: "Active",
+        photo: assetId,
+        story: localized("Story", "Parcours"),
+        consentStatus: "granted",
+        consentDate: "2026-01-01",
+        consentVersion: "scholar-v1",
+      },
+    };
+    const mediaReferences = {
+      assertPublishable: vi.fn().mockResolvedValue(undefined),
+    };
+    const { service, repository } = fixture(version, mediaReferences);
+
+    await expect(
+      service.publish("scholar", "scholar-1", 1, "en-GB", {
+        id: "reviewer-2",
+        roles: ["reviewer"],
+      }),
+    ).resolves.toEqual(
+      expect.objectContaining({ locale: "en-GB", version: 1 }),
+    );
+    const references = [
+      {
+        assetId,
+        resourceType: "image" as const,
+        path: "photo",
+        folder: "scholars" as const,
+      },
+    ];
+    expect(mediaReferences.assertPublishable).toHaveBeenCalledWith(references);
+    expect(repository.publishTransaction).toHaveBeenCalledWith(
+      expect.objectContaining({ mediaReferences: references }),
+    );
+  });
+
   it("can publish one approved version to the second locale without republishing the first", async () => {
     const version: ContentVersion = {
       documentType: "source",

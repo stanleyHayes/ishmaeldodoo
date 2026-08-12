@@ -39,6 +39,9 @@ const [
   mediaReferenceService,
   mediaRepository,
   cmsRepository,
+  mediaInventory,
+  handover,
+  reconciliationRecord,
 ] = await Promise.all([
   readFile("apps/api/src/modules/content/domain/schemas.ts", "utf8"),
   readFile(
@@ -63,6 +66,12 @@ const [
   ),
   readFile(
     "apps/api/src/modules/content/persistence/cms.repository.ts",
+    "utf8",
+  ),
+  readFile("docs/operations/media-inventory.md", "utf8"),
+  readFile("docs/handover/README.md", "utf8"),
+  readFile(
+    "docs/operations/templates/media-inventory-reconciliation-record.md",
     "utf8",
   ),
 ]);
@@ -183,6 +192,59 @@ const authoringSources = (
 ).flat();
 assertNoAuthoredImageUrls(authoringSources);
 
+const pendingReconciliationSentinels = [
+  "- Status: `Not run`",
+  "- Environment, release and registry export digest: `Not recorded`",
+  "- Cloudinary account, folder scope and provider export digest: `Not recorded`",
+  "- Inventory generated at and immutable evidence location: `Not recorded`",
+  "- Content reviewer and Legal reviewer: `Not assigned`",
+  "- Registry rows expected and reviewed: `0 / 0`",
+  "- Cloudinary resources expected and reconciled: `0 / 0`",
+  "- Registry-only and provider-only resources resolved: `Not run`",
+  "- Active, quarantined and retired status reconciliation: `Not run`",
+  "- Folder, public ID, resource type and delivery identity reconciliation: `Not run`",
+  "- English/French alt text and focal-point review: `Not run`",
+  "- Credit, source, licence and consent evidence review: `Not run`",
+  "- Retention, expiry, legal-hold and published-reference review: `Not run`",
+  "- Transformation and moderation-policy review: `Not run`",
+  "- Missing, stale, expired and requires-action findings resolved: `Not run`",
+  "- Accepted gaps with authority, rationale, owner and expiry: `None recorded`",
+  "- Orphan cleanup, cache invalidation and post-cleanup rerun: `Not run`",
+  "- Confidential metadata, personal data and credential non-disclosure review: `Not run`",
+  "- Final registry/provider digests and zero-unowned-gap result: `Not recorded`",
+  "- Content approval/date: `Not approved`",
+  "- Legal approval/date: `Not approved`",
+];
+
+function validatePendingReconciliation(candidate) {
+  for (const sentinel of pendingReconciliationSentinels)
+    assert.ok(
+      candidate.includes(sentinel),
+      `Media reconciliation no longer proves the pre-execution state: ${sentinel}`,
+    );
+}
+
+validatePendingReconciliation(reconciliationRecord);
+for (const sentinel of pendingReconciliationSentinels)
+  assert.throws(
+    () =>
+      validatePendingReconciliation(
+        reconciliationRecord.replace(sentinel, "[prematurely changed]"),
+      ),
+    undefined,
+    `Media reconciliation accepted mutation of required sentinel: ${sentinel}`,
+  );
+assert.ok(
+  mediaInventory.includes("templates/media-inventory-reconciliation-record.md"),
+  "Media inventory must link its controlled reconciliation record",
+);
+assert.ok(
+  handover.includes(
+    "../operations/templates/media-inventory-reconciliation-record.md",
+  ),
+  "Handover must link the controlled media reconciliation record",
+);
+
 for (const [name, values] of [
   [
     "URL-backed identity portrait",
@@ -251,5 +313,5 @@ assert.throws(
 );
 
 process.stdout.write(
-  "All production Admin/API/contract image authoring requires local-file upload, governed Cloudinary selection and atomic publication-time registry validation; seven unsafe fixtures rejected.\n",
+  `All production Admin/API/contract image authoring requires local-file upload, governed Cloudinary selection and atomic publication-time registry validation; seven unsafe fixtures and ${pendingReconciliationSentinels.length} reconciliation evidence mutations fail closed.\n`,
 );

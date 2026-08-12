@@ -7,3 +7,9 @@ It includes active, quarantined and retired records; Cloudinary taxonomy and pro
 An item requires action when French alt text is missing/stale, consent evidence is absent, an image lacks a focal point, expiring retention lacks a deadline, or an active asset is past its retention date. A report flag is an operator review signal, not automatic permission to publish or destroy. Publication, legal hold and reference-safe retirement rules still fail closed independently.
 
 The scan is capped at 10,000 assets and 10,000 published versions. Exceeding either bound fails rather than returning a misleading partial inventory. Production readiness requires Content/Legal to review every row, resolve or formally accept every gap, reconcile the report with Cloudinary, and sign the dated artifact.
+
+Record that review in the controlled
+[`media-inventory-reconciliation-record.md`](templates/media-inventory-reconciliation-record.md).
+Its expected/reviewed totals must match both the protected registry export and a
+provider-native Cloudinary export; neither sampling nor registry-only review is
+acceptable.

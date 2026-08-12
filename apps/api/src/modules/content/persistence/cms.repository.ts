@@ -384,9 +384,9 @@ export class CmsRepository {
         .collection<Publication>("publications")
         .findOne(
           {
-            documentType: input.documentType,
-            documentId: input.documentId,
-            locale: input.locale,
+            documentType: { $eq: input.documentType },
+            documentId: { $eq: input.documentId },
+            locale: { $eq: input.locale },
           },
           { session },
         );
@@ -394,10 +394,10 @@ export class CmsRepository {
         throw new Error("No current publication exists for this locale");
       await database.collection("publications").deleteOne(
         {
-          documentType: input.documentType,
-          documentId: input.documentId,
-          locale: input.locale,
-          version: publication.version,
+          documentType: { $eq: input.documentType },
+          documentId: { $eq: input.documentId },
+          locale: { $eq: input.locale },
+          version: { $eq: publication.version },
         },
         { session },
       );
@@ -478,7 +478,11 @@ export class CmsRepository {
     return this.database()
       .collection<Publication>("publications")
       .findOne(
-        { documentType, documentId, locale },
+        {
+          documentType: { $eq: documentType },
+          documentId: { $eq: documentId },
+          locale: { $eq: locale },
+        },
         { projection: { _id: 0 } },
       );
   }
@@ -629,7 +633,11 @@ export class CmsRepository {
     const publication = await this.database()
       .collection<Publication>("publications")
       .findOne(
-        { documentType, documentId, locale },
+        {
+          documentType: { $eq: documentType },
+          documentId: { $eq: documentId },
+          locale: { $eq: locale },
+        },
         { projection: { _id: 0 } },
       );
     if (!publication) return null;

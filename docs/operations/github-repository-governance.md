@@ -5,12 +5,21 @@
 - Verified at: `2026-08-12T02:07:32Z`
 - Active history ruleset: `20725073` (`Protect main history`)
 - Ruleset evidence: `https://github.com/stanleyHayes/ishmaeldodoo/rules/20725073`
+- Native security state verified at: `2026-08-12T02:09:01Z`
+- Private vulnerability reporting: `Enabled`
+- Dependabot security updates: `Enabled`
+- Secret scanning and push protection: `Enabled`
+- Non-provider pattern scanning and validity checks: `Unavailable/disabled`
 
 The active repository ruleset targets only `refs/heads/main`, has no bypass
 actors and blocks branch deletion plus non-fast-forward updates. Authorized
 fast-forward pushes remain possible because the current delivery workflow is
 direct-to-main. Secret scanning and push protection were also enabled when this
-state was verified.
+state was verified. Dependabot security updates and private vulnerability
+reporting are enabled; [SECURITY.md](../../SECURITY.md) directs researchers to
+the private advisory channel. GitHub did not retain requests to enable
+non-provider pattern scanning or validity checks for this repository, so both
+remain explicitly unavailable/disabled rather than being claimed as controls.
 
 This is a history-integrity control, not a claim that post-push CI is a
 pre-merge gate. `Quality` and `CodeQL SAST` currently run on pushes to `main`

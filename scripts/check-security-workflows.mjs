@@ -7,6 +7,7 @@ const governance = await readFile(
   "docs/operations/github-repository-governance.md",
   "utf8",
 );
+const disclosurePolicy = await readFile("SECURITY.md", "utf8");
 
 for (const invariant of [
   "pull_request:",
@@ -68,6 +69,28 @@ for (const evidence of [
   assert.ok(
     governance.includes(evidence),
     `Repository governance lost verified history-protection evidence: ${evidence}`,
+  );
+
+for (const evidence of [
+  "Private vulnerability reporting: `Enabled`",
+  "Dependabot security updates: `Enabled`",
+  "Secret scanning and push protection: `Enabled`",
+  "Non-provider pattern scanning and validity checks: `Unavailable/disabled`",
+  "private advisory channel",
+])
+  assert.ok(
+    governance.includes(evidence),
+    `Repository governance lost native security state: ${evidence}`,
+  );
+for (const evidence of [
+  "security/advisories/new",
+  "Do not open a public issue",
+  "Only the current `main` revision is supported",
+  "does not authorize testing production",
+])
+  assert.ok(
+    disclosurePolicy.includes(evidence),
+    `Security disclosure policy lost required boundary: ${evidence}`,
   );
 
 const pendingRequiredCheckSentinels = [

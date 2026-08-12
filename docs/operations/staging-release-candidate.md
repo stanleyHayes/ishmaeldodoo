@@ -9,8 +9,15 @@
 - Provider-plan template: `infra/deployment/rollback-plan.example.json`
 - Load command: `npm run rehearse:load -- <load-plan.json>`
 - Load-plan template: `infra/deployment/load-plan.template.json`
+- Repository governance: [GitHub repository governance](github-repository-governance.md)
 
 The public Next.js web, protected Next.js Admin/CMS and NestJS API are three releases with distinct origins, credentials, build artifacts, logs and rollback controls. A shared source revision does not make them one deployment. Content publication remains independent from code promotion.
+
+The active GitHub ruleset protects `main` from deletion and non-fast-forward
+history changes without changing the current direct fast-forward delivery
+model. It does not make post-push CI a pre-merge gate. Required checks and
+review enforcement remain pending the controlled workflow transition in the
+repository-governance record.
 
 ## Candidate entry criteria
 

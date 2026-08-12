@@ -3,6 +3,10 @@ import { readFile } from "node:fs/promises";
 
 const codeql = await readFile(".github/workflows/codeql.yml", "utf8");
 const quality = await readFile(".github/workflows/quality.yml", "utf8");
+const governance = await readFile(
+  "docs/operations/github-repository-governance.md",
+  "utf8",
+);
 
 for (const invariant of [
   "pull_request:",
@@ -55,6 +59,53 @@ assert.equal(
   3,
   "All three independently deployed images require vulnerability scans",
 );
+
+for (const evidence of [
+  "Active history ruleset: `20725073` (`Protect main history`)",
+  "blocks branch deletion plus non-fast-forward updates",
+  "This is a history-integrity control, not a claim that post-push CI is a\npre-merge gate",
+])
+  assert.ok(
+    governance.includes(evidence),
+    `Repository governance lost verified history-protection evidence: ${evidence}`,
+  );
+
+const pendingRequiredCheckSentinels = [
+  "- Status: `Not approved`",
+  "- Delivery-model owner and decision reference: `Not recorded`",
+  "- Pull-request or merge-queue workflow selected: `Not selected`",
+  "- Required `Quality` check name and successful trial run: `Not recorded`",
+  "- Required CodeQL check names and successful trial runs: `Not recorded`",
+  "- Required approving-review count and code-owner policy: `Not approved`",
+  "- Stale-review dismissal and conversation-resolution policy: `Not approved`",
+  "- Administrator/bypass actors and emergency procedure: `Not approved`",
+  "- Signed-commit requirement decision: `Not approved`",
+  "- Linear-history requirement decision: `Not approved`",
+  "- Ruleset export before/after and rollback procedure: `Not recorded`",
+  "- Failed-check, stale-review and emergency-release drills: `Not run`",
+  "- Engineering approval and date: `Not approved`",
+  "- Security approval and date: `Not approved`",
+  "- Product/Operations acceptance and date: `Not approved`",
+];
+
+function validatePendingRequiredChecks(candidate) {
+  for (const sentinel of pendingRequiredCheckSentinels)
+    assert.ok(
+      candidate.includes(sentinel),
+      `Repository governance no longer proves pending required-check state: ${sentinel}`,
+    );
+}
+
+validatePendingRequiredChecks(governance);
+for (const sentinel of pendingRequiredCheckSentinels)
+  assert.throws(
+    () =>
+      validatePendingRequiredChecks(
+        governance.replace(sentinel, "[prematurely changed]"),
+      ),
+    undefined,
+    `Repository governance accepted premature transition mutation: ${sentinel}`,
+  );
 assert.equal(
   (quality.match(/severity-cutoff: high/gu) ?? []).length,
   3,
@@ -67,5 +118,5 @@ assert.equal(
 );
 
 process.stdout.write(
-  "Security CI preserves CodeQL SAST and three image SARIF vulnerability gates.\n",
+  `Security CI preserves CodeQL SAST and three image SARIF vulnerability gates; active main-history protection is recorded while ${pendingRequiredCheckSentinels.length} required-check transition fields fail closed.\n`,
 );

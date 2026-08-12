@@ -51,7 +51,7 @@ Create a Vercel project from the GitHub repository with:
 - Root Directory: `apps/web`
 - Framework Preset: Next.js
 - Include source files outside the Root Directory: enabled, so the npm workspace and `packages/contracts` are available
-- Node.js: 22.x
+- Node.js: 24.x (Vercel's newest supported build and Functions runtime; minor and security patches roll forward automatically)
 - Production Branch: `main`
 - Deployment Protection: enabled for Preview; staging must also be protected and `PUBLIC_INDEXING_ENABLED=false`
 
@@ -66,7 +66,7 @@ Create a second Vercel project from the same repository with:
 - Root Directory: `apps/admin`
 - Framework Preset: Next.js
 - Include source files outside the Root Directory: enabled
-- Node.js: 22.x
+- Node.js: 24.x (Vercel's newest supported build and Functions runtime; minor and security patches roll forward automatically)
 - Production Branch: `main`
 - Deployment Protection: enabled for every non-production deployment
 

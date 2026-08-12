@@ -4,6 +4,7 @@ import { parse } from "yaml";
 
 const blueprint = parse(await readFile("render.yaml", "utf8"));
 const apiDockerfile = await readFile("apps/api/Dockerfile", "utf8");
+const rootPackage = JSON.parse(await readFile("package.json", "utf8"));
 const guide = await readFile(
   "docs/operations/render-vercel-deployment.md",
   "utf8",
@@ -95,6 +96,16 @@ assert.deepEqual(
 );
 assert.ok(
   apiDockerfile.includes("apt-get install -y --no-install-recommends chromium"),
+);
+assert.equal(
+  rootPackage.engines?.node,
+  ">=24.0.0 <27.0.0",
+  "The workspace must support Vercel Node 24 and pinned Node 26 containers without admitting unknown future majors",
+);
+assert.equal(
+  guide.match(/Node\.js: 24\.x/gu)?.length,
+  2,
+  "Both independent Vercel projects must select the newest supported Node 24 runtime",
 );
 
 for (const [name, config] of Object.entries(vercel)) {

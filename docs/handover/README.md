@@ -41,6 +41,7 @@ This index is the controlled entry point for operating the independently deploye
 - Controlled [release acceptance](../operations/release-acceptance.md) templates from UAT through project closure.
 - Controlled [disaster-recovery rehearsal record](../operations/templates/disaster-recovery-rehearsal-record.md) for provider PITR, Room reconciliation, key recovery and RTO/RPO acceptance.
 - Controlled [retention and deletion rehearsal record](../operations/templates/retention-deletion-rehearsal-record.md) for TTL expiry, Protocol pseudonymisation, Room deletion, Cloudinary disposal, restored-backup reconciliation and independent approvals.
+- Controlled [source and claim audit record](../operations/templates/source-claim-audit-record.md) for exact bilingual graph coverage, claim quality, rights/consent, defect closure and Content/Legal approval without sampling.
 - Monthly, quarterly and six-month [measurement cadence](../operations/measurement-cadence.md) evidence.
 - Versioned [release notes](release-notes.md) and completed [training evidence](training-evidence.md).
 

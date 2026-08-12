@@ -3,7 +3,24 @@ import type { RoomEnvelope } from "@amanor/contracts";
 
 /** RFC 4648 base32 without padding, so a reference is unambiguous when read aloud. */
 const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
-const REFERENCE_CHARACTERS = 16;
+const REFERENCE_BYTES = 10;
+
+function encodeBase32(bytes: Uint8Array): string {
+  let bits = 0;
+  let value = 0;
+  let encoded = "";
+  for (const byte of bytes) {
+    value = (value << 8) | byte;
+    bits += 8;
+    while (bits >= 5) {
+      encoded += ALPHABET[(value >>> (bits - 5)) & 31];
+      bits -= 5;
+      value &= (1 << bits) - 1;
+    }
+  }
+  if (bits > 0) encoded += ALPHABET[(value << (5 - bits)) & 31];
+  return encoded;
+}
 
 /**
  * Public receipts are 80 bits of CSPRNG output. They are never derived from
@@ -11,10 +28,7 @@ const REFERENCE_CHARACTERS = 16;
  * public internet: there is no public status route.
  */
 export function newRoomReference(now = new Date()): string {
-  const bytes = randomBytes(REFERENCE_CHARACTERS);
-  let suffix = "";
-  for (const byte of bytes) suffix += ALPHABET[byte % ALPHABET.length];
-  return `RM-${now.getUTCFullYear()}-${suffix}`;
+  return `RM-${now.getUTCFullYear()}-${encodeBase32(randomBytes(REFERENCE_BYTES))}`;
 }
 
 /**

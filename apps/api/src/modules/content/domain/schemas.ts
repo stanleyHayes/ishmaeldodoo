@@ -692,7 +692,28 @@ function localizedWordCount(
 
 export const pageSchema = z
   .object({
-    slug: z.string().regex(/^\/(?:[a-z0-9]+(?:-[a-z0-9]+)*\/?)*$/),
+    slug: z.string().refine(
+      (slug) => {
+        if (!slug.startsWith("/") || slug.includes("//")) return false;
+        const normalized = slug.endsWith("/") ? slug.slice(0, -1) : slug;
+        return normalized
+          .slice(1)
+          .split("/")
+          .every(
+            (segment) =>
+              segment.length > 0 &&
+              !segment.startsWith("-") &&
+              !segment.endsWith("-") &&
+              [...segment].every(
+                (character) =>
+                  (character >= "a" && character <= "z") ||
+                  (character >= "0" && character <= "9") ||
+                  character === "-",
+              ),
+          );
+      },
+      { message: "Slug must be a lowercase absolute path" },
+    ),
     title: localizedTextSchema,
     summary: localizedTextSchema,
     sections: z.array(pageSectionSchema).min(1),

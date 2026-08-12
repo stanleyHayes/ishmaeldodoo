@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { access, readFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 
 const required = new Map([
   [
@@ -25,7 +25,6 @@ const required = new Map([
 ]);
 
 for (const [path, phrases] of required) {
-  await access(path);
   const content = await readFile(path, "utf8");
   for (const phrase of phrases) {
     if (!content.includes(phrase))

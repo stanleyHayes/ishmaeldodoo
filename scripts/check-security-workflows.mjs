@@ -225,6 +225,7 @@ for (const invariant of [
   "persist-credentials: false",
   "validate-deployment-dispatch.mjs",
   "verify-hosted-gates.mjs",
+  "AMANOR_HOSTED_GATES_EVIDENCE_PATH: deployment-evidence/hosted-gates.json",
   "deploy-provider-revision.mjs",
   "wait-for-deployment-smoke.mjs",
   "bind-deployment-evidence.mjs",

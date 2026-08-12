@@ -71,6 +71,7 @@ jobs:
         env:
           REQUESTED_REVISION: ${{ inputs.revision }}
           GH_REPOSITORY: ${{ github.repository }}
+          AMANOR_HOSTED_GATES_EVIDENCE_PATH: deployment-evidence/hosted-gates.json
         run: node scripts/verify-hosted-gates.mjs
 
       - name: Deploy exact revision API then Admin then Web

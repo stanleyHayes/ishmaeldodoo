@@ -36,6 +36,24 @@ const smoke = {
     apiLiveReadyCorrelation: "passed",
   },
 };
+const hostedGates = {
+  schemaVersion: 1,
+  repository: "stanleyHayes/ishmaeldodoo",
+  sourceRevision: revision,
+  verifiedAt: "2026-08-12T00:00:30.000Z",
+  gates: {
+    Quality: {
+      runId: "41",
+      url: "https://github.com/stanleyHayes/ishmaeldodoo/actions/runs/41",
+      conclusion: "success",
+    },
+    "CodeQL SAST": {
+      runId: "42",
+      url: "https://github.com/stanleyHayes/ishmaeldodoo/actions/runs/42",
+      conclusion: "success",
+    },
+  },
+};
 const environment = (directory) => ({
   AMANOR_DEPLOYMENT_EVIDENCE_DIR: directory,
   REQUESTED_REVISION: revision,
@@ -53,6 +71,10 @@ async function fixture(providerValue = provider, smokeValue = smoke) {
       JSON.stringify(providerValue),
     ),
     writeFile(path.join(directory, "smoke.json"), JSON.stringify(smokeValue)),
+    writeFile(
+      path.join(directory, "hosted-gates.json"),
+      JSON.stringify(hostedGates),
+    ),
   ]);
   return directory;
 }
@@ -65,6 +87,7 @@ test("binds exact provider and smoke evidence with checksums", async () => {
     manifest.files["provider-deployments.json"],
     /^sha256:[a-f0-9]{64}$/u,
   );
+  assert.match(manifest.files["hosted-gates.json"], /^sha256:[a-f0-9]{64}$/u);
   assert.deepEqual(
     JSON.parse(await readFile(path.join(directory, "manifest.json"), "utf8")),
     manifest,

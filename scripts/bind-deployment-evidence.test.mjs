@@ -62,6 +62,16 @@ const hostedGates = {
     },
   },
 };
+const attempt = {
+  schemaVersion: 1,
+  sourceRevision: revision,
+  environment: "staging",
+  startedAt: "2026-08-12T00:00:35.000Z",
+  updatedAt: "2026-08-12T00:00:50.000Z",
+  phase: "complete",
+  outcome: "succeeded",
+  deployments: provider.deployments,
+};
 const environment = (directory) => ({
   AMANOR_DEPLOYMENT_EVIDENCE_DIR: directory,
   REQUESTED_REVISION: revision,
@@ -76,6 +86,7 @@ async function fixture(
   providerValue = provider,
   smokeValue = smoke,
   hostedGatesValue = hostedGates,
+  attemptValue = attempt,
 ) {
   const directory = await mkdtemp(path.join(os.tmpdir(), "amanor-deploy-"));
   await Promise.all([
@@ -87,6 +98,10 @@ async function fixture(
     writeFile(
       path.join(directory, "hosted-gates.json"),
       JSON.stringify(hostedGatesValue),
+    ),
+    writeFile(
+      path.join(directory, "provider-attempt.json"),
+      JSON.stringify(attemptValue),
     ),
   ]);
   return directory;
@@ -101,6 +116,10 @@ test("binds exact provider and smoke evidence with checksums", async () => {
     /^sha256:[a-f0-9]{64}$/u,
   );
   assert.match(manifest.files["hosted-gates.json"], /^sha256:[a-f0-9]{64}$/u);
+  assert.match(
+    manifest.files["provider-attempt.json"],
+    /^sha256:[a-f0-9]{64}$/u,
+  );
   assert.deepEqual(
     JSON.parse(await readFile(path.join(directory, "manifest.json"), "utf8")),
     manifest,
@@ -164,6 +183,36 @@ test("rejects malformed and chronologically impossible evidence", async () => {
         await fixture(provider, {
           ...smoke,
           checkedAt: "2026-08-11T23:59:59.000Z",
+        }),
+      ),
+    ),
+  );
+});
+
+test("rejects failed or mismatched provider attempt evidence", async () => {
+  await assert.rejects(
+    bindDeploymentEvidence(
+      environment(
+        await fixture(provider, smoke, hostedGates, {
+          ...attempt,
+          phase: "admin",
+          outcome: "failed",
+        }),
+      ),
+    ),
+  );
+  await assert.rejects(
+    bindDeploymentEvidence(
+      environment(
+        await fixture(provider, smoke, hostedGates, {
+          ...attempt,
+          deployments: {
+            ...attempt.deployments,
+            web: {
+              ...attempt.deployments.web,
+              deploymentId: "dpl_other",
+            },
+          },
         }),
       ),
     ),

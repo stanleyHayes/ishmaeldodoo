@@ -114,6 +114,11 @@ deployment IDs/projects, last states and failed phase needed for diagnosis and
 rollback. The attempt journal contains no request bodies, response payloads,
 tokens or exception text and is diagnostic only; it cannot substitute for the
 strict successful manifest.
+On success, the binder requires that journal to be `complete`/`succeeded`,
+match every provider ID/project/state exactly, fit the authorization-to-smoke
+timeline and contribute its own SHA-256 digest to the manifest. A failed or
+mismatched journal therefore remains useful for diagnosis but can never be
+promoted into successful release evidence.
 
 1. Resolve D01 and provision the API, public Web and Admin domains.
 2. Create separate MongoDB application, migration and retention users.

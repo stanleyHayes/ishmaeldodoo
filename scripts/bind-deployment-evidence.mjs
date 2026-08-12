@@ -35,14 +35,18 @@ export async function bindDeploymentEvidence(environment = process.env) {
   const providerPath = path.join(directory, "provider-deployments.json");
   const smokePath = path.join(directory, "smoke.json");
   const hostedGatesPath = path.join(directory, "hosted-gates.json");
-  const [providerBuffer, smokeBuffer, hostedGatesBuffer] = await Promise.all([
-    readFile(providerPath),
-    readFile(smokePath),
-    readFile(hostedGatesPath),
-  ]);
+  const attemptPath = path.join(directory, "provider-attempt.json");
+  const [providerBuffer, smokeBuffer, hostedGatesBuffer, attemptBuffer] =
+    await Promise.all([
+      readFile(providerPath),
+      readFile(smokePath),
+      readFile(hostedGatesPath),
+      readFile(attemptPath),
+    ]);
   const provider = JSON.parse(providerBuffer.toString("utf8"));
   const smoke = JSON.parse(smokeBuffer.toString("utf8"));
   const hostedGates = JSON.parse(hostedGatesBuffer.toString("utf8"));
+  const attempt = JSON.parse(attemptBuffer.toString("utf8"));
   exactKeys(
     provider,
     [
@@ -95,6 +99,25 @@ export async function bindDeploymentEvidence(environment = process.env) {
       ],
       `${workflow} gate`,
     );
+  exactKeys(
+    attempt,
+    [
+      "schemaVersion",
+      "sourceRevision",
+      "environment",
+      "startedAt",
+      "updatedAt",
+      "phase",
+      "outcome",
+      "deployments",
+    ],
+    "provider attempt",
+  );
+  exactKeys(
+    attempt.deployments,
+    ["api", "admin", "web"],
+    "attempt deployments",
+  );
   const revision = required(environment, "REQUESTED_REVISION");
   const deploymentEnvironment = required(
     environment,
@@ -106,6 +129,12 @@ export async function bindDeploymentEvidence(environment = process.env) {
   );
   assert.equal(provider.sourceRevision, revision);
   assert.equal(provider.environment, deploymentEnvironment);
+  assert.equal(attempt.sourceRevision, revision);
+  assert.equal(attempt.environment, deploymentEnvironment);
+  assert.equal(attempt.phase, "complete");
+  assert.equal(attempt.outcome, "succeeded");
+  validTimestamp(attempt.startedAt, "attempt startedAt");
+  validTimestamp(attempt.updatedAt, "attempt updatedAt");
   validTimestamp(provider.createdAt, "provider createdAt");
   assert.match(provider.deployments.api.serviceId, /^srv-[A-Za-z0-9]+$/u);
   assert.match(provider.deployments.api.deploymentId, /^dep-[A-Za-z0-9]+$/u);
@@ -126,6 +155,7 @@ export async function bindDeploymentEvidence(environment = process.env) {
     provider.deployments.web.project,
     "Admin and Web must use distinct Vercel projects",
   );
+  assert.deepEqual(attempt.deployments, provider.deployments);
   assert.notEqual(
     provider.deployments.admin.deploymentId,
     provider.deployments.web.deploymentId,
@@ -142,6 +172,22 @@ export async function bindDeploymentEvidence(environment = process.env) {
   assert.ok(
     Date.parse(hostedGates.verifiedAt) <= Date.parse(provider.createdAt),
     "provider deployment evidence predates hosted gate verification",
+  );
+  assert.ok(
+    Date.parse(hostedGates.verifiedAt) <= Date.parse(attempt.startedAt),
+    "provider attempt predates hosted gate verification",
+  );
+  assert.ok(
+    Date.parse(attempt.startedAt) <= Date.parse(provider.createdAt),
+    "provider evidence predates provider attempt",
+  );
+  assert.ok(
+    Date.parse(provider.createdAt) <= Date.parse(attempt.updatedAt),
+    "successful provider attempt predates provider evidence",
+  );
+  assert.ok(
+    Date.parse(attempt.updatedAt) <= Date.parse(smoke.checkedAt),
+    "smoke evidence predates successful provider attempt",
   );
   assert.equal(
     hostedGates.repository,
@@ -193,7 +239,7 @@ export async function bindDeploymentEvidence(environment = process.env) {
   );
   assert.match(migrationEvidenceSha256, /^sha256:[0-9a-f]{64}$/u);
 
-  const serialized = `${providerBuffer.toString("utf8")}\n${smokeBuffer.toString("utf8")}\n${hostedGatesBuffer.toString("utf8")}`;
+  const serialized = `${providerBuffer.toString("utf8")}\n${smokeBuffer.toString("utf8")}\n${hostedGatesBuffer.toString("utf8")}\n${attemptBuffer.toString("utf8")}`;
   assert.doesNotMatch(
     serialized,
     /authorization|bearer|token|secret|password|cookie|deploy.?hook/iu,
@@ -212,6 +258,7 @@ export async function bindDeploymentEvidence(environment = process.env) {
       "provider-deployments.json": `sha256:${digest(providerBuffer)}`,
       "smoke.json": `sha256:${digest(smokeBuffer)}`,
       "hosted-gates.json": `sha256:${digest(hostedGatesBuffer)}`,
+      "provider-attempt.json": `sha256:${digest(attemptBuffer)}`,
     },
   };
   await writeFile(

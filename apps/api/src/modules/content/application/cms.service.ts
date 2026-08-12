@@ -439,6 +439,37 @@ export class CmsService {
     };
   }
 
+  async listPublicSignals(locale: Locale): Promise<
+    Readonly<{
+      items: readonly unknown[];
+      translation: TranslationSummary;
+    }>
+  > {
+    const rows = await this.repository.listPublicSignals(locale);
+    const summaries = rows.map((row) =>
+      summarizeTranslation(row.payload, locale),
+    );
+    const sourceUpdatedAt = summaries
+      .map((item) => item.sourceUpdatedAt)
+      .filter((date): date is Date => Boolean(date))
+      .sort((left, right) => right.getTime() - left.getTime())[0];
+    return {
+      items: rows.map((row) => {
+        const payload = projectPublicLocale(row.payload, locale);
+        return {
+          documentId: row.documentId,
+          ...(payload && typeof payload === "object" && !Array.isArray(payload)
+            ? payload
+            : {}),
+        };
+      }),
+      translation: {
+        stale: summaries.some((item) => item.stale),
+        ...(sourceUpdatedAt ? { sourceUpdatedAt } : {}),
+      },
+    };
+  }
+
   async transition(
     documentType: ContentKind,
     documentId: string,

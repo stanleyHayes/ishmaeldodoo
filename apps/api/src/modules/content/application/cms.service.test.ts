@@ -61,6 +61,7 @@ function fixture(
     listDocuments: vi.fn().mockResolvedValue({ items: [] }),
     listPublicSources: vi.fn().mockResolvedValue({ items: [] }),
     latestPublicSignal: vi.fn().mockResolvedValue(null),
+    listPublicSignals: vi.fn().mockResolvedValue([]),
     findMissingPublishedSourceRefs: vi.fn().mockResolvedValue([]),
     findPublishedSourceDependents: vi.fn().mockResolvedValue([]),
     listPublishedForSourceAudit: vi.fn().mockResolvedValue([]),
@@ -131,6 +132,46 @@ describe("CmsService", () => {
       documentId: "signal-1",
       payload: { body: "Signal français", sourceRefs: ["source-1"] },
       translation: { stale: false },
+    });
+  });
+
+  it("projects every published Signal and aggregate translation state", async () => {
+    const { service, repository } = fixture();
+    repository.listPublicSignals.mockResolvedValue([
+      {
+        documentId: "signal-1",
+        publishedAt: new Date("2026-08-10T00:00:00Z"),
+        payload: {
+          slug: "signal-1",
+          body: {
+            "en-GB": "English signal",
+            "fr-FR": "Signal français",
+            status: { "en-GB": "current", "fr-FR": "stale" },
+            sourceUpdatedAt: new Date("2026-08-10T00:00:00Z"),
+          },
+          tags: ["economy"],
+          confidence: "watching",
+          changeMyMind: {
+            "en-GB": "Evidence",
+            "fr-FR": "Preuve",
+            status: { "en-GB": "current", "fr-FR": "current" },
+          },
+          sourceRefs: ["source-1"],
+        },
+      },
+    ]);
+    await expect(service.listPublicSignals("fr-FR")).resolves.toMatchObject({
+      items: [
+        {
+          documentId: "signal-1",
+          body: "Signal français",
+          changeMyMind: "Preuve",
+        },
+      ],
+      translation: {
+        stale: true,
+        sourceUpdatedAt: new Date("2026-08-10T00:00:00Z"),
+      },
     });
   });
 

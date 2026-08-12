@@ -63,6 +63,7 @@ if (mode === "generate") {
     "/v1/auth/recovery-codes/rotate",
     "/v1/auth/hardware-keys",
     "/v1/auth/hardware-keys/{credentialId}",
+    "/v1/public/signals",
     "/v1/auth/hardware-keys/registration/options",
     "/v1/auth/hardware-keys/registration/verify",
     "/v1/auth/hardware-keys/authentication/options",

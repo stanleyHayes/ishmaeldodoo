@@ -3685,6 +3685,18 @@ integration("MongoDB replica-set integration", () => {
       },
       translation: { stale: false },
     });
+    await expect(service.listPublicSignals("en-GB")).resolves.toMatchObject({
+      items: [
+        {
+          documentId: "finance-call",
+          slug: "finance-call",
+          body: words(150, "signal"),
+          confidence: "watching",
+          sourceRefs: ["source-1"],
+        },
+      ],
+      translation: { stale: false },
+    });
 
     const archive = await service.createDraft(
       "archiveItem",

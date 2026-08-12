@@ -1,6 +1,80 @@
 {
   "components": {
     "schemas": {
+      "AdministratorInvitationDto": {
+        "properties": {},
+        "type": "object"
+      },
+      "AdministratorStatusDto": {
+        "properties": {},
+        "type": "object"
+      },
+      "ContactEnquiryDto": {
+        "properties": {
+          "category": {
+            "enum": [
+              "general",
+              "correction",
+              "accessibility",
+              "website",
+              "other"
+            ],
+            "type": "string"
+          },
+          "email": {
+            "format": "email",
+            "maxLength": 254,
+            "type": "string"
+          },
+          "locale": {
+            "enum": [
+              "en-GB",
+              "fr-FR"
+            ],
+            "type": "string"
+          },
+          "message": {
+            "maxLength": 4000,
+            "minLength": 20,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 100,
+            "minLength": 2,
+            "type": "string"
+          },
+          "organisation": {
+            "maxLength": 160,
+            "minLength": 2,
+            "type": "string"
+          },
+          "privacyConsent": {
+            "enum": [
+              true
+            ],
+            "type": "boolean"
+          },
+          "subject": {
+            "maxLength": 160,
+            "minLength": 4,
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "email",
+          "category",
+          "subject",
+          "message",
+          "locale",
+          "privacyConsent"
+        ],
+        "type": "object"
+      },
+      "CreateDraftDto": {
+        "properties": {},
+        "type": "object"
+      },
       "ErrorEnvelope": {
         "additionalProperties": false,
         "properties": {
@@ -35,6 +109,107 @@
         ],
         "type": "object"
       },
+      "GenerateLivingDossierDto": {
+        "properties": {
+          "email": {
+            "format": "email",
+            "maxLength": 254,
+            "type": "string"
+          },
+          "locale": {
+            "enum": [
+              "en-GB",
+              "fr-FR"
+            ],
+            "type": "string"
+          },
+          "organisation": {
+            "maxLength": 160,
+            "minLength": 2,
+            "type": "string"
+          },
+          "purpose": {
+            "maxLength": 500,
+            "minLength": 10,
+            "type": "string"
+          },
+          "requesterName": {
+            "maxLength": 100,
+            "minLength": 2,
+            "type": "string"
+          },
+          "variant": {
+            "enum": [
+              "speaker",
+              "institutional",
+              "full"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "requesterName",
+          "organisation",
+          "email",
+          "purpose",
+          "variant",
+          "locale"
+        ],
+        "type": "object"
+      },
+      "GeneratePressKitDto": {
+        "properties": {
+          "email": {
+            "format": "email",
+            "maxLength": 254,
+            "type": "string"
+          },
+          "format": {
+            "enum": [
+              "pdf",
+              "zip"
+            ],
+            "type": "string"
+          },
+          "locale": {
+            "enum": [
+              "en-GB",
+              "fr-FR"
+            ],
+            "type": "string"
+          },
+          "outlet": {
+            "maxLength": 160,
+            "minLength": 2,
+            "type": "string"
+          },
+          "requesterName": {
+            "maxLength": 100,
+            "minLength": 2,
+            "type": "string"
+          }
+        },
+        "required": [
+          "requesterName",
+          "outlet",
+          "email",
+          "locale",
+          "format"
+        ],
+        "type": "object"
+      },
+      "HardwareKeyAuthenticationDto": {
+        "properties": {},
+        "type": "object"
+      },
+      "HardwareKeyRegistrationDto": {
+        "properties": {},
+        "type": "object"
+      },
+      "InvitationAcceptanceDto": {
+        "properties": {},
+        "type": "object"
+      },
       "InvitationAcceptanceResponseDto": {
         "properties": {
           "recoveryCodes": {
@@ -51,6 +226,71 @@
         "required": [
           "recoveryCodes"
         ],
+        "type": "object"
+      },
+      "InvitationSetupDto": {
+        "properties": {},
+        "type": "object"
+      },
+      "LoginDto": {
+        "properties": {},
+        "type": "object"
+      },
+      "MediaEnquiryDto": {
+        "properties": {
+          "deadline": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "email": {
+            "format": "email",
+            "maxLength": 254,
+            "type": "string"
+          },
+          "locale": {
+            "enum": [
+              "en-GB",
+              "fr-FR"
+            ],
+            "type": "string"
+          },
+          "message": {
+            "maxLength": 4000,
+            "minLength": 20,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 100,
+            "minLength": 2,
+            "type": "string"
+          },
+          "outlet": {
+            "maxLength": 160,
+            "minLength": 2,
+            "type": "string"
+          },
+          "subject": {
+            "maxLength": 160,
+            "minLength": 4,
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "outlet",
+          "email",
+          "subject",
+          "message",
+          "locale"
+        ],
+        "type": "object"
+      },
+      "PublishContentDto": {
+        "properties": {},
+        "type": "object"
+      },
+      "RolesUpdateDto": {
+        "properties": {},
         "type": "object"
       },
       "RoomCiphertext": {
@@ -515,6 +755,10 @@
         ],
         "type": "object"
       },
+      "StepUpDto": {
+        "properties": {},
+        "type": "object"
+      },
       "StepUpResponseDto": {
         "properties": {
           "accessToken": {
@@ -532,6 +776,10 @@
           "accessToken",
           "expiresIn"
         ],
+        "type": "object"
+      },
+      "TransitionContentDto": {
+        "properties": {},
         "type": "object"
       }
     },
@@ -665,7 +913,24 @@
     "/v1/auth/hardware-keys/{credentialId}": {
       "delete": {
         "operationId": "AuthController_hardwareKeyRevoke",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "credentialId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "origin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "204": {
             "description": ""
@@ -702,7 +967,16 @@
     "/v1/auth/hardware-keys/authentication/options": {
       "post": {
         "operationId": "AuthController_hardwareKeyAuthenticationOptions",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "origin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "201": {
             "description": ""
@@ -739,7 +1013,26 @@
     "/v1/auth/hardware-keys/authentication/verify": {
       "post": {
         "operationId": "AuthController_hardwareKeyAuthenticationVerify",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "origin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HardwareKeyAuthenticationDto"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "201": {
             "description": ""
@@ -776,7 +1069,16 @@
     "/v1/auth/hardware-keys/registration/options": {
       "post": {
         "operationId": "AuthController_hardwareKeyRegistrationOptions",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "origin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "201": {
             "description": ""
@@ -813,7 +1115,26 @@
     "/v1/auth/hardware-keys/registration/verify": {
       "post": {
         "operationId": "AuthController_hardwareKeyRegistrationVerify",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "origin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HardwareKeyRegistrationDto"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "201": {
             "description": ""
@@ -851,6 +1172,16 @@
       "post": {
         "operationId": "AuthController_invite",
         "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdministratorInvitationDto"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "One-time administrator invitation created."
@@ -888,6 +1219,16 @@
       "post": {
         "operationId": "AuthController_acceptInvitation",
         "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InvitationAcceptanceDto"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "content": {
@@ -927,6 +1268,16 @@
       "post": {
         "operationId": "AuthController_invitationSetup",
         "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InvitationSetupDto"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "Valid invitation MFA enrollment details."
@@ -959,6 +1310,16 @@
       "post": {
         "operationId": "AuthController_login",
         "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "Password and MFA verified; session created."
@@ -1178,7 +1539,16 @@
     "/v1/auth/sessions/{sessionId}": {
       "delete": {
         "operationId": "AuthController_revokeSession",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sessionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "204": {
             "description": "The selected session family was revoked."
@@ -1216,6 +1586,16 @@
       "post": {
         "operationId": "AuthController_stepUp",
         "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StepUpDto"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "content": {
@@ -1296,7 +1676,26 @@
     "/v1/auth/users/{userId}/roles": {
       "patch": {
         "operationId": "AuthController_changeRoles",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RolesUpdateDto"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "Roles replaced and all subject sessions invalidated."
@@ -1333,7 +1732,26 @@
     "/v1/auth/users/{userId}/status": {
       "patch": {
         "operationId": "AuthController_setStatus",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdministratorStatusDto"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "Administrator status changed and all subject sessions invalidated."
@@ -1370,7 +1788,32 @@
     "/v1/cms/content/{documentType}": {
       "get": {
         "operationId": "CmsController_documents",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "documentType",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "A bounded page of content documents with their latest workflow state."
@@ -1407,7 +1850,32 @@
     "/v1/cms/content/{documentType}/{documentId}/audit": {
       "get": {
         "operationId": "CmsController_audit",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "documentType",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Immutable audit history for the requested content document."
@@ -1444,7 +1912,32 @@
     "/v1/cms/content/{documentType}/{documentId}/audit/export": {
       "get": {
         "operationId": "CmsController_auditExport",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "documentType",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Portable, hash-linked editorial audit export."
@@ -1481,7 +1974,24 @@
     "/v1/cms/content/{documentType}/{documentId}/audit/integrity": {
       "get": {
         "operationId": "CmsController_auditIntegrity",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "documentType",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Editorial audit-chain integrity status."
@@ -1518,7 +2028,34 @@
     "/v1/cms/content/{documentType}/{documentId}/unpublish": {
       "post": {
         "operationId": "CmsController_unpublish",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "documentType",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublishContentDto"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "The locale publication was removed and audited atomically."
@@ -1555,7 +2092,24 @@
     "/v1/cms/content/{documentType}/{documentId}/versions": {
       "get": {
         "operationId": "CmsController_versions",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "documentType",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Version history for the requested content document."
@@ -1590,7 +2144,34 @@
       },
       "post": {
         "operationId": "CmsController_createDraft",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "documentType",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDraftDto"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "201": {
             "description": "A new immutable draft version was created."
@@ -1627,7 +2208,42 @@
     "/v1/cms/content/{documentType}/{documentId}/versions/{version}/actions": {
       "post": {
         "operationId": "CmsController_transition",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "documentType",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "version",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransitionContentDto"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "The editorial workflow transition was applied atomically."
@@ -1664,7 +2280,42 @@
     "/v1/cms/content/{documentType}/{documentId}/versions/{version}/publish": {
       "post": {
         "operationId": "CmsController_publish",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "documentType",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "version",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublishContentDto"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "Approved content was published and revalidation queued."
@@ -1701,7 +2352,42 @@
     "/v1/cms/content/{documentType}/{documentId}/versions/{version}/rollback": {
       "post": {
         "operationId": "CmsController_rollback",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "documentType",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "version",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublishContentDto"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "A previously published immutable version was restored for one locale."
@@ -1812,7 +2498,16 @@
     "/v1/desk/requests/{requestId}": {
       "get": {
         "operationId": "ProtocolDeskOperatorController_detail",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "requestId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": ""
@@ -1849,7 +2544,24 @@
     "/v1/desk/requests/{requestId}/assignment": {
       "post": {
         "operationId": "ProtocolDeskOperatorController_assign",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "requestId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "origin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "201": {
             "description": ""
@@ -1886,7 +2598,32 @@
     "/v1/desk/requests/{requestId}/calendar-sync/{syncId}/retry": {
       "post": {
         "operationId": "ProtocolDeskOperatorController_retryCalendarSync",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "requestId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "syncId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "origin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "201": {
             "description": ""
@@ -1923,7 +2660,32 @@
     "/v1/desk/requests/{requestId}/correspondence/{correspondenceId}/retry": {
       "post": {
         "operationId": "ProtocolDeskOperatorController_retryCorrespondence",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "requestId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "correspondenceId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "origin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "201": {
             "description": ""
@@ -1960,7 +2722,32 @@
     "/v1/desk/requests/{requestId}/flags/{flagId}/clearance": {
       "post": {
         "operationId": "ProtocolDeskOperatorController_clearFlag",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "requestId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "flagId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "origin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "201": {
             "description": ""
@@ -1997,7 +2784,24 @@
     "/v1/desk/requests/{requestId}/notes": {
       "post": {
         "operationId": "ProtocolDeskOperatorController_note",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "requestId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "origin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "201": {
             "description": ""
@@ -2034,7 +2838,24 @@
     "/v1/desk/requests/{requestId}/principal-decision-capabilities": {
       "post": {
         "operationId": "ProtocolDeskOperatorController_issuePrincipalDecisionCapability",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "requestId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "origin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "201": {
             "description": ""
@@ -2071,7 +2892,32 @@
     "/v1/desk/requests/{requestId}/principal-decision-delivery/{deliveryId}/retry": {
       "post": {
         "operationId": "ProtocolDeskOperatorController_retryPrincipalDecisionDelivery",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "requestId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "deliveryId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "origin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "201": {
             "description": ""
@@ -2108,7 +2954,24 @@
     "/v1/desk/requests/{requestId}/protocol-note": {
       "post": {
         "operationId": "ProtocolDeskOperatorController_generateProtocolNote",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "requestId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "origin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "201": {
             "description": ""
@@ -2145,7 +3008,24 @@
     "/v1/desk/requests/{requestId}/protocol-note/configuration": {
       "post": {
         "operationId": "ProtocolDeskOperatorController_configureProtocolNote",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "requestId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "origin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "201": {
             "description": ""
@@ -2182,7 +3062,24 @@
     "/v1/desk/requests/{requestId}/transitions": {
       "post": {
         "operationId": "ProtocolDeskOperatorController_transition",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "requestId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "origin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "201": {
             "description": ""
@@ -2357,7 +3254,16 @@
     "/v1/internal/revalidation/claims/{idempotencyKey}": {
       "post": {
         "operationId": "RevalidationClaimController_claim",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idempotencyKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "201": {
             "description": "Atomically claims a revalidation idempotency key."
@@ -2424,7 +3330,16 @@
       },
       "post": {
         "operationId": "MediaController_completeUpload",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "origin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "201": {
             "description": "Cloudinary asset independently verified and registered with governance metadata."
@@ -2461,7 +3376,24 @@
     "/v1/media/assets/{assetId}": {
       "delete": {
         "operationId": "MediaController_deleteAsset",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assetId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "origin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "204": {
             "description": "Cloudinary asset invalidated and registry record retired."
@@ -2496,7 +3428,24 @@
       },
       "patch": {
         "operationId": "MediaController_updateAsset",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assetId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "origin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Governed alt text, rights, source and non-destructive focal-point metadata updated."
@@ -2570,7 +3519,16 @@
     "/v1/media/uploads/sign": {
       "post": {
         "operationId": "MediaController_signUpload",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "origin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Short-lived signed Cloudinary upload parameters without the API secret."
@@ -2672,6 +3630,16 @@
       "post": {
         "operationId": "ContactEnquiryController_create",
         "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContactEnquiryDto"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "202": {
             "description": "General contact enquiry accepted for durable delivery."
@@ -2703,7 +3671,24 @@
     "/v1/public/content/{documentType}/{documentId}": {
       "get": {
         "operationId": "PublicContentController_getPublished",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "documentType",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "A published, locale-specific content projection. Drafts are never returned."
@@ -2736,6 +3721,16 @@
       "post": {
         "operationId": "LivingDossierController_generate",
         "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateLivingDossierDto"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "201": {
             "description": "A personalised, watermarked PDF assembled from current published CMS records."
@@ -2768,6 +3763,16 @@
       "post": {
         "operationId": "MediaEnquiryController_create",
         "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MediaEnquiryDto"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "202": {
             "description": "Media enquiry accepted for durable delivery to the designated press contact."
@@ -2799,7 +3804,16 @@
     "/v1/public/media/{assetId}": {
       "get": {
         "operationId": "PublicMediaController_asset",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assetId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Delivery-safe metadata for an active governed media asset."
@@ -2832,6 +3846,16 @@
       "post": {
         "operationId": "PressKitController_generate",
         "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GeneratePressKitDto"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "201": {
             "description": "A personalised PDF or ZIP generated from the live published identity registry."
@@ -3012,6 +4036,38 @@
         ]
       }
     },
+    "/v1/public/signals": {
+      "get": {
+        "operationId": "PublicSignalsController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "At most 50 published Signal projections."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "public-content"
+        ]
+      }
+    },
     "/v1/public/signals/latest": {
       "get": {
         "operationId": "PublicSignalsController_latest",
@@ -3047,7 +4103,24 @@
     "/v1/public/sources": {
       "get": {
         "operationId": "PublicSourcesController_list",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Published Source Register entries without confidential editorial notes."

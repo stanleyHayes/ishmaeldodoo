@@ -2662,3 +2662,65 @@ button {
   letter-spacing: 0.08em;
   word-break: break-all;
 }
+
+.signal-board {
+  border-top: 1px solid var(--line);
+  margin-top: 3rem;
+  padding-top: 2rem;
+}
+
+.signal-list {
+  display: grid;
+  gap: 1.25rem;
+  list-style: none;
+  margin: 2rem 0 0;
+  padding: 0;
+}
+
+.signal-card {
+  border: 1px solid var(--line);
+  padding: clamp(1.25rem, 3vw, 2rem);
+  scroll-margin-top: 2rem;
+}
+
+.signal-card header {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: space-between;
+}
+
+.signal-date,
+.signal-review {
+  color: var(--ink-muted);
+  font-family: var(--font-data);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.signal-confidence {
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-family: var(--font-data);
+  font-size: 0.75rem;
+  padding: 0.3rem 0.65rem;
+}
+
+.signal-expecting,
+.signal-callingIt {
+  color: var(--accent-deep);
+}
+
+.signal-condition,
+.signal-resolution {
+  background: var(--paper-muted);
+  margin-top: 1.25rem;
+  padding: 1rem;
+}
+
+.signal-condition p,
+.signal-resolution p {
+  margin-bottom: 0;
+}

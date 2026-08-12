@@ -1115,4 +1115,56 @@ export class CmsRepository {
       .toArray();
     return rows[0] ?? null;
   }
+
+  async listPublicSignals(
+    locale: "en-GB" | "fr-FR",
+  ): Promise<readonly PublishedSignalPayload[]> {
+    return this.database()
+      .collection<Publication>("publications")
+      .aggregate<PublishedSignalPayload>([
+        { $match: { documentType: "signal", locale } },
+        {
+          $lookup: {
+            from: "content_versions",
+            let: { documentId: "$documentId", version: "$version" },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ["$documentType", "signal"] },
+                      { $eq: ["$documentId", "$$documentId"] },
+                      { $eq: ["$version", "$$version"] },
+                      { $eq: ["$state", "published"] },
+                    ],
+                  },
+                },
+              },
+              { $project: { _id: 0, payload: 1 } },
+            ],
+            as: "versionDocument",
+          },
+        },
+        { $unwind: "$versionDocument" },
+        {
+          $match: { "versionDocument.payload.sourceRefs.0": { $exists: true } },
+        },
+        {
+          $sort: {
+            "versionDocument.payload.publishedAt": -1,
+            documentId: 1,
+          },
+        },
+        { $limit: 50 },
+        {
+          $project: {
+            _id: 0,
+            documentId: 1,
+            publishedAt: 1,
+            payload: "$versionDocument.payload",
+          },
+        },
+      ])
+      .toArray();
+  }
 }

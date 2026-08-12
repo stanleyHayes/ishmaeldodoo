@@ -8,7 +8,7 @@ import { PublicSignalsController } from "./public-signals.controller";
 
 describe("PublicSignalsController", () => {
   let app: INestApplication;
-  const cms = { latestPublicSignal: vi.fn() };
+  const cms = { latestPublicSignal: vi.fn(), listPublicSignals: vi.fn() };
 
   beforeEach(async () => {
     vi.resetAllMocks();
@@ -38,6 +38,27 @@ describe("PublicSignalsController", () => {
       body: "Current signal",
     });
     expect(cms.latestPublicSignal).toHaveBeenCalledWith("fr-FR");
+  });
+
+  it("returns the bounded published Signal Board projection", async () => {
+    cms.listPublicSignals.mockResolvedValue({
+      items: [{ documentId: "signal-1", slug: "signal-1" }],
+      translation: { stale: false },
+    });
+    const response = await request(app.getHttpServer())
+      .get("/v1/public/signals?locale=en-GB")
+      .expect(200);
+    expect(response.headers["cache-control"]).toContain("s-maxage=60");
+    const body = response.body as { items?: unknown };
+    expect(body.items).toEqual([{ documentId: "signal-1", slug: "signal-1" }]);
+    expect(cms.listPublicSignals).toHaveBeenCalledWith("en-GB");
+  });
+
+  it("rejects an invalid Signal Board locale", async () => {
+    await request(app.getHttpServer())
+      .get("/v1/public/signals?locale=de-DE")
+      .expect(404);
+    expect(cms.listPublicSignals).not.toHaveBeenCalled();
   });
 
   it("collapses invalid locale and no-publication states to 404", async () => {

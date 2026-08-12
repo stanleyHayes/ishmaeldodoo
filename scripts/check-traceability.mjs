@@ -169,6 +169,41 @@ validateF12(rows.get("F12").line);
 validateRecordPrintEvidence();
 validateP01SignalEvidence(rows.get("P01").line);
 
+function validateSignalBoard(id) {
+  const columns = columnsFor(rows.get(id).line);
+  if (columns[1] !== "PARTIAL")
+    throw new Error(
+      `${id} must remain PARTIAL until its external approvals exist`,
+    );
+  for (const requirement of [
+    "Signal Board",
+    "confidence",
+    "change-my-mind",
+    "watching",
+  ])
+    if (!columns[2].includes(requirement))
+      throw new Error(`${id} traceability is missing ${requirement}`);
+  for (const evidence of [
+    "apps/api/src/modules/content/application/cms.service.test.ts",
+    "apps/api/src/platform/mongo/mongo.integration.test.ts",
+    "apps/web/src/components/content/signal-board.test.tsx",
+  ])
+    if (!columns[3].includes(`\`${evidence}\``))
+      throw new Error(
+        `${id} traceability is missing direct evidence: ${evidence}`,
+      );
+  if (
+    !columns[4].includes("D02") ||
+    !columns[4].includes("approved production Signals")
+  )
+    throw new Error(
+      `${id} traceability is missing its external acceptance gates`,
+    );
+}
+
+validateSignalBoard("P06");
+validateSignalBoard("F06");
+
 const operationCount = Object.values(openApi.paths ?? {}).reduce(
   (count, item) =>
     count +

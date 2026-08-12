@@ -66,6 +66,7 @@ export interface ApiOperations {
   readonly "PublicContentController_getPublished": { readonly method: "GET"; readonly path: "/v1/public/content/{documentType}/{documentId}"; readonly successStatus: 200 };
   readonly "PublicMediaController_asset": { readonly method: "GET"; readonly path: "/v1/public/media/{assetId}"; readonly successStatus: 200 };
   readonly "PublicSignalsController_latest": { readonly method: "GET"; readonly path: "/v1/public/signals/latest"; readonly successStatus: 200 };
+  readonly "PublicSignalsController_list": { readonly method: "GET"; readonly path: "/v1/public/signals"; readonly successStatus: 200 };
   readonly "PublicSourcesController_list": { readonly method: "GET"; readonly path: "/v1/public/sources"; readonly successStatus: 200 };
   readonly "PublicSpeakingController_list": { readonly method: "GET"; readonly path: "/v1/public/speaking"; readonly successStatus: 200 };
   readonly "RevalidationClaimController_claim": { readonly method: "POST"; readonly path: "/v1/internal/revalidation/claims/{idempotencyKey}"; readonly successStatus: 201 };

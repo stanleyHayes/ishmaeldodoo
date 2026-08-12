@@ -1075,6 +1075,14 @@ export const publicSignalSchema = z.object({
   }),
 });
 export type PublicSignal = z.infer<typeof publicSignalSchema>;
+export const publicSignalsSchema = z.object({
+  items: z.array(publicSignalSchema.omit({ translation: true })).max(50),
+  translation: z.object({
+    stale: z.boolean(),
+    sourceUpdatedAt: z.coerce.date().optional(),
+  }),
+});
+export type PublicSignals = z.infer<typeof publicSignalsSchema>;
 
 export const protocolDeskStates = [
   "received",

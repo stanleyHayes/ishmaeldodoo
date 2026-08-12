@@ -19,6 +19,21 @@ import { localeSchema } from "../domain/types";
 export class PublicSignalsController {
   constructor(@Inject(CmsService) private readonly cms: CmsService) {}
 
+  @Get()
+  @ApiOkResponse({ description: "At most 50 published Signal projections." })
+  async list(
+    @Query("locale") rawLocale = "en-GB",
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<Awaited<ReturnType<CmsService["listPublicSignals"]>>> {
+    const locale = localeSchema.safeParse(rawLocale);
+    if (!locale.success) throw new NotFoundException("Signals were not found");
+    response.setHeader(
+      "Cache-Control",
+      "public, max-age=0, s-maxage=60, stale-while-revalidate=300",
+    );
+    return this.cms.listPublicSignals(locale.data);
+  }
+
   @Get("latest")
   @ApiOkResponse({
     description: "The most recently dated published Signal projection.",

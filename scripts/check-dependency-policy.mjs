@@ -4,6 +4,8 @@ import { readFile } from "node:fs/promises";
 import { parse } from "yaml";
 
 const dependabot = parse(await readFile(".github/dependabot.yml", "utf8"));
+const pnpmWorkspace = parse(await readFile("pnpm-workspace.yaml", "utf8"));
+const pnpmLock = parse(await readFile("pnpm-lock.yaml", "utf8"));
 assert.equal(dependabot.version, 2, "Dependabot must use schema version 2");
 
 const updates = Array.isArray(dependabot.updates) ? dependabot.updates : [];
@@ -39,6 +41,42 @@ assert.deepEqual(
   "Dependabot major holds must match the reviewed incompatible toolchain",
 );
 
+assert.deepEqual(
+  pnpmWorkspace.packages,
+  ["apps/*", "packages/*"],
+  "pnpm must cover the same workspace boundaries as npm",
+);
+assert.equal(
+  pnpmWorkspace.linkWorkspacePackages,
+  true,
+  "pnpm must resolve @amanor packages from the workspace",
+);
+const requiredSecurityOverrides = {
+  "js-yaml": "5.2.3",
+  tmp: "0.2.7",
+  uuid: "11.1.1",
+};
+assert.deepEqual(
+  pnpmWorkspace.overrides,
+  requiredSecurityOverrides,
+  "pnpm security overrides must match the reviewed patched graph",
+);
+assert.deepEqual(
+  pnpmLock.overrides,
+  requiredSecurityOverrides,
+  "pnpm lockfile lost the reviewed security overrides",
+);
+for (const vulnerable of [
+  "tmp@0.0.33",
+  "tmp@0.1.0",
+  "uuid@8.3.2",
+  "js-yaml@5.2.1",
+])
+  assert.ok(
+    !Object.hasOwn(pnpmLock.packages ?? {}, vulnerable),
+    `pnpm lockfile retains vulnerable package ${vulnerable}`,
+  );
+
 const policy = await readFile("docs/quality/dependency-currency.md", "utf8");
 for (const evidence of [
   /\|\s*ESLint\s*\|\s*9\.39\.5\s*\|\s*10\.8\.1\s*\|/u,
@@ -64,5 +102,5 @@ assert.equal(
 );
 
 process.stdout.write(
-  "Dependency policy preserves weekly update discovery and a peer-valid ESLint/TypeScript graph.\n",
+  "Dependency policy preserves weekly update discovery, synchronized npm/pnpm security overrides and a peer-valid ESLint/TypeScript graph.\n",
 );

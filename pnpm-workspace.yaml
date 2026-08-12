@@ -1,0 +1,10 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+linkWorkspacePackages: true
+
+overrides:
+  js-yaml: 5.2.3
+  tmp: 0.2.7
+  uuid: 11.1.1

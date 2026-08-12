@@ -11,7 +11,10 @@ import { ApiAcceptedResponse, ApiTags } from "@nestjs/swagger";
 import { ZodError } from "zod";
 import { principalDecisionInputSchema } from "@amanor/contracts";
 import { ProtocolDeskService } from "../application/protocol-desk.service";
-import { ProtocolDeskRateLimitGuard } from "./protocol-desk-rate-limit.guard";
+import {
+  ProtocolDeskDecisionRateLimitGuard,
+  ProtocolDeskRateLimitGuard,
+} from "./protocol-desk-rate-limit.guard";
 
 @ApiTags("protocol-desk")
 @Controller("public/protocol-desk/requests")
@@ -45,6 +48,7 @@ export class ProtocolDeskController {
   @HttpCode(200)
   @Header("Cache-Control", "no-store")
   @Header("Referrer-Policy", "no-referrer")
+  @UseGuards(ProtocolDeskDecisionRateLimitGuard)
   async decide(
     @Body() raw: unknown,
   ): Promise<Readonly<{ reference: string; state: string }>> {

@@ -59,9 +59,21 @@ const pages = {
 
 describe("LivingDossierService", () => {
   it.each([
-    ["speaker", "Speaking content", "Delivered result"],
-    ["institutional", "Delivered result", "Speaking content"],
-    ["full", "Verified narrative", "Delivered result"],
+    [
+      "speaker",
+      ["Speaking content"],
+      ["Verified narrative", "Delivered result"],
+    ],
+    [
+      "institutional",
+      ["Delivered result"],
+      ["Verified narrative", "Speaking content"],
+    ],
+    [
+      "full",
+      ["Verified narrative", "Speaking content", "Delivered result"],
+      [],
+    ],
   ] as const)(
     "assembles and logs the %s live-CMS variant",
     async (variant, included, excluded) => {
@@ -71,12 +83,13 @@ describe("LivingDossierService", () => {
         if (type === "identity") return { payload: identity };
         return { payload: pages[id as keyof typeof pages] };
       });
+      const listPublicAtlas = vi
+        .fn()
+        .mockResolvedValue({ items: atlas, translation: { stale: false } });
       const service = new LivingDossierService(
         {
           publicProjection,
-          listPublicAtlas: vi
-            .fn()
-            .mockResolvedValue({ items: atlas, translation: { stale: false } }),
+          listPublicAtlas,
         } as never,
         { render },
         { recordDossier } as never,
@@ -97,8 +110,8 @@ describe("LivingDossierService", () => {
       const html = String(render.mock.calls[0]![0]);
       expect(html).toContain("@page{size:A4");
       expect(html).toContain("&lt;Partner &amp; Co&gt;");
-      expect(html).toContain(included);
-      if (variant !== "full") expect(html).not.toContain(excluded);
+      for (const expected of included) expect(html).toContain(expected);
+      for (const unexpected of excluded) expect(html).not.toContain(unexpected);
       expect(recordDossier).toHaveBeenCalledWith(
         expect.objectContaining({
           organisation: "<Partner & Co>",
@@ -109,6 +122,39 @@ describe("LivingDossierService", () => {
       );
       expect(html).toContain('class="watermark"');
       expect(html).toMatch(/[0-9a-f-]{36}/);
+      expect(listPublicAtlas).toHaveBeenCalledTimes(
+        variant === "speaker" ? 0 : 1,
+      );
     },
   );
+
+  it("fails closed when the Full Record cannot include every required live projection", async () => {
+    const render = vi.fn();
+    const service = new LivingDossierService(
+      {
+        publicProjection: vi.fn((type: string, id: string) => {
+          if (type === "identity") return { payload: identity };
+          if (id === "record") return { payload: pages.record };
+          return null;
+        }),
+        listPublicAtlas: vi
+          .fn()
+          .mockResolvedValue({ items: atlas, translation: { stale: false } }),
+      } as never,
+      { render },
+      { recordDossier: vi.fn() } as never,
+    );
+
+    await expect(
+      service.generate({
+        requesterName: "Requester",
+        organisation: "Partner",
+        email: "person@example.test",
+        purpose: "Complete institutional briefing",
+        variant: "full",
+        locale: "en-GB",
+      }),
+    ).rejects.toThrow("The approved living dossier is not available");
+    expect(render).not.toHaveBeenCalled();
+  });
 });

@@ -78,7 +78,9 @@ export class LivingDossierService {
       speakingProjection,
     ] = await Promise.all([
       this.cms.publicProjection("identity", "canonical", input.locale),
-      this.cms.listPublicAtlas(input.locale),
+      input.variant === "speaker"
+        ? Promise.resolve({ items: [] })
+        : this.cms.listPublicAtlas(input.locale),
       input.variant === "full"
         ? this.cms.publicProjection("page", "record", input.locale)
         : Promise.resolve(null),
@@ -88,12 +90,17 @@ export class LivingDossierService {
     ]);
     const identity = identitySchema.safeParse(identityProjection?.payload);
     const atlas = atlasSchema.safeParse(atlasProjection.items);
-    if (!identity.success || !atlas.success)
+    const record = pageSchema.safeParse(recordProjection?.payload);
+    const speaking = pageSchema.safeParse(speakingProjection?.payload);
+    if (
+      !identity.success ||
+      !atlas.success ||
+      (input.variant === "speaker" && !speaking.success) ||
+      (input.variant === "full" && (!record.success || !speaking.success))
+    )
       throw new NotFoundException(
         "The approved living dossier is not available",
       );
-    const record = pageSchema.safeParse(recordProjection?.payload);
-    const speaking = pageSchema.safeParse(speakingProjection?.payload);
     const html = livingDossierHtml({
       input,
       identity: identity.data,
@@ -170,12 +177,20 @@ export function livingDossierHtml(data: HtmlInput): string {
         `<tr><td>${item.startDate.getUTCFullYear()}-${item.endDate?.getUTCFullYear() ?? (fr ? "présent" : "present")}</td><td><strong>${escapeHtml(item.role)}</strong><br>${escapeHtml(item.institution)} · ${escapeHtml(item.country)}</td><td>${item.outcomes.map(escapeHtml).join(" ")}${item.portfolioValue !== undefined ? `<br>${escapeHtml(item.currency ?? "")} ${escapeHtml(item.portfolioValue.toLocaleString(data.input.locale))}${item.valueYear ? ` (${item.valueYear})` : ""}` : ""}<br><span class="sources">${item.sourceRefs.map(escapeHtml).join(", ")}</span></td></tr>`,
     )
     .join("");
+  const speakingSection = section(
+    fr ? "Interventions" : "Speaking",
+    pageSections(data.speaking),
+  );
+  const recordSection = section(
+    fr ? "Le parcours" : "The Record",
+    pageSections(data.record),
+  );
   const narrative =
     data.input.variant === "speaker"
-      ? section(fr ? "Interventions" : "Speaking", pageSections(data.speaking))
+      ? speakingSection
       : data.input.variant === "institutional"
         ? ""
-        : section(fr ? "Le parcours" : "The Record", pageSections(data.record));
+        : `${recordSection}${speakingSection}`;
   const atlasSection =
     data.input.variant === "speaker"
       ? ""

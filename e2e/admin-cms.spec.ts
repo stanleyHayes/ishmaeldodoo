@@ -342,6 +342,69 @@ test("authenticates with the live NestJS password and TOTP session boundary", as
   ).toBeUndefined();
 });
 
+test("keeps the bilingual CMS editors responsive and exposes translation parity", async ({
+  page,
+  browserName,
+}) => {
+  await page.goto("https://localhost:3211/");
+  await completeLiveLogin(page, e2eRoleEmail("principal", browserName));
+  await page.getByRole("button", { name: /Content/ }).click();
+
+  await page.getByLabel("Content type").selectOption("page");
+  await page.getByLabel("Document ID").fill(`takedown-${browserName}`);
+  await page.getByRole("button", { name: "Open document" }).click();
+  await page.getByRole("button", { name: /Version 1/ }).click();
+
+  for (const width of [360, 768, 1024, 1440]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await expect(
+      page.locator('[aria-label="French translation parity"]'),
+    ).toBeVisible();
+    await expect(page.getByLabel("Page title, English")).toBeVisible();
+    await expect(page.getByLabel("Page title, French")).toBeVisible();
+    expect(
+      await page.evaluate(
+        "document.documentElement.scrollWidth <= document.documentElement.clientWidth",
+      ),
+    ).toBe(true);
+  }
+
+  const englishTitle = page.getByLabel("Page title, English");
+  const frenchTitle = page.getByLabel("Page title, French");
+  const titleStatus = page.getByLabel("Page title translation status");
+  await expect(titleStatus).toHaveValue("current");
+  await englishTitle.fill("Updated takedown rehearsal");
+  await expect(titleStatus).toHaveValue("stale");
+  await frenchTitle.fill("");
+  await expect(titleStatus).toHaveValue("missing");
+  await frenchTitle.fill("Répétition de retrait actualisée");
+  await expect(titleStatus).toHaveValue("current");
+
+  await page.getByLabel("Content type").selectOption("signal");
+  await page.getByLabel("Document ID").fill(`policy-signal-${browserName}`);
+  await page.getByRole("button", { name: "Open document" }).click();
+  await page.getByRole("button", { name: /Version 1/ }).click();
+  await page.setViewportSize({ width: 360, height: 1000 });
+
+  const englishBody = page.getByLabel("Signal, English");
+  const frenchBody = page.getByLabel("Signal, French");
+  const bodyStatus = page.getByLabel("Signal translation status");
+  await expect(englishBody).toBeVisible();
+  await expect(frenchBody).toBeVisible();
+  await expect(bodyStatus).toHaveValue("current");
+  await englishBody.fill("A revised policy signal for browser acceptance.");
+  await expect(bodyStatus).toHaveValue("stale");
+  await frenchBody.fill("");
+  await expect(bodyStatus).toHaveValue("missing");
+  await frenchBody.fill("Un signal politique révisé pour la validation.");
+  await expect(bodyStatus).toHaveValue("current");
+  expect(
+    await page.evaluate(
+      "document.documentElement.scrollWidth <= document.documentElement.clientWidth",
+    ),
+  ).toBe(true);
+});
+
 test("operates a screened Protocol Desk request through review, decision and archival", async ({
   page,
   browserName,

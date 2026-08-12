@@ -1401,7 +1401,7 @@ button:disabled {
   overflow-wrap: anywhere;
 }
 
-@media (max-width: 60rem) {
+@media (max-width: 75rem) {
   .login-panel {
     grid-template-columns: 1fr;
   }

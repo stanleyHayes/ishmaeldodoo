@@ -191,6 +191,28 @@ function validatePressBrowserEvidence() {
 
 validatePressBrowserEvidence();
 
+function validateBilingualEditorBrowserEvidence() {
+  const row = plan
+    .split("\n")
+    .find((line) => line.startsWith("| AMANOR-043 |"));
+  if (!row) throw new Error("Missing AMANOR-043 primary ledger row");
+  const normalizedRow = row.toLowerCase();
+  for (const requirement of [
+    "all three desktop engines",
+    "360/768/1024/1440",
+    "page and schema-driven editors",
+    "`current`/`stale`/`missing`",
+  ])
+    if (!normalizedRow.includes(requirement.toLowerCase()))
+      throw new Error(`AMANOR-043 is missing browser evidence: ${requirement}`);
+  if (row.includes("responsive live-browser review remains"))
+    throw new Error(
+      "AMANOR-043 still records completed responsive browser scope as outstanding",
+    );
+}
+
+validateBilingualEditorBrowserEvidence();
+
 function validateSignalBoard(id) {
   const columns = columnsFor(rows.get(id).line);
   if (columns[1] !== "PARTIAL")

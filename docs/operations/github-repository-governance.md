@@ -13,6 +13,12 @@
 - GitHub deployment namespaces: `preview`, `staging`, `production`
 - Staging/production branch policy: `Protected branches only`
 - Preview branch policy: `Any branch for pull-request previews`
+- Actions allowed policy: `Selected actions only`
+- Actions SHA-pinning policy: `Required`
+- Default workflow token: `Read-only; cannot approve pull requests`
+- GitHub-owned actions: `Allowed`
+- All verified Marketplace actions: `Denied`
+- Reviewed third-party actions: `gitleaks/gitleaks-action`, `dorny/paths-filter`, `anchore/sbom-action`, `anchore/scan-action`
 
 The active repository ruleset targets only `refs/heads/main`, has no bypass
 actors and blocks branch deletion plus non-fast-forward updates. Authorized
@@ -31,6 +37,16 @@ revisions can be represented. These namespaces contain no secrets, variables,
 reviewers or deployments and no workflow currently targets them. They are
 trust-boundary preparation, not evidence that Render, Vercel, MongoDB,
 Cloudinary or any other provider environment is provisioned.
+
+GitHub Actions is repository-restricted to GitHub-owned actions plus the four
+named third-party action families used by the reviewed workflows. All actions,
+including GitHub-owned actions, must resolve by full commit SHA. The default
+`GITHUB_TOKEN` is read-only and cannot approve pull-request reviews; individual
+SARIF jobs receive only their explicit `security-events: write` permission.
+Adding an action requires a reviewed immutable SHA, an allowlist change and an
+updated verifier in the same change. Recovery from a broken action pin uses a
+reviewed replacement SHA or removal of that step—never `allowed_actions: all`,
+disabling SHA enforcement or granting repository-wide write permission.
 
 ## Deployment-environment integration record
 

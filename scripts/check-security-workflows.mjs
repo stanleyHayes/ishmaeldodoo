@@ -130,6 +130,20 @@ for (const evidence of [
   );
 
 for (const evidence of [
+  "Actions allowed policy: `Selected actions only`",
+  "Actions SHA-pinning policy: `Required`",
+  "Default workflow token: `Read-only; cannot approve pull requests`",
+  "GitHub-owned actions: `Allowed`",
+  "All verified Marketplace actions: `Denied`",
+  "Reviewed third-party actions: `gitleaks/gitleaks-action`, `dorny/paths-filter`, `anchore/sbom-action`, `anchore/scan-action`",
+  "never `allowed_actions: all`",
+])
+  assert.ok(
+    governance.includes(evidence),
+    `Repository governance lost Actions permission evidence: ${evidence}`,
+  );
+
+for (const evidence of [
   "GitHub deployment namespaces: `preview`, `staging`, `production`",
   "Staging/production branch policy: `Protected branches only`",
   "Preview branch policy: `Any branch for pull-request previews`",

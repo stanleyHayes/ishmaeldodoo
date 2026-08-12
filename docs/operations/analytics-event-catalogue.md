@@ -16,3 +16,6 @@ Analytics is optional and disabled until a visitor explicitly grants consent thr
 The contract rejects unknown fields and query strings. It never accepts names, email, telephone, free text, organisation, request/reference IDs, Atlas record IDs, IP address, user agent, referrer, JWT/session identifiers or raw content. The Next.js server constructs the provider payload, forwards no browser headers/cookies and suppresses provider failures so telemetry cannot block a user journey.
 
 Before production, privacy/legal reviewers must approve the catalogue, consent wording, six-month choice lifetime, provider configuration, retention, data location and deletion/access process. Event QA must prove opt-out/no-choice silence, exact counts after opt-in, no sensitive provider payloads and dashboard aggregation thresholds.
+
+Capture that provider-bound proof in the
+[deployed analytics acceptance record](templates/deployed-analytics-acceptance-record.md).

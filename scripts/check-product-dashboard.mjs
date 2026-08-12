@@ -13,6 +13,14 @@ const runbook = await readFile(
   "docs/operations/product-measurement-dashboard.md",
   "utf8",
 );
+const catalogueGuide = await readFile(
+  "docs/operations/analytics-event-catalogue.md",
+  "utf8",
+);
+const deployedAcceptance = await readFile(
+  "docs/operations/templates/deployed-analytics-acceptance-record.md",
+  "utf8",
+);
 const framework = JSON.parse(
   await readFile("infra/analytics/outcome-framework.json", "utf8"),
 );
@@ -63,6 +71,69 @@ const requiredOutcomes = new Set([
   "office_hours",
   "sahel_mode",
 ]);
+
+const pendingDeployedAcceptanceSentinels = [
+  "- Status: `Not run`",
+  "- S04 decision and approval evidence: `Not approved`",
+  "- Environment, release and immutable source revision: `Not recorded`",
+  "- Public Web origin and deployment revision: `Not recorded`",
+  "- Analytics provider, hosting region and processor record: `Not selected`",
+  "- Provider site/resource and dashboard revision identifiers: `Not recorded`",
+  "- Event catalogue, consent-copy and dashboard-manifest revisions: `Not recorded`",
+  "- Exercise window, timezone, operators and independent observer: `Not scheduled`",
+  "- Production-like differences and accepted limitations: `Not assessed`",
+  "- English and French consent wording/version approved: `Not approved`",
+  "- Six-month consent-choice lifetime and withdrawal behavior: `Not approved`",
+  "- No-choice and refusal produce zero provider events: `Not run`",
+  "- Consent grant enables collection only after the recorded choice: `Not run`",
+  "- Consent withdrawal stops subsequent provider events: `Not run`",
+  "- All eight exact event names ingested at expected counts: `Not run`",
+  "- Route, locale, audience and mode dimensions match the catalogue: `Not run`",
+  "- Unknown event, query route and extra-property rejection: `Not run`",
+  "- Identity, contact, request, record and content-field rejection: `Not run`",
+  "- Browser headers, cookies, IP, user agent and referrer non-disclosure: `Not run`",
+  "- Provider timeout/outage preserves the user journey and bounded response: `Not run`",
+  "- Duplicate, delayed and replayed event behavior reconciled: `Not run`",
+  "- Nine-event group suppressed and tenth-event aggregate released: `Not run`",
+  "- Raw-event and visitor export disabled with access-denial proof: `Not run`",
+  "- Eight dashboard panel IDs and saved-query parity: `Not run`",
+  "- Desk zero denominator, Sahel share and bilingual grouping QA: `Not run`",
+  "- Desk SLA aggregate datasource joined without request data: `Not run`",
+  "- Africa/Accra timezone and 30-day default window: `Not run`",
+  "- Desktop and narrow 24-hour/30-day/empty/suppressed screenshots: `Not recorded`",
+  "- Read-only Product/Content/Operations role access verified: `Not run`",
+  "- Provider retention, deletion/access process and data location: `Not approved`",
+  "- Synthetic events and temporary access removed after exercise: `Not run`",
+  "- Baseline annotation and first monthly quality-review owner/date: `Not recorded`",
+  "- Defects, severity, owners, target dates and retest evidence: `None recorded`",
+  "- Privacy/Legal approval and date: `Not approved`",
+  "- Product approval and date: `Not approved`",
+  "- Engineering approval and date: `Not approved`",
+];
+
+function validatePendingDeployedAcceptance(candidate) {
+  for (const sentinel of pendingDeployedAcceptanceSentinels)
+    assert.ok(
+      candidate.includes(sentinel),
+      `Deployed analytics record no longer proves its pending state: ${sentinel}`,
+    );
+}
+
+validatePendingDeployedAcceptance(deployedAcceptance);
+for (const sentinel of pendingDeployedAcceptanceSentinels)
+  assert.throws(
+    () =>
+      validatePendingDeployedAcceptance(
+        deployedAcceptance.replace(sentinel, "[prematurely changed]"),
+      ),
+    undefined,
+    `Deployed analytics record accepted mutation of required sentinel: ${sentinel}`,
+  );
+for (const guide of [runbook, catalogueGuide])
+  assert.ok(
+    guide.includes("templates/deployed-analytics-acceptance-record.md"),
+    "Analytics guidance must link the controlled deployed-acceptance record",
+  );
 
 if (manifest.schemaVersion !== 1 || manifest.privacy?.minimumGroupSize < 10)
   throw new Error("Dashboard privacy schema or threshold is invalid");
@@ -367,5 +438,5 @@ for (const [name, template] of Object.entries(templates)) {
 }
 
 process.stdout.write(
-  `Product dashboard covers ${manifest.panels.length} outcomes using ${allowedEvents.size} approved events with group suppression at ${manifest.privacy.minimumGroupSize}; cadence preserves ${requiredOutcomeIds.length} month-six targets and rejects ${measurementMutationCount} premature measurement-state mutations.\n`,
+  `Product dashboard covers ${manifest.panels.length} outcomes using ${allowedEvents.size} approved events with group suppression at ${manifest.privacy.minimumGroupSize}; cadence preserves ${requiredOutcomeIds.length} month-six targets and rejects ${measurementMutationCount} measurement plus ${pendingDeployedAcceptanceSentinels.length} deployed-acceptance state mutations.\n`,
 );

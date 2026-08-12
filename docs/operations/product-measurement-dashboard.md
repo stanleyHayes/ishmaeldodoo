@@ -40,3 +40,10 @@ Monthly, compare expected product releases and synthetic canaries to event volum
 The first six-month outcome report may use only aggregate, quality-reviewed results. Reach means consent-qualified page views, not unique people or the whole audience. Office Hours readership is not participation, and Desk completion is not acceptance. Those distinctions must remain visible in reports.
 
 Before provider deployment, `npm run check:analytics` runs non-personal synthetic events through the provider-neutral panel semantics. It verifies route filters, locale/mode grouping, exact counts, Desk completion arithmetic, Sahel share arithmetic, and suppression at nine events followed by release at ten. This local gate does not replace the staging provider-ingestion and screenshot evidence above.
+
+Record the S04 outcome, exact deployed release/provider/dashboard revisions,
+consent and ingestion QA, privacy settings, screenshots, cleanup, defects and
+approvals in the controlled
+[deployed analytics acceptance record](templates/deployed-analytics-acceptance-record.md).
+Pending fields keep AMANOR-035/131 open; a successful local event or dashboard
+test is not provider acceptance.

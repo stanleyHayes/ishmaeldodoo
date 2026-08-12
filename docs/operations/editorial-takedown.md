@@ -28,3 +28,8 @@ Retain the incident decision, timestamps, public checks and exported audit envel
 ## Rehearsal gate
 
 Before launch, rehearse one bad-content takedown and one mistaken-takedown recovery in staging. Evidence must show separate Admin, API and public-web deployments; MFA and role checks; Mongo transaction results; outbox delivery; origin and edge invalidation; a valid exported chain; and elapsed time below 15 minutes. AMANOR-145 remains open until that signed rehearsal exists.
+
+Record both independently timed scenarios in the controlled
+[`editorial-takedown-rehearsal-record.md`](templates/editorial-takedown-rehearsal-record.md).
+The release-candidate record continues to hold Web/Admin/API code rollback
+evidence; neither record substitutes for the other.

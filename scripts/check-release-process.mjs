@@ -14,6 +14,15 @@ const record = await readFile(
   "docs/operations/templates/release-candidate-record.md",
   "utf8",
 );
+const editorialRunbook = await readFile(
+  "docs/operations/editorial-takedown.md",
+  "utf8",
+);
+const editorialRecord = await readFile(
+  "docs/operations/templates/editorial-takedown-rehearsal-record.md",
+  "utf8",
+);
+const handover = await readFile("docs/handover/README.md", "utf8");
 const rollbackPlan = JSON.parse(
   await readFile("infra/deployment/rollback-plan.example.json", "utf8"),
 );
@@ -97,6 +106,7 @@ const pendingReleaseSentinels = [
   "- Backup/recovery point: `Not run`",
   "- Remote smoke JSON: `Not run`",
   "- Timed rollback rehearsal JSON: `Not run`",
+  "- Editorial takedown/recovery rehearsal record: `Not run`",
   "- API dependent jobs paused/resumed: `Not run`",
   "- Provider state matched all three declared rollback targets: `Not run`",
   "- Preview/staging unauthorised access denied: `Not run`",
@@ -120,6 +130,64 @@ function validatePendingReleaseRecord(candidate) {
       `Release record no longer proves the pre-execution state: ${sentinel}`,
     );
 }
+
+const pendingEditorialSentinels = [
+  "- Status: `Not run`",
+  "- Environment, release and three deployment revisions: `Not recorded`",
+  "- Exercise window, incident reference and time source: `Not scheduled`",
+  "- Synthetic document type, document ID and affected locale: `Not recorded`",
+  "- Published bad-content version and correct restoration version: `Not recorded`",
+  "- Principal/Reviewer authorisation and operator MFA evidence: `Not recorded`",
+  "- Admin, API and public-web separation evidence: `Not recorded`",
+  "- Authorised decision/start timestamp: `Not recorded`",
+  "- Mongo publication-pointer transaction and `unpublished` event: `Not run`",
+  "- Takedown revalidation outbox queued/delivered and alert state: `Not run`",
+  "- Origin and CDN/edge unavailable timestamps: `Not recorded`",
+  "- Sitemap, feed, llms.txt, structured-data and public-API removal: `Not run`",
+  "- Valid exported audit-chain evidence: `Not recorded`",
+  "- Narrow emergency purge action/reason, if any: `None`",
+  "- Takedown end timestamp and elapsed result below 15 minutes: `Not run`",
+  "- Authorised recovery/start timestamp: `Not recorded`",
+  "- Exact immutable version restored without historical mutation: `Not run`",
+  "- Mongo publication-pointer transaction and `rolled_back` event: `Not run`",
+  "- Recovery revalidation outbox queued/delivered and alert state: `Not run`",
+  "- Origin and CDN/edge restored timestamps: `Not recorded`",
+  "- Sitemap, feed, llms.txt, structured-data and public-API restoration: `Not run`",
+  "- Valid exported audit chain includes takedown and recovery: `Not recorded`",
+  "- Recovery end timestamp and elapsed result below 15 minutes: `Not run`",
+  "- Unaffected locale/document and independent code releases unchanged: `Not run`",
+  "- Synthetic content and temporary-access cleanup: `Not run`",
+  "- Sensitive-content, personal-data and credential non-disclosure review: `Not run`",
+  "- Defects, owners, dates and successful retest evidence: `None recorded`",
+  "- Operations approval/date: `Not approved`",
+  "- Product approval/date: `Not approved`",
+  "- Security approval/date: `Not approved`",
+  "- Content approval/date: `Not approved`",
+];
+
+function validatePendingEditorialRecord(candidate) {
+  for (const sentinel of pendingEditorialSentinels)
+    assert.ok(
+      candidate.includes(sentinel),
+      `Editorial rehearsal no longer proves pending state: ${sentinel}`,
+    );
+}
+
+validatePendingEditorialRecord(editorialRecord);
+for (const sentinel of pendingEditorialSentinels)
+  assert.throws(() =>
+    validatePendingEditorialRecord(
+      editorialRecord.replace(sentinel, "[prematurely changed]"),
+    ),
+  );
+assert.ok(
+  editorialRunbook.includes("templates/editorial-takedown-rehearsal-record.md"),
+);
+assert.ok(
+  handover.includes(
+    "../operations/templates/editorial-takedown-rehearsal-record.md",
+  ),
+);
 
 validatePendingReleaseRecord(record);
 for (const sentinel of pendingReleaseSentinels) {
@@ -233,5 +301,5 @@ if (!resumedAfterFailure)
   );
 
 process.stdout.write(
-  `Release process preserves ${contract.deployables.length} deployables across ${Object.keys(contract.environments).length} isolated environments; ${pendingReleaseSentinels.length} pre-execution record mutations fail closed, smoke fixture passed ${Object.keys(smoke.checks).length} checks and rollback fixture passed ${rollback.results.length} independent paths.\n`,
+  `Release process preserves ${contract.deployables.length} deployables across ${Object.keys(contract.environments).length} isolated environments; ${pendingReleaseSentinels.length} release and ${pendingEditorialSentinels.length} editorial pending-state mutations fail closed, smoke fixture passed ${Object.keys(smoke.checks).length} checks and rollback fixture passed ${rollback.results.length} independent paths.\n`,
 );

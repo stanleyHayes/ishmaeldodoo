@@ -25,6 +25,7 @@
 
 - Remote smoke JSON: `Not run`
 - Timed rollback rehearsal JSON: `Not run`
+- Editorial takedown/recovery rehearsal record: `Not run`
 - API dependent jobs paused/resumed: `Not run`
 - Provider state matched all three declared rollback targets: `Not run`
 - Preview/staging unauthorised access denied: `Not run`

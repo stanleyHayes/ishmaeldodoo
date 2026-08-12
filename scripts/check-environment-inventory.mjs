@@ -128,6 +128,95 @@ const examples = {
   api: await readFile("apps/api/.env.example", "utf8"),
 };
 
+const custodyRecord = await readFile(
+  "docs/security/templates/provider-secret-custody-rotation-record.md",
+  "utf8",
+);
+const custodyGuide = await readFile(
+  "docs/operations/deployment-secret-inventory.md",
+  "utf8",
+);
+const rotationGuide = await readFile(
+  "docs/security/secret-rotation.md",
+  "utf8",
+);
+
+const pendingCustodySentinels = [
+  "- Status: `Not run`",
+  "- Environment, release and immutable source revision: `Not recorded`",
+  "- Render, Vercel and provider accounts/regions: `Not recorded`",
+  "- Exercise window, timezone, operators and independent observer: `Not scheduled`",
+  "- Named primary/secondary custodians and approval authorities: `Not assigned`",
+  "- Provider secret-manager resource and audit-export locations: `Not recorded`",
+  "- Break-glass owner, access method, expiry and revocation evidence: `Not recorded`",
+  "- Workload-identity availability and exception decisions: `Not assessed`",
+  "- Cross-environment resource/value isolation evidence: `Not run`",
+  "- Repository, build-log, image, artifact and frontend-bundle non-disclosure: `Not run`",
+  "- Admin/CMS receives no server secret: `Not run`",
+  "- JWT active/retiring key overlap and post-window removal: `Not run`",
+  "- Session-pepper overlap, legacy refresh and invitation drain: `Not run`",
+  "- MFA re-encryption aggregate report complete and safe to retire: `Not run`",
+  "- Service-HMAC and revalidation key-ring overlap: `Not run`",
+  "- MongoDB application/Room/job grant-denial proof after rotation: `Not run`",
+  "- Cloudinary runtime/retention credential separation and rotation: `Not run`",
+  "- Email, calendar and metrics dual-credential continuity: `Not run`",
+  "- Job credentials absent from long-running API and frontends: `Not run`",
+  "- Old versions disabled/revoked after validated drain: `Not run`",
+  "- Rollback restores service without resurrecting superseded access: `Not run`",
+  "- Alert, audit-log and incident-route evidence: `Not run`",
+  "- Temporary access removed and break-glass path resealed: `Not run`",
+  "- Defects, severity, owners, target dates and retest evidence: `None recorded`",
+  "- Security approval and date: `Not approved`",
+  "- Operations approval and date: `Not approved`",
+  "- Privacy approval and date: `Not approved`",
+  "- Product acceptance and date: `Not approved`",
+];
+
+function validatePendingCustodyRecord(candidate) {
+  for (const sentinel of pendingCustodySentinels)
+    assert.ok(
+      candidate.includes(sentinel),
+      `Provider custody record no longer proves its pending state: ${sentinel}`,
+    );
+  for (const className of Object.keys(inventory.classes)) {
+    const row = new RegExp(
+      `^\\| \\x60${className}\\x60\\s+\\| Not recorded\\s+\\| Not recorded\\s+\\| Not recorded\\s+\\| Not run\\s+\\| Not assessed \\|$`,
+      "mu",
+    );
+    assert.ok(
+      row.test(candidate),
+      `Provider custody record lost exact inventory row ${className}`,
+    );
+  }
+}
+
+validatePendingCustodyRecord(custodyRecord);
+for (const sentinel of pendingCustodySentinels) {
+  const mutated = custodyRecord.replace(sentinel, "[prematurely changed]");
+  assert.throws(
+    () => validatePendingCustodyRecord(mutated),
+    undefined,
+    `Provider custody record accepted mutation of required sentinel: ${sentinel}`,
+  );
+}
+for (const className of Object.keys(inventory.classes)) {
+  const row = new RegExp(
+    `^\\| \\x60${className}\\x60\\s+\\| Not recorded\\s+\\| Not recorded\\s+\\| Not recorded\\s+\\| Not run\\s+\\| Not assessed \\|$`,
+    "mu",
+  );
+  const mutated = custodyRecord.replace(row, "[missing inventory row]");
+  assert.throws(
+    () => validatePendingCustodyRecord(mutated),
+    undefined,
+    `Provider custody record accepted removal of inventory row ${className}`,
+  );
+}
+for (const document of [custodyGuide, rotationGuide])
+  assert.ok(
+    document.includes("provider-secret-custody-rotation-record.md"),
+    "Secret custody/rotation guidance must link the controlled record",
+  );
+
 validateInventory(contract, inventory, examples);
 
 const rejectedFixtures = [
@@ -199,5 +288,5 @@ for (const fixture of rejectedFixtures) {
 }
 
 process.stdout.write(
-  `Environment inventory assigns ${Object.keys(inventory.classes).length} secret classes across ${Object.keys(inventory.deployables).length} deployables with no Admin or browser-build secrets; ${rejectedFixtures.length} dangerous drift fixtures rejected.\n`,
+  `Environment inventory assigns ${Object.keys(inventory.classes).length} secret classes across ${Object.keys(inventory.deployables).length} deployables with no Admin or browser-build secrets; ${rejectedFixtures.length} dangerous drift fixtures, ${pendingCustodySentinels.length} pending-state mutations and ${Object.keys(inventory.classes).length} missing custody rows rejected.\n`,
 );

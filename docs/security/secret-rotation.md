@@ -42,3 +42,6 @@ Do not rotate by replacing the active key and its only verification key in one d
 Service HMAC key rings (`PUBLIC_WEB_SERVICE_KEYS` and `REVALIDATION_WEBHOOK_KEYS`) use active/retiring key IDs and should follow the same add, switch, drain and remove pattern. Database, Cloudinary, email and monitoring credentials require provider-side dual credentials, least-privilege validation, consumer rollout, old-credential revocation and a recorded rollback test.
 
 Production custody, named approvers, emergency access, provider audit evidence, an aggregate MFA-migration completion report and an observed rotation rehearsal remain deployment acceptance gates.
+
+Capture those gates without secret values in the controlled
+[provider secret custody and rotation record](templates/provider-secret-custody-rotation-record.md).

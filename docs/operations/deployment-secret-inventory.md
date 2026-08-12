@@ -22,6 +22,12 @@ For every inventory class, the platform owner records only the provider resource
 
 Production promotion requires two-person review of provider access, workload identities where available, version pinning, audit logging, emergency-access ownership and revocation of superseded versions. Rotation follows `docs/security/secret-rotation.md`; MongoDB job identities additionally follow the migration and retention runbooks.
 
+Reconcile every exact inventory class and attach the provider-bound custody,
+least-privilege, rotation, rollback, revocation and approval evidence in the
+[provider secret custody and rotation record](../security/templates/provider-secret-custody-rotation-record.md).
+An unfilled row or pending approval keeps AMANOR-120 and production promotion
+open; provider configuration must never be inferred from repository checks.
+
 ## Drift response
 
 Adding a provider credential requires one inventory class or an explicit variable under an existing class, an `.env.example` placeholder, environment validation in the consuming application, a documented rotation method and an updated deployment contract when the class is new. `check:environment` fails on unowned classes, missing examples, ambiguous variable ownership, secret-bearing `NEXT_PUBLIC_*` names, Admin secrets or migration/retention credentials assigned to API runtime. The gate exercises five adversarial mutations on every run so these denial paths cannot silently weaken while the valid inventory remains green.

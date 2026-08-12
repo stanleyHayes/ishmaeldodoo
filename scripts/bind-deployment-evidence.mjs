@@ -80,7 +80,15 @@ export async function bindDeploymentEvidence(environment = process.env) {
   for (const workflow of ["Quality", "CodeQL SAST"])
     exactKeys(
       hostedGates.gates[workflow],
-      ["runId", "url", "conclusion"],
+      [
+        "runId",
+        "runAttempt",
+        "workflowPath",
+        "event",
+        "headBranch",
+        "url",
+        "conclusion",
+      ],
       `${workflow} gate`,
     );
   const revision = required(environment, "REQUESTED_REVISION");
@@ -97,9 +105,20 @@ export async function bindDeploymentEvidence(environment = process.env) {
     required(environment, "AMANOR_DEPLOYMENT_REPOSITORY"),
   );
   for (const workflow of ["Quality", "CodeQL SAST"]) {
+    const expectedPath =
+      workflow === "Quality"
+        ? ".github/workflows/quality.yml"
+        : ".github/workflows/codeql.yml";
     assert.equal(hostedGates.gates[workflow].conclusion, "success");
     assert.match(hostedGates.gates[workflow].runId, /^[1-9][0-9]*$/u);
-    assert.match(hostedGates.gates[workflow].url, /^https:\/\/github\.com\//u);
+    assert.match(hostedGates.gates[workflow].runAttempt, /^[1-9][0-9]*$/u);
+    assert.equal(hostedGates.gates[workflow].workflowPath, expectedPath);
+    assert.equal(hostedGates.gates[workflow].event, "push");
+    assert.equal(hostedGates.gates[workflow].headBranch, "main");
+    assert.equal(
+      hostedGates.gates[workflow].url,
+      `https://github.com/${hostedGates.repository}/actions/runs/${hostedGates.gates[workflow].runId}`,
+    );
   }
   exactKeys(smoke.origins, ["api", "admin", "web"], "smoke origins");
   exactKeys(smoke.checks, expectedChecks, "smoke checks");

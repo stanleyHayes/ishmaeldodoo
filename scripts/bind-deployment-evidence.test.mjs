@@ -44,11 +44,19 @@ const hostedGates = {
   gates: {
     Quality: {
       runId: "41",
+      runAttempt: "1",
+      workflowPath: ".github/workflows/quality.yml",
+      event: "push",
+      headBranch: "main",
       url: "https://github.com/stanleyHayes/ishmaeldodoo/actions/runs/41",
       conclusion: "success",
     },
     "CodeQL SAST": {
       runId: "42",
+      runAttempt: "1",
+      workflowPath: ".github/workflows/codeql.yml",
+      event: "push",
+      headBranch: "main",
       url: "https://github.com/stanleyHayes/ishmaeldodoo/actions/runs/42",
       conclusion: "success",
     },

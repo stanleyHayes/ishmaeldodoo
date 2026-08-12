@@ -94,8 +94,9 @@ Vercel `preview` and `production` use the built-in targets. Persistent
 on both frontend projects (or a separately reviewed branch-preview design).
 The GitHub environment's `VERCEL_TARGET` must match its selected namespace.
 Each successful run retains a 90-day redacted artifact with the exact source
-SHA, exact successful Quality and CodeQL run identities, three provider
-deployment IDs/projects and terminal states plus the remote smoke JSON. A
+SHA, exact successful canonical Quality and CodeQL `push`-to-`main` workflow
+run identities/attempts, three provider deployment IDs/projects and terminal
+states plus the remote smoke JSON. A
 manifest binds the repository, workflow run/attempt, deployment environment,
 exact SHA and HTTPS migration-evidence reference to SHA-256 digests of all
 three JSON evidence files, preventing evidence from separate runs from being

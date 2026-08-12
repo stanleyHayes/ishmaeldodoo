@@ -204,6 +204,22 @@ function validateSignalBoard(id) {
 validateSignalBoard("P06");
 validateSignalBoard("F06");
 
+function validatePlanStatus(taskId, allowedStatuses) {
+  const row = plan.split("\n").find((line) => line.startsWith(`| ${taskId} |`));
+  if (!row) throw new Error(`Missing primary ledger row: ${taskId}`);
+  const status = row.match(
+    /`(BACKLOG|BLOCKED|IN PROGRESS|IN REVIEW|DONE)`/u,
+  )?.[1];
+  if (!status || !allowedStatuses.includes(status))
+    throw new Error(
+      `${taskId} status ${status ?? "missing"} contradicts implemented traceability evidence`,
+    );
+}
+
+for (const taskId of ["AMANOR-056", "AMANOR-070", "AMANOR-072"])
+  validatePlanStatus(taskId, ["IN REVIEW", "DONE"]);
+validatePlanStatus("AMANOR-073", ["IN PROGRESS", "IN REVIEW", "DONE"]);
+
 const operationCount = Object.values(openApi.paths ?? {}).reduce(
   (count, item) =>
     count +

@@ -186,6 +186,55 @@ test("renders only the consent-safe bilingual Legacy scholar projection", async 
   ).toHaveCount(0);
 });
 
+test("keeps the bilingual Source Register searchable and excludes editorial notes", async ({
+  page,
+}) => {
+  for (const width of [360, 768, 1024, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("https://localhost:3210/record/sources");
+    await expect(
+      page.getByRole("heading", { name: "The sources behind the record." }),
+    ).toBeVisible();
+    await expect(page.locator("#source-e2e")).toContainText(
+      "Regional delivery record",
+    );
+    await expect(page.locator("#source-homepage")).toContainText(
+      "Homepage evidence record",
+    );
+    await expect(page.getByText(/Internal verification note/iu)).toHaveCount(0);
+    await expect(page.getByText(/Private provenance review/iu)).toHaveCount(0);
+    expect(
+      await page.evaluate(
+        "document.documentElement.scrollWidth <= document.documentElement.clientWidth",
+      ),
+    ).toBe(true);
+  }
+
+  await page
+    .getByLabel("Search by title, publisher or reference")
+    .fill("Regional delivery");
+  await page.getByRole("button", { name: "Search" }).click();
+  await expect(page).toHaveURL(/q=Regional\+delivery/u);
+  await expect(page.locator("#source-e2e")).toBeVisible();
+  await expect(page.locator("#source-homepage")).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Open source" })).toHaveAttribute(
+    "href",
+    "https://evidence.example.test/regional-delivery",
+  );
+
+  await page.goto("https://localhost:3210/fr/record/sources?q=Independent");
+  await expect(
+    page.getByRole("heading", { name: "Les sources derrière le parcours." }),
+  ).toBeVisible();
+  await expect(page.locator("#source-homepage")).toContainText(
+    "Independent Archive",
+  );
+  await expect(page.locator("#source-e2e")).toHaveCount(0);
+  await expect(
+    page.getByText(/Private provenance review detail/iu),
+  ).toHaveCount(0);
+});
+
 test("keeps the public design system usable in day and night at every required width", async ({
   page,
 }) => {

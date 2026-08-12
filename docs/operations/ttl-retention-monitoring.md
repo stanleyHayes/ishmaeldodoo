@@ -3,6 +3,7 @@
 - Status: Engineering monitoring implemented; Legal approval and staging drill required
 - Scope: General contact, media enquiries, Press Kit receipts and Living Dossier receipts
 - Related: AMANOR-113, `docs/privacy/data-inventory-retention.md`
+- Controlled evidence: `templates/retention-deletion-rehearsal-record.md`
 
 MongoDB TTL deletion is asynchronous. The API therefore scans only `expiresAt`
 for four fixed collections every five minutes and exports aggregate due counts,
@@ -28,7 +29,7 @@ pages after five minutes of unhealthy scans.
 4. Observe the fixed-class due and oldest-age gauges return to zero and scan
    health return to one. Record only class-level counts, times and incident ID.
 5. Reconcile the same expired set after any backup restore and complete the
-   signed Privacy/Operations rehearsal record before production acceptance.
+   controlled retention/deletion rehearsal record before production acceptance.
 
 The repository recovery proof performs that reconciliation with a fixed
 synthetic recovery cutoff across all four collections. It verifies that every

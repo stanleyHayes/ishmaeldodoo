@@ -53,4 +53,6 @@ Protocol Desk grants; it must not publish content or mutate publication rows.
 
 Production acceptance still requires Legal approval of media schedules and
 hold authority, a real Cloudinary deletion/invalidation rehearsal, provider
-audit evidence, restored-backup reconciliation and signed operator review.
+audit evidence, restored-backup reconciliation and the completed
+[`retention-deletion-rehearsal-record.md`](templates/retention-deletion-rehearsal-record.md)
+with independent Legal/Data Protection, Operations and Security approval.

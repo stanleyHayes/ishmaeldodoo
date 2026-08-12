@@ -11,6 +11,9 @@ const [
   mediaRepository,
   retentionCommand,
   mediaRunbook,
+  ttlRunbook,
+  handover,
+  rehearsal,
 ] = await Promise.all([
   readFile("docs/privacy/data-inventory-retention.md", "utf8"),
   readFile("packages/contracts/src/room.ts", "utf8"),
@@ -36,6 +39,12 @@ const [
   ),
   readFile("apps/api/src/retention.ts", "utf8"),
   readFile("docs/operations/media-retention.md", "utf8"),
+  readFile("docs/operations/ttl-retention-monitoring.md", "utf8"),
+  readFile("docs/handover/README.md", "utf8"),
+  readFile(
+    "docs/operations/templates/retention-deletion-rehearsal-record.md",
+    "utf8",
+  ),
 ]);
 
 function roomScheduleRow(markdown) {
@@ -126,6 +135,59 @@ assert.match(retentionCommand, /mediaResult\.failed > 0/u);
 assert.match(mediaRunbook, /real Cloudinary deletion\/invalidation rehearsal/u);
 assert.match(schedule, /destroyed through a job-scoped Cloudinary credential/u);
 
+const pendingRehearsalSentinels = [
+  "- Status: `Not run`",
+  "- Environment, provider accounts and release revision: `Not recorded`",
+  "- Approved schedule, lawful-basis and legal-hold reference: `Not approved`",
+  "- Exercise window, incident owner and observers: `Not scheduled`",
+  "- Synthetic dataset and non-production identifiers: `Not recorded`",
+  "- MongoDB TTL indexes and monitor deployment evidence: `Not recorded`",
+  "- Contact, media enquiry, Press Kit and Living Dossier expiry result: `Not run`",
+  "- Protocol Desk pseudonymisation and correspondence cleanup result: `Not run`",
+  "- Room primary deletion and content-free evidence result: `Not run`",
+  "- Governed media quarantine, Cloudinary destruction and CDN invalidation result: `Not run`",
+  "- Scheduler, retention-job and least-privilege identity evidence: `Not recorded`",
+  "- Alert delivery, acknowledgement and escalation timestamps: `Not recorded`",
+  "- Controlled provider outage, retry and fail-closed result: `Not run`",
+  "- Restored-backup cutoff and deletion reconciliation result: `Not run`",
+  "- Aggregate before/after counts and elapsed times: `Not recorded`",
+  "- Personal-data, ciphertext, media-object and log non-disclosure review: `Not run`",
+  "- Synthetic record/object cleanup and temporary-access revocation: `Not run`",
+  "- Defects, remediation owners/dates and retest evidence: `None recorded`",
+  "- Legal/Data Protection approval/date: `Not approved`",
+  "- Operations approval/date: `Not approved`",
+  "- Security approval/date: `Not approved`",
+];
+
+function validatePendingRehearsal(candidate) {
+  for (const sentinel of pendingRehearsalSentinels)
+    assert.ok(
+      candidate.includes(sentinel),
+      `Retention rehearsal no longer proves the pre-execution state: ${sentinel}`,
+    );
+}
+
+validatePendingRehearsal(rehearsal);
+for (const sentinel of pendingRehearsalSentinels) {
+  assert.throws(
+    () =>
+      validatePendingRehearsal(
+        rehearsal.replace(sentinel, "[prematurely changed]"),
+      ),
+    undefined,
+    `Retention rehearsal accepted mutation of required sentinel: ${sentinel}`,
+  );
+}
+for (const [candidate, link] of [
+  [ttlRunbook, "templates/retention-deletion-rehearsal-record.md"],
+  [mediaRunbook, "templates/retention-deletion-rehearsal-record.md"],
+  [handover, "../operations/templates/retention-deletion-rehearsal-record.md"],
+])
+  assert.ok(
+    candidate.includes(link),
+    `Missing retention rehearsal link: ${link}`,
+  );
+
 for (const staleFixture of [
   schedule.replace(
     "Implemented for the current inline encrypted envelope",
@@ -137,5 +199,5 @@ for (const staleFixture of [
 }
 
 process.stdout.write(
-  "Privacy schedule matches Room and governed-media deletion controls; two Room drift fixtures passed.\n",
+  `Privacy schedule matches Room and governed-media deletion controls; two Room drift fixtures and ${pendingRehearsalSentinels.length} rehearsal evidence mutations fail closed.\n`,
 );

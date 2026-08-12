@@ -19,6 +19,11 @@ model. It does not make post-push CI a pre-merge gate. Required checks and
 review enforcement remain pending the controlled workflow transition in the
 repository-governance record.
 
+GitHub `preview`, `staging` and `production` namespaces exist, with staging and
+production limited to protected branches. No deployment workflow, secret,
+reviewer or provider resource is bound to them yet; complete the controlled
+deployment-environment integration record before treating them as provisioned.
+
 ## Candidate entry criteria
 
 - Immutable source revision and dependency lockfile recorded; no uncommitted candidate changes.

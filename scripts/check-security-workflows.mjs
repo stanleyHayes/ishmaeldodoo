@@ -75,6 +75,55 @@ for (const evidence of [
     `Repository governance lost verified history-protection evidence: ${evidence}`,
   );
 
+for (const evidence of [
+  "GitHub deployment namespaces: `preview`, `staging`, `production`",
+  "Staging/production branch policy: `Protected branches only`",
+  "Preview branch policy: `Any branch for pull-request previews`",
+  "These namespaces contain no secrets, variables,",
+  "trust-boundary preparation, not evidence",
+])
+  assert.ok(
+    governance.includes(evidence),
+    `Repository governance lost deployment-namespace evidence: ${evidence}`,
+  );
+
+const pendingEnvironmentIntegrationSentinels = [
+  "- Status: `Not integrated`",
+  "- Preview workflow/job and pull-request deployment evidence: `Not recorded`",
+  "- Staging workflow/job and protected-main deployment evidence: `Not recorded`",
+  "- Production workflow/job and approved-promotion evidence: `Not recorded`",
+  "- Web/Admin/API provider resources mapped per namespace: `Not provisioned`",
+  "- Environment-scoped secret and variable inventory reconciliation: `Not run`",
+  "- Preview/staging noindex and edge-access verification: `Not run`",
+  "- Production indexing and custom-domain verification: `Not run`",
+  "- Staging and production required reviewers: `Not approved`",
+  "- Self-review prevention and emergency bypass policy: `Not approved`",
+  "- Deployment history, exact revision and provider-release linkage: `Not run`",
+  "- Environment deletion/rename protection and recovery procedure: `Not approved`",
+  "- Deployment Engineering/Operations approval and date: `Not approved`",
+  "- Deployment Security approval and date: `Not approved`",
+  "- Deployment Product acceptance and date: `Not approved`",
+];
+
+function validatePendingEnvironmentIntegration(candidate) {
+  for (const sentinel of pendingEnvironmentIntegrationSentinels)
+    assert.ok(
+      candidate.includes(sentinel),
+      `Repository governance no longer proves pending environment integration: ${sentinel}`,
+    );
+}
+
+validatePendingEnvironmentIntegration(governance);
+for (const sentinel of pendingEnvironmentIntegrationSentinels)
+  assert.throws(
+    () =>
+      validatePendingEnvironmentIntegration(
+        governance.replace(sentinel, "[prematurely changed]"),
+      ),
+    undefined,
+    `Repository governance accepted premature environment integration: ${sentinel}`,
+  );
+
 const pendingSupplyChainSentinels = [
   "- Status: `Not run`",
   "- Environment, release and immutable source revision: `Not recorded`",
@@ -211,5 +260,5 @@ assert.equal(
 );
 
 process.stdout.write(
-  `Security CI preserves CodeQL SAST and three image SARIF vulnerability gates; active main-history protection is recorded while ${pendingRequiredCheckSentinels.length} required-check and ${pendingSupplyChainSentinels.length + 3} image supply-chain fields fail closed.\n`,
+  `Security CI preserves CodeQL SAST and three image SARIF vulnerability gates; active main-history protection is recorded while ${pendingRequiredCheckSentinels.length} required-check, ${pendingEnvironmentIntegrationSentinels.length} environment-integration and ${pendingSupplyChainSentinels.length + 3} image supply-chain fields fail closed.\n`,
 );

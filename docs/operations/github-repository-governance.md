@@ -10,6 +10,9 @@
 - Dependabot security updates: `Enabled`
 - Secret scanning and push protection: `Enabled`
 - Non-provider pattern scanning and validity checks: `Unavailable/disabled`
+- GitHub deployment namespaces: `preview`, `staging`, `production`
+- Staging/production branch policy: `Protected branches only`
+- Preview branch policy: `Any branch for pull-request previews`
 
 The active repository ruleset targets only `refs/heads/main`, has no bypass
 actors and blocks branch deletion plus non-fast-forward updates. Authorized
@@ -20,6 +23,32 @@ reporting are enabled; [SECURITY.md](../../SECURITY.md) directs researchers to
 the private advisory channel. GitHub did not retain requests to enable
 non-provider pattern scanning or validity checks for this repository, so both
 remain explicitly unavailable/disabled rather than being claimed as controls.
+
+GitHub environment namespaces now mirror the three remote phases in the
+deployment contract. `staging` and `production` allow deployment only from
+protected branches; `preview` remains branch-agnostic so pull-request preview
+revisions can be represented. These namespaces contain no secrets, variables,
+reviewers or deployments and no workflow currently targets them. They are
+trust-boundary preparation, not evidence that Render, Vercel, MongoDB,
+Cloudinary or any other provider environment is provisioned.
+
+## Deployment-environment integration record
+
+- Status: `Not integrated`
+- Preview workflow/job and pull-request deployment evidence: `Not recorded`
+- Staging workflow/job and protected-main deployment evidence: `Not recorded`
+- Production workflow/job and approved-promotion evidence: `Not recorded`
+- Web/Admin/API provider resources mapped per namespace: `Not provisioned`
+- Environment-scoped secret and variable inventory reconciliation: `Not run`
+- Preview/staging noindex and edge-access verification: `Not run`
+- Production indexing and custom-domain verification: `Not run`
+- Staging and production required reviewers: `Not approved`
+- Self-review prevention and emergency bypass policy: `Not approved`
+- Deployment history, exact revision and provider-release linkage: `Not run`
+- Environment deletion/rename protection and recovery procedure: `Not approved`
+- Deployment Engineering/Operations approval and date: `Not approved`
+- Deployment Security approval and date: `Not approved`
+- Deployment Product acceptance and date: `Not approved`
 
 This is a history-integrity control, not a claim that post-push CI is a
 pre-merge gate. `Quality` and `CodeQL SAST` currently run on pushes to `main`

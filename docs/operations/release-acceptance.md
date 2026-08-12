@@ -22,4 +22,11 @@ These controlled templates preserve one evidence chain from the reviewed release
 
 Every template starts `Not run`, `Not approved`, or `Not signed`. Replace those values only with dated evidence from the named authority. Never paste credentials, Room ciphertext/plaintext, request bodies, personal contact details, analytics raw exports or provider tokens into these records.
 
-`npm run check:acceptance-evidence` validates structure and honest initial state. It cannot approve UAT, beta, launch, handover, hypercare or closure.
+`npm run check:acceptance-evidence` validates structure and the exact
+pre-execution status, approval and signature sentinels for every stage. Leaving
+one unrelated `Not run` value in a record does not permit its stage status or
+required signatures to claim completion. Before the first real execution,
+extend the validator in the same reviewed change to validate that stage's dated
+evidence references and complete authority set; do not simply remove the
+pending-state checks. The validator cannot approve UAT, beta, launch, handover,
+hypercare or closure.

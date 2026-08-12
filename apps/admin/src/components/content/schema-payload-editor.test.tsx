@@ -99,6 +99,37 @@ describe("SchemaPayloadEditor Atlas proof emphasis", () => {
     ).toBeGreaterThan(0);
   }, 15_000);
 
+  it("selects scholar photos from the governed local-upload library without a URL field", async () => {
+    const onChange = vi.fn();
+    render(
+      <SchemaPayloadEditor
+        kind="scholar"
+        rawValue={JSON.stringify({ name: "" })}
+        readOnly={false}
+        onChange={onChange}
+      />,
+    );
+
+    const picker = await screen.findByLabelText("Scholar photo");
+    expect(
+      screen.queryByLabelText(/scholar photo url/iu),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("textbox", { name: /scholar photo/iu }),
+    ).not.toBeInTheDocument();
+    fireEvent.change(picker, {
+      target: { value: "00000000-0000-4000-8000-000000000001" },
+    });
+
+    expect(JSON.parse(onChange.mock.lastCall?.[0] as string)).toEqual({
+      name: "",
+      photo: "00000000-0000-4000-8000-000000000001",
+    });
+    expect(listMediaAssets).toHaveBeenCalledWith(
+      expect.objectContaining({ folder: "scholars", resourceType: "image" }),
+    );
+  }, 15_000);
+
   it("filters Speaking media by kind and clears an incompatible selection", async () => {
     const onChange = vi.fn();
     render(

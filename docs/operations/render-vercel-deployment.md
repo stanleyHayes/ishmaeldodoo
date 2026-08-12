@@ -95,7 +95,10 @@ on both frontend projects (or a separately reviewed branch-preview design).
 The GitHub environment's `VERCEL_TARGET` must match its selected namespace.
 Each successful run retains a 90-day redacted artifact with the exact source
 SHA, three provider deployment IDs/projects and terminal states plus the remote
-smoke JSON; tokens, provider responses and hook URLs are never written.
+smoke JSON. A manifest binds the repository, workflow run/attempt, deployment
+environment, exact SHA and HTTPS migration-evidence reference to SHA-256
+digests of both JSON evidence files, preventing evidence from separate runs
+from being mixed. Tokens, provider responses and hook URLs are never written.
 
 1. Resolve D01 and provision the API, public Web and Admin domains.
 2. Create separate MongoDB application, migration and retention users.

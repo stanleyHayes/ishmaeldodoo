@@ -84,6 +84,17 @@ jobs:
           AMANOR_SMOKE_EVIDENCE_PATH: deployment-evidence/smoke.json
         run: node scripts/wait-for-deployment-smoke.mjs
 
+      - name: Bind deployment evidence manifest
+        env:
+          REQUESTED_REVISION: ${{ inputs.revision }}
+          AMANOR_SMOKE_ENVIRONMENT: ${{ inputs.environment }}
+          AMANOR_DEPLOYMENT_EVIDENCE_DIR: deployment-evidence
+          AMANOR_DEPLOYMENT_RUN_ID: ${{ github.run_id }}
+          AMANOR_DEPLOYMENT_RUN_ATTEMPT: ${{ github.run_attempt }}
+          AMANOR_DEPLOYMENT_REPOSITORY: ${{ github.repository }}
+          AMANOR_MIGRATION_EVIDENCE: ${{ inputs.migration_evidence }}
+        run: node scripts/bind-deployment-evidence.mjs
+
       - name: Retain immutable deployment evidence
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:

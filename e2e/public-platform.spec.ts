@@ -70,6 +70,57 @@ test("keeps analytics optional, bilingual and usable on a narrow night-mode view
   ).toBe(true);
 });
 
+test("keeps the global Search utility bilingual, public-only and connected to specialist search", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 360, height: 800 });
+  await page.goto("https://localhost:3210/");
+  await useStandardMode(page);
+  await page.getByRole("link", { name: "Search", exact: true }).click();
+  await expect(page).toHaveURL("https://localhost:3210/search");
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Search" }),
+  ).toBeVisible();
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
+    "content",
+    /noindex/u,
+  );
+  await page.getByLabel("Search the site").fill("source register");
+  await page.getByRole("button", { name: "Search", exact: true }).click();
+  await expect(page).toHaveURL(/\/search\?q=source(?:\+|%20)register$/u);
+  await expect(
+    page.getByRole("link", { name: "Source Register", exact: true }),
+  ).toHaveAttribute("href", "/record/sources");
+  await expect(
+    page.getByRole("link", { name: "Search Archive transcripts" }),
+  ).toHaveAttribute("href", "/archive?q=source%20register");
+  await expect(
+    page.locator(
+      '.search-results a[href^="/admin"], .search-results a[href="/contact/room"], .search-results a[href^="/protocol-decision"]',
+    ),
+  ).toHaveCount(0);
+  expect(
+    await page.evaluate(
+      "document.documentElement.scrollWidth <= document.documentElement.clientWidth",
+    ),
+  ).toBe(true);
+
+  await page.goto("https://localhost:3210/fr");
+  await useStandardMode(page);
+  await page.getByRole("link", { name: "Recherche", exact: true }).click();
+  await expect(page).toHaveURL("https://localhost:3210/fr/search");
+  await page.getByLabel("Rechercher sur le site").fill("confidentialité");
+  await page.getByRole("button", { name: "Rechercher", exact: true }).click();
+  await expect(
+    page.getByRole("link", { name: "Avis de confidentialité" }),
+  ).toHaveAttribute("href", "/fr/legal/privacy");
+  await expect(
+    page.getByRole("link", {
+      name: "Rechercher dans les transcriptions des archives",
+    }),
+  ).toHaveAttribute("href", "/fr/archive?q=confidentialit%C3%A9");
+});
+
 test("keeps French punctuation non-breaking across public routes", async ({
   page,
 }) => {

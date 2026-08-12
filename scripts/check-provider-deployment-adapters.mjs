@@ -24,6 +24,12 @@ const retention = blueprint.services.find(
   ({ name }) => name === "amanor-retention",
 );
 assert.ok(api && retention, "Render API and retention services are required");
+for (const service of [api, retention])
+  assert.equal(
+    service.repo,
+    "https://github.com/stanleyHayes/ishmaeldodoo",
+    `${service.name} must bind to the canonical GitHub repository accepted by Render`,
+  );
 assert.deepEqual(
   {
     type: api.type,

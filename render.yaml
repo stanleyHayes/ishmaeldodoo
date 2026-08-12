@@ -2,6 +2,7 @@
 services:
   - type: web
     name: amanor-api
+    repo: https://github.com/stanleyHayes/ishmaeldodoo
     runtime: docker
     plan: starter
     region: frankfurt
@@ -87,6 +88,7 @@ services:
 
   - type: cron
     name: amanor-retention
+    repo: https://github.com/stanleyHayes/ishmaeldodoo
     runtime: docker
     plan: starter
     region: frankfurt

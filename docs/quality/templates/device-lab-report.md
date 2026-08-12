@@ -19,3 +19,7 @@
 - Accessibility approval/date: `Not approved`
 
 Do not include credentials, real requester data, message bodies, confidential content or production cookies. Emulated Playwright output may be attached as regression evidence but cannot replace any physical row.
+
+The generic `Desk result` column does not close the Principal's role-specific
+own-phone acceptance. Record that complete provider-backed journey in
+[`protocol-desk-lifecycle-phone-record.md`](../../operations/templates/protocol-desk-lifecycle-phone-record.md).

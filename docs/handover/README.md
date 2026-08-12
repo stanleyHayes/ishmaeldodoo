@@ -45,6 +45,7 @@ This index is the controlled entry point for operating the independently deploye
 - Controlled [media inventory reconciliation record](../operations/templates/media-inventory-reconciliation-record.md) for exact registry/Cloudinary parity, bilingual accessibility metadata, rights/retention review, gap ownership, cleanup and Content/Legal approval.
 - Controlled [institutional email delivery record](../operations/templates/institutional-email-delivery-record.md) for all nine templates across `.gov.gh`, `.un.org` and an EU institutional mailbox with delivery/read proof and four-party approval.
 - Controlled [editorial takedown and recovery record](../operations/templates/editorial-takedown-rehearsal-record.md) for independently timed bad-content removal and immutable restoration across origin, edge, discoverability, outbox and audit evidence.
+- Controlled [Protocol Desk lifecycle and Principal-phone record](../operations/templates/protocol-desk-lifecycle-phone-record.md) for provider-backed request-to-close execution and personal acceptance on the Principal's recorded physical device.
 - Monthly, quarterly and six-month [measurement cadence](../operations/measurement-cadence.md) evidence.
 - Versioned [release notes](release-notes.md) and completed [training evidence](training-evidence.md).
 

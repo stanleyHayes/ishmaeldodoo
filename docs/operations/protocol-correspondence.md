@@ -76,3 +76,7 @@ The first three gates above use the controlled
 [`institutional-email-delivery-record.md`](templates/institutional-email-delivery-record.md),
 whose template keys must remain identical to the runtime correspondence
 catalogue.
+
+The complete provider-backed request-to-close and Principal own-phone exercise
+uses the separate controlled
+[`protocol-desk-lifecycle-phone-record.md`](templates/protocol-desk-lifecycle-phone-record.md).

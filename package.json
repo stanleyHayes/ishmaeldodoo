@@ -22,6 +22,7 @@
     "check:decisions": "node scripts/check-decision-register.mjs",
     "check:privacy-retention": "node scripts/check-privacy-retention.mjs",
     "check:source-audit": "node scripts/check-source-claim-audit.mjs",
+    "check:content-acceptance": "node scripts/check-content-acceptance.mjs",
     "check:media-governance": "node scripts/check-media-governance.mjs",
     "build": "npm run build --workspace @amanor/contracts && npm run build --workspace @amanor/admin --workspace @amanor/api --workspace @amanor/web",
     "typecheck": "npm run build --workspace @amanor/contracts && npm run typecheck --workspaces --if-present && tsc -p tsconfig.e2e.json",
@@ -64,7 +65,7 @@
     "check:security-ci": "node scripts/check-security-workflows.mjs",
     "check:format": "prettier --check .",
     "check:secrets": "node scripts/check-secrets.mjs --verify-fixtures",
-    "check": "npm run check:format && npm run check:dependency-policy && npm run check:outbound-destinations && npm run check:boundaries && npm run check:public-copy && npm run check:french-typography && npm run check:contracts && npm run check:traceability && npm run check:decisions && npm run check:privacy-retention && npm run check:source-audit && npm run check:media-governance && npm run check:observability && npm run check:email-domain && npm run check:analytics && npm run check:release && npm run check:deployment-manifests && npm run check:provider-adapters && npm run check:environment && npm run check:load && npm run check:devices && npm run check:handover && npm run check:acceptance-evidence && npm run check:concurrency-guards && npm run check:accessibility-structure && npm run check:security && npm run check:security-ci && npm run check:secrets && npm run typecheck && npm run lint && npm run test:coverage && npm run build && npm run check:frontend-bundles && npm run check:standard-script-budget && npm run check:sahel-budget"
+    "check": "npm run check:format && npm run check:dependency-policy && npm run check:outbound-destinations && npm run check:boundaries && npm run check:public-copy && npm run check:french-typography && npm run check:contracts && npm run check:traceability && npm run check:decisions && npm run check:privacy-retention && npm run check:source-audit && npm run check:content-acceptance && npm run check:media-governance && npm run check:observability && npm run check:email-domain && npm run check:analytics && npm run check:release && npm run check:deployment-manifests && npm run check:provider-adapters && npm run check:environment && npm run check:load && npm run check:devices && npm run check:handover && npm run check:acceptance-evidence && npm run check:concurrency-guards && npm run check:accessibility-structure && npm run check:security && npm run check:security-ci && npm run check:secrets && npm run typecheck && npm run lint && npm run test:coverage && npm run build && npm run check:frontend-bundles && npm run check:standard-script-budget && npm run check:sahel-budget"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.12.1",

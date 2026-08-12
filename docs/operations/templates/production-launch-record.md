@@ -10,6 +10,7 @@
 ## Content freeze and entry approvals
 
 - Content/French/identity/source freeze reference: Not approved
+- [Production content acceptance record](../../content/templates/production-content-acceptance-record.md): Not approved
 - UAT and beta approvals: Not approved
 - Security/accessibility/privacy/legal approvals: Not approved
 - Backup/PITR and rollback targets verified: Not run

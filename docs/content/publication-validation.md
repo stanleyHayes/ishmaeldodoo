@@ -41,3 +41,7 @@ The same approved immutable version may be published independently to `en-GB` an
 - Reviewers confirm that the named sources support the exact claim, not merely that the references exist.
 - Source takedown requires dependent content to be replaced or unpublished first.
 - French stale notices are temporary disclosure controls, not a substitute for translation parity work.
+
+Final release-bound identity, bilingual content, media, source, print and
+discoverability approval is recorded in the controlled
+[`production-content-acceptance-record.md`](templates/production-content-acceptance-record.md).

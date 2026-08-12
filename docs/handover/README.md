@@ -49,6 +49,7 @@ This index is the controlled entry point for operating the independently deploye
 - Controlled [independent WCAG 2.2 AA audit record](../quality/templates/wcag-audit-remediation-record.md) for complete route/workflow scope, success-criterion findings, remediation, independent retest, exceptions and approvals.
 - Controlled [independent security assessment record](../security/templates/independent-security-assessment-record.md) for authenticated DAST, hosting/IAM/infrastructure review, broad platform and Room-specific penetration scope, remediation, retest and approvals.
 - Controlled [Ghana DPC registration and DPIA record](../privacy/templates/dpc-registration-dpia-record.md) for statutory controller registration, complete processing decisions, processor/transfers, notices, rights, retention, residual risk and approvals.
+- Controlled [production content and identity acceptance record](../content/templates/production-content-acceptance-record.md) for immutable bilingual versions, canonical identity/title history, media/source/print/discoverability checks, freeze integrity and approvals.
 - Monthly, quarterly and six-month [measurement cadence](../operations/measurement-cadence.md) evidence.
 - Versioned [release notes](release-notes.md) and completed [training evidence](training-evidence.md).
 

@@ -39,6 +39,7 @@ This index is the controlled entry point for operating the independently deploye
 - WebAuthn: [hardware-key operations](../security/webauthn-hardware-keys.md), approved environment RP records, authenticator/attestation/back-up policy, issuance inventory and signed physical-key loss/recovery drill. WebAuthn and the Room ship disabled until those external controls are accepted.
 - UAT, beta, launch, training attendance, acceptance and hypercare records.
 - Controlled [release acceptance](../operations/release-acceptance.md) templates from UAT through project closure.
+- Controlled [disaster-recovery rehearsal record](../operations/templates/disaster-recovery-rehearsal-record.md) for provider PITR, Room reconciliation, key recovery and RTO/RPO acceptance.
 - Monthly, quarterly and six-month [measurement cadence](../operations/measurement-cadence.md) evidence.
 - Versioned [release notes](release-notes.md) and completed [training evidence](training-evidence.md).
 

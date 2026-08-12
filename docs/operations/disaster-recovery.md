@@ -38,6 +38,17 @@ This proves that the current logical schema can be exported and restored, that t
 - Evidence that the old environment is isolated and temporary credentials removed.
 - Defects, remediation owners/dates and signed Product/Security/Privacy acceptance.
 
+Record the exercise in the controlled
+[disaster-recovery rehearsal record](templates/disaster-recovery-rehearsal-record.md).
+Until a production-like provider environment exists, `npm run check:handover`
+binds every pending recovery point, timestamp, RPO/RTO, retention/Room
+reconciliation, key-custody, regional, teardown and Operations/Security/Privacy
+approval field. Before the first real rehearsal, extend the validator in the
+same reviewed change to require immutable provider identifiers, durable
+evidence references, measured objective comparison, complete reconciliation
+and dated approvals; do not delete the pending-state guard without an
+executed-state replacement.
+
 ## Key-loss and regional failure
 
 Key recovery must use the approved external custody/escrow process and a non-production recovery key; application environment files are not escrow. A regional exercise restores into the approved alternate region and verifies data-location/transfer obligations. The local proof covers only synthetic Room database restoration and deletion-ledger reconciliation. Production still requires an independently reviewed encrypted ciphertext backup scope, separate content-free deletion-ledger custody, least-privilege recovery identities, recipient-key recovery or approved crypto-erasure behavior, and a timed rehearsal.

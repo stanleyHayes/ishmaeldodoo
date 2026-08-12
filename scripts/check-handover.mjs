@@ -45,6 +45,10 @@ for (const linked of [
 }
 
 const training = await readFile("docs/handover/training-evidence.md", "utf8");
+const disasterRecovery = await readFile(
+  "docs/operations/templates/disaster-recovery-rehearsal-record.md",
+  "utf8",
+);
 const pendingTrainingSentinels = [
   "- Environment: `Not recorded`",
   "- Source/release revision: `Not recorded`",
@@ -88,6 +92,46 @@ for (const sentinel of pendingTrainingSentinels) {
     `Training record accepted mutation of required sentinel: ${sentinel}`,
   );
 }
+const pendingDisasterRecoverySentinels = [
+  "- Status: `Not run`",
+  "- Environment and provider account: `Not recorded`",
+  "- Source release and migration revision: `Not recorded`",
+  "- Approved RPO/RTO and approval reference: `Not approved`",
+  "- Recovery window and incident commander: `Not scheduled`",
+  "- Application backup/snapshot/oplog recovery point: `Not recorded`",
+  "- Isolated Room backup and deletion-ledger recovery points: `Not recorded`",
+  "- Independent restore targets and least-privilege identities: `Not recorded`",
+  "- Detection/selection/restore/validation/cutover timestamps: `Not recorded`",
+  "- Measured RPO/RTO result: `Not run`",
+  "- Record/index/integrity validation evidence: `Not recorded`",
+  "- TTL, retention, subject-erasure and Room deletion reconciliation: `Not run`",
+  "- Application and Room key-custody/recovery evidence: `Not recorded`",
+  "- Alternate-region/data-location evidence: `Not recorded`",
+  "- Smoke, security and access-isolation evidence: `Not run`",
+  "- Restored-environment teardown and secret revocation: `Not run`",
+  "- Defects, remediation owners/dates and retest evidence: `None recorded`",
+  "- Operations approval/date: `Not approved`",
+  "- Security approval/date: `Not approved`",
+  "- Privacy approval/date: `Not approved`",
+];
+
+function validatePendingDisasterRecovery(candidate) {
+  for (const sentinel of pendingDisasterRecoverySentinels)
+    assert.ok(
+      candidate.includes(sentinel),
+      `DR record no longer proves the pre-execution state: ${sentinel}`,
+    );
+}
+
+validatePendingDisasterRecovery(disasterRecovery);
+for (const sentinel of pendingDisasterRecoverySentinels) {
+  const mutated = disasterRecovery.replace(sentinel, "[prematurely changed]");
+  assert.throws(
+    () => validatePendingDisasterRecovery(mutated),
+    undefined,
+    `DR record accepted mutation of required sentinel: ${sentinel}`,
+  );
+}
 for (const requirement of [
   "Physical security-key enrollment, assertion and audited revocation",
   "Lost-key containment, spare-key custody and supervised recovery",
@@ -105,6 +149,14 @@ for (const [path, evidence] of [
     "docs/handover/security-incident-response.md",
     "Lost or suspect WebAuthn key",
   ],
+  [
+    "docs/handover/README.md",
+    "../operations/templates/disaster-recovery-rehearsal-record.md",
+  ],
+  [
+    "docs/operations/disaster-recovery.md",
+    "templates/disaster-recovery-rehearsal-record.md",
+  ],
 ]) {
   const content = await readFile(path, "utf8");
   if (!content.includes(evidence))
@@ -114,5 +166,5 @@ for (const [path, evidence] of [
 }
 
 process.stdout.write(
-  `Handover package structure is valid; ${pendingTrainingSentinels.length} training-session, scenario and acceptance mutations fail closed.\n`,
+  `Handover package structure is valid; ${pendingTrainingSentinels.length} training and ${pendingDisasterRecoverySentinels.length} disaster-recovery evidence mutations fail closed.\n`,
 );

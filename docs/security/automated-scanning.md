@@ -24,3 +24,7 @@ Generated SARIF, SBOM and scanner logs may contain repository paths and package 
 ## Evidence still requiring deployed staging
 
 CodeQL and image scanning do not prove runtime security. Authenticated DAST for Admin/CMS, Protocol Desk and The Room; TLS/hosting configuration review; infrastructure/IAM scanning; and the independent penetration test remain staging release gates. Store only redacted reports and remediation/retest evidence.
+
+Record the complete independent assessment and remediation lifecycle in the
+controlled
+[`independent-security-assessment-record.md`](templates/independent-security-assessment-record.md).

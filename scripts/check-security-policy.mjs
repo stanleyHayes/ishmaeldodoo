@@ -288,6 +288,25 @@ const publicRateGuard = await readFile(
   ),
   "utf8",
 );
+const securityAssessmentRecord = await readFile(
+  new URL(
+    "../docs/security/templates/independent-security-assessment-record.md",
+    import.meta.url,
+  ),
+  "utf8",
+);
+const automatedScanning = await readFile(
+  new URL("../docs/security/automated-scanning.md", import.meta.url),
+  "utf8",
+);
+const roomOperations = await readFile(
+  new URL("../docs/security/room-operations.md", import.meta.url),
+  "utf8",
+);
+const handover = await readFile(
+  new URL("../docs/handover/README.md", import.meta.url),
+  "utf8",
+);
 for (const namespace of [
   "press-kit-ip",
   "media-enquiry-ip",
@@ -299,6 +318,62 @@ for (const namespace of [
   );
 }
 
+const pendingAssessmentSentinels = [
+  "- Status: `Not commissioned`",
+  "- Assessor organisation, lead and independence declaration: `Not assigned`",
+  "- Rules of engagement, authorization and emergency contacts: `Not recorded`",
+  "- Production-like environment, release and Web/Admin/API revisions: `Not recorded`",
+  "- Test window and final-report immutable evidence location: `Not scheduled`",
+  "- Public Web, same-origin proxies and external egress scope: `Not run`",
+  "- Admin/CMS authentication, JWT, cookies, CSRF, MFA/WebAuthn and recovery scope: `Not run`",
+  "- Content/media publication, preview, rollback and audit scope: `Not run`",
+  "- Protocol Desk intake, operator lifecycle, correspondence and decision links: `Not run`",
+  "- Contact, Press Kit, media enquiry and generated-download scope: `Not run`",
+  "- The Room enabled configuration, crypto flows and restricted client scope: `Not run`",
+  "- Mongo application/migration/retention/Room identity and backup boundaries: `Not run`",
+  "- Cloudinary, email, calendar, analytics, tile and revalidation integrations: `Not run`",
+  "- Render/Vercel, DNS/TLS, CDN/WAF, IAM, secrets and network configuration: `Not run`",
+  "- Authenticated DAST and manual business-logic test evidence: `Not run`",
+  "- Cryptographic/threat-model review reference and disposition: `Not recorded`",
+  "- Critical findings opened/closed/retested: `0 / 0 / 0`",
+  "- High findings opened/closed/retested: `0 / 0 / 0`",
+  "- Medium findings opened/closed/retested: `0 / 0 / 0`",
+  "- Low findings opened/closed/retested: `0 / 0 / 0`",
+  "- Finding IDs, affected revisions, owners, target dates and fixes: `None recorded`",
+  "- Independent retest and zero-open-critical/high result: `Not run`",
+  "- Accepted lower-risk findings with authority, rationale and expiry: `None recorded`",
+  "- Test accounts/data, temporary access and provider artifacts cleaned up: `Not run`",
+  "- Credentials, tokens, Room content and personal-data non-disclosure review: `Not run`",
+  "- External assessor approval/date: `Not approved`",
+  "- Security owner approval/date: `Not approved`",
+  "- Privacy/Legal approval/date: `Not approved`",
+  "- Product/Principal approval/date: `Not approved`",
+];
+
+function validatePendingAssessment(candidate) {
+  for (const sentinel of pendingAssessmentSentinels)
+    assert.ok(
+      candidate.includes(sentinel),
+      `Security assessment no longer proves pending state: ${sentinel}`,
+    );
+}
+
+validatePendingAssessment(securityAssessmentRecord);
+for (const sentinel of pendingAssessmentSentinels)
+  assert.throws(() =>
+    validatePendingAssessment(
+      securityAssessmentRecord.replace(sentinel, "[prematurely changed]"),
+    ),
+  );
+const assessmentLink = "templates/independent-security-assessment-record.md";
+assert.ok(automatedScanning.includes(assessmentLink));
+assert.ok(roomOperations.includes(assessmentLink));
+assert.ok(
+  handover.includes(
+    "../security/templates/independent-security-assessment-record.md",
+  ),
+);
+
 console.log(
-  "Security headers, CSP origins, API hardening, privileged-read audit and abuse controls are internally consistent.",
+  `Security headers, CSP origins, API hardening, privileged-read audit and abuse controls are internally consistent; ${pendingAssessmentSentinels.length} independent-assessment pending-state mutations fail closed.`,
 );

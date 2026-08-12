@@ -47,6 +47,7 @@ This index is the controlled entry point for operating the independently deploye
 - Controlled [editorial takedown and recovery record](../operations/templates/editorial-takedown-rehearsal-record.md) for independently timed bad-content removal and immutable restoration across origin, edge, discoverability, outbox and audit evidence.
 - Controlled [Protocol Desk lifecycle and Principal-phone record](../operations/templates/protocol-desk-lifecycle-phone-record.md) for provider-backed request-to-close execution and personal acceptance on the Principal's recorded physical device.
 - Controlled [independent WCAG 2.2 AA audit record](../quality/templates/wcag-audit-remediation-record.md) for complete route/workflow scope, success-criterion findings, remediation, independent retest, exceptions and approvals.
+- Controlled [independent security assessment record](../security/templates/independent-security-assessment-record.md) for authenticated DAST, hosting/IAM/infrastructure review, broad platform and Room-specific penetration scope, remediation, retest and approvals.
 - Monthly, quarterly and six-month [measurement cadence](../operations/measurement-cadence.md) evidence.
 - Versioned [release notes](release-notes.md) and completed [training evidence](training-evidence.md).
 

@@ -168,3 +168,8 @@ None of the following has been performed. Each is a launch blocker.
    analytics, email or error reporting.
 8. An independent Room-scoped penetration test (AMANOR-097) with every high and
    critical finding closed and retested.
+
+The Room scope and the broader platform assessment share the controlled
+[`independent-security-assessment-record.md`](templates/independent-security-assessment-record.md),
+but both scopes must be explicitly executed; neither can stand in for the
+other.

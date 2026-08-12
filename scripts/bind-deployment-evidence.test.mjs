@@ -70,6 +70,7 @@ const environment = (directory) => ({
   AMANOR_DEPLOYMENT_RUN_ID: "123",
   AMANOR_DEPLOYMENT_RUN_ATTEMPT: "1",
   AMANOR_MIGRATION_EVIDENCE: "https://evidence.example.test/migration/123",
+  AMANOR_MIGRATION_EVIDENCE_SHA256: `sha256:${"b".repeat(64)}`,
 });
 async function fixture(providerValue = provider, smokeValue = smoke) {
   const directory = await mkdtemp(path.join(os.tmpdir(), "amanor-deploy-"));

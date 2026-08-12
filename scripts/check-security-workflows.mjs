@@ -230,6 +230,7 @@ for (const invariant of [
   "wait-for-deployment-smoke.mjs",
   "bind-deployment-evidence.mjs",
   "AMANOR_MIGRATION_EVIDENCE: ${{ inputs.migration_evidence }}",
+  "AMANOR_MIGRATION_EVIDENCE_SHA256: ${{ inputs.migration_evidence_sha256 }}",
   "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7",
   "retention-days: 90",
 ])

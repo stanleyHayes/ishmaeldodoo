@@ -131,6 +131,11 @@ export async function bindDeploymentEvidence(environment = process.env) {
   assert.equal(migrationEvidence.protocol, "https:");
   assert.equal(migrationEvidence.username, "");
   assert.equal(migrationEvidence.password, "");
+  const migrationEvidenceSha256 = required(
+    environment,
+    "AMANOR_MIGRATION_EVIDENCE_SHA256",
+  );
+  assert.match(migrationEvidenceSha256, /^sha256:[0-9a-f]{64}$/u);
 
   const serialized = `${providerBuffer.toString("utf8")}\n${smokeBuffer.toString("utf8")}\n${hostedGatesBuffer.toString("utf8")}`;
   assert.doesNotMatch(
@@ -146,6 +151,7 @@ export async function bindDeploymentEvidence(environment = process.env) {
     environment: deploymentEnvironment,
     sourceRevision: revision,
     migrationEvidence: migrationEvidence.href,
+    migrationEvidenceSha256,
     files: {
       "provider-deployments.json": `sha256:${digest(providerBuffer)}`,
       "smoke.json": `sha256:${digest(smokeBuffer)}`,

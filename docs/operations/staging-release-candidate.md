@@ -23,6 +23,8 @@ GitHub `preview`, `staging` and `production` namespaces exist, with staging and
 production limited to protected branches. The manual workflow binds deployment
 jobs to the selected namespace, exact reviewed SHA, hosted Quality/CodeQL pass,
 migration evidence, separate Render/Vercel provider APIs and three-origin smoke.
+The dispatch also requires the reviewed migration evidence artifact's lowercase
+SHA-256 digest; a mutable URL alone is not release evidence.
 No environment secret, variable, reviewer or provider resource is configured
 yet; complete the controlled deployment-environment integration record before
 treating any namespace as provisioned or deployed.

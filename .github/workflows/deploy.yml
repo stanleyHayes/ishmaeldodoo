@@ -19,6 +19,10 @@ on:
         description: HTTPS evidence URL for backup, migration and idempotent rerun
         required: true
         type: string
+      migration_evidence_sha256:
+        description: SHA-256 digest of the reviewed migration evidence artifact
+        required: true
+        type: string
       confirmation:
         description: Type DEPLOY to confirm provider mutation
         required: true
@@ -64,6 +68,7 @@ jobs:
         env:
           REQUESTED_REVISION: ${{ inputs.revision }}
           MIGRATION_EVIDENCE: ${{ inputs.migration_evidence }}
+          MIGRATION_EVIDENCE_SHA256: ${{ inputs.migration_evidence_sha256 }}
           DEPLOY_CONFIRMATION: ${{ inputs.confirmation }}
         run: node scripts/validate-deployment-dispatch.mjs
 
@@ -94,6 +99,7 @@ jobs:
           AMANOR_DEPLOYMENT_RUN_ATTEMPT: ${{ github.run_attempt }}
           AMANOR_DEPLOYMENT_REPOSITORY: ${{ github.repository }}
           AMANOR_MIGRATION_EVIDENCE: ${{ inputs.migration_evidence }}
+          AMANOR_MIGRATION_EVIDENCE_SHA256: ${{ inputs.migration_evidence_sha256 }}
         run: node scripts/bind-deployment-evidence.mjs
 
       - name: Retain immutable deployment evidence

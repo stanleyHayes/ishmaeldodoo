@@ -1,3 +1,4 @@
+import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { runDeploymentSmoke } from "./smoke-deployment.mjs";
 import { runRollbackRehearsal } from "./rollback-rehearsal.mjs";
@@ -81,8 +82,54 @@ for (const field of [
 ])
   if (!record.includes(field))
     throw new Error(`Release record misses ${field}`);
-if (!record.includes("Not run") || !record.includes("Not approved"))
-  throw new Error("Release record must default to an unexecuted state");
+const pendingReleaseSentinels = [
+  "- Candidate ID: `Not assigned`",
+  "- Environment: `Not deployed`",
+  "- Source revision: `Not recorded`",
+  "- Pipeline/review evidence: `Not run`",
+  "- Prepared/approved: `Not assigned` / `Not approved`",
+  "| Web release   | Not recorded         | Not recorded           | Not provisioned | Not recorded          | Not deployed |",
+  "| Admin release | Not recorded         | Not recorded           | Not provisioned | Not recorded          | Not deployed |",
+  "| API release   | Not recorded         | Not recorded           | Not provisioned | Not recorded          | Not deployed |",
+  "- Migration IDs/checksums: `Not run`",
+  "- Separate job identity and least-privilege evidence: `Not run`",
+  "- Start/end and idempotent re-run: `Not run`",
+  "- Backup/recovery point: `Not run`",
+  "- Remote smoke JSON: `Not run`",
+  "- Timed rollback rehearsal JSON: `Not run`",
+  "- API dependent jobs paused/resumed: `Not run`",
+  "- Provider state matched all three declared rollback targets: `Not run`",
+  "- Preview/staging unauthorised access denied: `Not run`",
+  "- Browser, accessibility and performance evidence: `Not run`",
+  "- Security/load/failure-mode evidence: `Not run`",
+  "- 100x load result/provider graphs: `Not run`",
+  "- Protocol Desk under-load result and synthetic cleanup: `Not run`",
+  "- Content/French/Principal/UAT approvals: `Not approved`",
+  "- QA recommendation: `Not approved`",
+  "- Product: `Not approved`",
+  "- Engineering: `Not approved`",
+  "- Security/Privacy/Content as applicable: `Not approved`",
+  "- Principal acceptance gates: `Not approved`",
+  "- Promotion or rejection reason: `Not recorded`",
+];
+
+function validatePendingReleaseRecord(candidate) {
+  for (const sentinel of pendingReleaseSentinels)
+    assert.ok(
+      candidate.includes(sentinel),
+      `Release record no longer proves the pre-execution state: ${sentinel}`,
+    );
+}
+
+validatePendingReleaseRecord(record);
+for (const sentinel of pendingReleaseSentinels) {
+  const mutated = record.replace(sentinel, "[prematurely changed]");
+  assert.throws(
+    () => validatePendingReleaseRecord(mutated),
+    undefined,
+    `Release record accepted mutation of required sentinel: ${sentinel}`,
+  );
+}
 
 const baseHeaders = {
   "content-security-policy": "default-src 'self'",
@@ -186,5 +233,5 @@ if (!resumedAfterFailure)
   );
 
 process.stdout.write(
-  `Release process preserves ${contract.deployables.length} deployables across ${Object.keys(contract.environments).length} isolated environments; smoke fixture passed ${Object.keys(smoke.checks).length} checks and rollback fixture passed ${rollback.results.length} independent paths.\n`,
+  `Release process preserves ${contract.deployables.length} deployables across ${Object.keys(contract.environments).length} isolated environments; ${pendingReleaseSentinels.length} pre-execution record mutations fail closed, smoke fixture passed ${Object.keys(smoke.checks).length} checks and rollback fixture passed ${rollback.results.length} independent paths.\n`,
 );

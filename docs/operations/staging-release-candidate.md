@@ -38,6 +38,15 @@ Set `AMANOR_SMOKE_ENVIRONMENT`, `AMANOR_SMOKE_WEB_URL`, `AMANOR_SMOKE_ADMIN_URL`
 
 The smoke runner proves three distinct origins; English, French and Atlas-table public paths; preview/staging noindex or production sitemap/indexing state; frontend security headers; Admin noindex/no-store; and API live/ready request correlation. Save its JSON output with the [release candidate record](templates/release-candidate-record.md). It is a smoke check, not UAT, penetration testing or production proof.
 
+While staging has not been provisioned, `npm run check:release` binds the
+release-candidate record's exact pending entry, artifact, migration, smoke,
+rollback and authority fields. One unrelated `Not run` value cannot conceal a
+premature candidate or promotion claim. Before the first real candidate,
+extend the validator in the same reviewed change to require immutable provider
+identifiers, durable evidence references and the complete approval set; do not
+delete the pending-state checks without replacing them with executed-state
+validation.
+
 ## Independent rollback
 
 - API rollback selects the prior immutable image/config while leaving forward migrations intact; use a reviewed forward repair when schema compatibility is lost.

@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { mkdir, writeFile } from "node:fs/promises";
+import path from "node:path";
 import { pathToFileURL } from "node:url";
 
 const required = (environment, name) => {
@@ -57,7 +59,7 @@ export async function deployProviderRevision({
   );
   assert.match(renderDeployment.id ?? "", /^dep-[A-Za-z0-9]+$/u);
   assert.equal(renderDeployment.commit?.id, revision);
-  await poll({
+  const renderReady = await poll({
     label: "Render API deployment",
     wait,
     read: async () => {
@@ -114,7 +116,7 @@ export async function deployProviderRevision({
       deployment.meta?.githubCommitSha ?? deployment.meta?.amanorSourceRevision,
       revision,
     );
-    await poll({
+    const ready = await poll({
       label: `${label} deployment`,
       wait,
       read: async () => {
@@ -138,13 +140,41 @@ export async function deployProviderRevision({
       failed: ({ state }) => ["ERROR", "CANCELED"].includes(state),
     });
     process.stdout.write(`${label} ${deployment.id} is ready.\n`);
+    return { project, deploymentId: deployment.id, state: ready.state };
   }
 
-  await deployVercel(
+  const admin = await deployVercel(
     required(environment, "VERCEL_ADMIN_PROJECT"),
     "Admin CMS",
   );
-  await deployVercel(required(environment, "VERCEL_WEB_PROJECT"), "Public Web");
+  const web = await deployVercel(
+    required(environment, "VERCEL_WEB_PROJECT"),
+    "Public Web",
+  );
+  const evidence = {
+    schemaVersion: 1,
+    sourceRevision: revision,
+    environment: required(environment, "AMANOR_SMOKE_ENVIRONMENT"),
+    createdAt: new Date().toISOString(),
+    deployments: {
+      api: {
+        serviceId: renderServiceId,
+        deploymentId: renderDeployment.id,
+        state: renderReady.state,
+      },
+      admin,
+      web,
+    },
+  };
+  const evidencePath = environment.AMANOR_DEPLOYMENT_EVIDENCE_PATH?.trim();
+  if (evidencePath) {
+    await mkdir(path.dirname(evidencePath), { recursive: true });
+    await writeFile(evidencePath, `${JSON.stringify(evidence, null, 2)}\n`, {
+      mode: 0o600,
+      flag: "wx",
+    });
+  }
+  return evidence;
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href)

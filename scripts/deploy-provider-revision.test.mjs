@@ -12,6 +12,7 @@ const environment = {
   VERCEL_ADMIN_PROJECT: "amanor-admin",
   VERCEL_WEB_PROJECT: "amanor-web",
   VERCEL_TARGET: "staging",
+  AMANOR_SMOKE_ENVIRONMENT: "staging",
 };
 
 const response = (value) =>
@@ -38,7 +39,7 @@ test("waits for exact API, Admin and Web revisions in order", async () => {
       readyState: "READY",
     },
   ];
-  await deployProviderRevision({
+  const evidence = await deployProviderRevision({
     environment,
     wait: async () => undefined,
     fetchImpl: async (url, options = {}) => {
@@ -57,6 +58,23 @@ test("waits for exact API, Admin and Web revisions in order", async () => {
   assert.match(calls[3].url, /dpl_admin1/u);
   assert.equal(JSON.parse(calls[4].options.body).name, "amanor-web");
   assert.match(calls[5].url, /dpl_web1/u);
+  assert.deepEqual(evidence.deployments, {
+    api: {
+      serviceId: "srv-amanorapi",
+      deploymentId: "dep-render1",
+      state: "live",
+    },
+    admin: {
+      project: "amanor-admin",
+      deploymentId: "dpl_admin1",
+      state: "READY",
+    },
+    web: {
+      project: "amanor-web",
+      deploymentId: "dpl_web1",
+      state: "READY",
+    },
+  });
 });
 
 test("fails before frontend deployment when Render reports a different revision", async () => {

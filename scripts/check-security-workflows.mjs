@@ -227,6 +227,8 @@ for (const invariant of [
   "verify-hosted-gates.mjs",
   "deploy-provider-revision.mjs",
   "wait-for-deployment-smoke.mjs",
+  "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7",
+  "retention-days: 90",
 ])
   assert.ok(
     deploy.includes(invariant),

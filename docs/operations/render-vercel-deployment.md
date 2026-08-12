@@ -89,6 +89,14 @@ the existing three-origin remote smoke passes. Provider acceptance is not
 staging acceptance; retain all three deployment IDs and reconcile them in the
 release record.
 
+Vercel `preview` and `production` use the built-in targets. Persistent
+`staging` requires a Vercel Pro/Enterprise custom environment named `staging`
+on both frontend projects (or a separately reviewed branch-preview design).
+The GitHub environment's `VERCEL_TARGET` must match its selected namespace.
+Each successful run retains a 90-day redacted artifact with the exact source
+SHA, three provider deployment IDs/projects and terminal states plus the remote
+smoke JSON; tokens, provider responses and hook URLs are never written.
+
 1. Resolve D01 and provision the API, public Web and Admin domains.
 2. Create separate MongoDB application, migration and retention users.
 3. Create the Render Blueprint with WebAuthn and Room disabled.

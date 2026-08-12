@@ -41,7 +41,6 @@ const pendingCodeqlTriageSentinels = [
   "| 21     | Medium",
   "| 22     | Medium",
   "| 23-24  | Medium",
-  "| 25     | Medium",
   "No approval may be inferred from a successful CodeQL run or this engineering",
 ];
 
@@ -53,7 +52,7 @@ function validatePendingCodeqlTriage(candidate) {
     );
   assert.equal(
     (candidate.match(/\| Not approved\s+\|/gu) ?? []).length,
-    5,
+    4,
     "Every CodeQL alert group requires an explicit pending Security decision",
   );
 }

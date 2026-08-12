@@ -7,6 +7,28 @@ import { Injectable, ServiceUnavailableException } from "@nestjs/common";
 
 const runFile = promisify(execFile);
 const maximumPdfBytes = 20 * 1024 * 1024;
+const maximumHtmlBytes = 2 * 1024 * 1024;
+
+export function assertOfflineGeneratedHtml(html: string): void {
+  if (
+    Buffer.byteLength(html, "utf8") > maximumHtmlBytes ||
+    !html.trimStart().toLowerCase().startsWith("<!doctype html>")
+  )
+    throw new Error("Generated HTML is missing or exceeds the size limit");
+  const normalized = html.toLowerCase();
+  for (const forbidden of [
+    "http:",
+    "https:",
+    'src="//',
+    "src='//",
+    'href="//',
+    "href='//",
+    "file:",
+    "javascript:",
+  ])
+    if (normalized.includes(forbidden))
+      throw new Error("Generated HTML may not reference external resources");
+}
 
 function executablePath(): string {
   if (process.env.CHROME_EXECUTABLE_PATH)
@@ -19,6 +41,7 @@ function executablePath(): string {
 @Injectable()
 export class BrowserPdfService {
   async render(html: string): Promise<Buffer<ArrayBufferLike>> {
+    assertOfflineGeneratedHtml(html);
     const directory = await mkdtemp(path.join(tmpdir(), "amanor-print-"));
     const source = path.join(directory, "document.html");
     const output = path.join(directory, "document.pdf");
@@ -29,6 +52,7 @@ export class BrowserPdfService {
         "--disable-gpu",
         "--disable-extensions",
         "--disable-background-networking",
+        "--host-resolver-rules=MAP * ~NOTFOUND",
         "--no-pdf-header-footer",
         "--run-all-compositor-stages-before-draw",
         `--print-to-pdf=${output}`,

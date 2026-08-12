@@ -20,7 +20,7 @@ for (const source of unsafeSources) {
   assert.notEqual(result.status, 0, `${source} must be rejected`);
   assert.match(
     `${result.stdout}${result.stderr}`,
-    /local loopback API \/v1\/docs-json endpoint/u,
+    /custom source arguments are forbidden/u,
     `${source} failed for an unexpected reason`,
   );
 }

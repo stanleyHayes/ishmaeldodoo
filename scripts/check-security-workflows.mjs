@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 
 const codeql = await readFile(".github/workflows/codeql.yml", "utf8");
 const quality = await readFile(".github/workflows/quality.yml", "utf8");
+const deploy = await readFile(".github/workflows/deploy.yml", "utf8");
 const governance = await readFile(
   "docs/operations/github-repository-governance.md",
   "utf8",
@@ -70,7 +71,7 @@ for (const sentinel of pendingCodeqlTriageSentinels)
     `CodeQL triage accepted premature mutation: ${sentinel}`,
   );
 
-for (const source of [codeql, quality]) {
+for (const source of [codeql, quality, deploy]) {
   const actionUses = [
     ...source.matchAll(/^\s*uses:\s+([^\s#]+)(?:\s+#\s+(\S+))?$/gmu),
   ];
@@ -188,7 +189,8 @@ for (const evidence of [
   "GitHub deployment namespaces: `preview`, `staging`, `production`",
   "Staging/production branch policy: `Protected branches only`",
   "Preview branch policy: `Any branch for pull-request previews`",
-  "These namespaces contain no secrets, variables,",
+  "These namespaces contain no secrets, variables,\nreviewers or deployments",
+  "The manual deployment workflow targets each namespace but remains fail-closed",
   "trust-boundary preparation, not evidence",
 ])
   assert.ok(
@@ -198,9 +200,10 @@ for (const evidence of [
 
 const pendingEnvironmentIntegrationSentinels = [
   "- Status: `Not integrated`",
-  "- Preview workflow/job and pull-request deployment evidence: `Not recorded`",
-  "- Staging workflow/job and protected-main deployment evidence: `Not recorded`",
-  "- Production workflow/job and approved-promotion evidence: `Not recorded`",
+  "- Manual preview/staging/production workflow definition: `Implemented; not executed`",
+  "- Preview workflow/job and pull-request deployment evidence: `Not run`",
+  "- Staging workflow/job and protected-main deployment evidence: `Not run`",
+  "- Production workflow/job and approved-promotion evidence: `Not run`",
   "- Web/Admin/API provider resources mapped per namespace: `Not provisioned`",
   "- Environment-scoped secret and variable inventory reconciliation: `Not run`",
   "- Preview/staging noindex and edge-access verification: `Not run`",
@@ -213,6 +216,27 @@ const pendingEnvironmentIntegrationSentinels = [
   "- Deployment Security approval and date: `Not approved`",
   "- Deployment Product acceptance and date: `Not approved`",
 ];
+
+for (const invariant of [
+  "workflow_dispatch:",
+  "environment: ${{ inputs.environment }}",
+  "cancel-in-progress: false",
+  "actions: read",
+  "persist-credentials: false",
+  "validate-deployment-dispatch.mjs",
+  "verify-hosted-gates.mjs",
+  "deploy-provider-revision.mjs",
+  "wait-for-deployment-smoke.mjs",
+])
+  assert.ok(
+    deploy.includes(invariant),
+    `Deployment workflow lost ${invariant}`,
+  );
+for (const forbidden of ["pull_request:", "push:", "VERCEL_DEPLOY_HOOK"])
+  assert.ok(
+    !deploy.includes(forbidden),
+    `Deployment workflow must not contain ${forbidden}`,
+  );
 
 function validatePendingEnvironmentIntegration(candidate) {
   for (const sentinel of pendingEnvironmentIntegrationSentinels)

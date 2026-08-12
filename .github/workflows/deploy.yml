@@ -1,0 +1,81 @@
+name: Deploy separated applications
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Protected GitHub environment and provider namespace
+        required: true
+        type: choice
+        options:
+          - preview
+          - staging
+          - production
+      revision:
+        description: Exact reviewed 40-character commit SHA to deploy
+        required: true
+        type: string
+      migration_evidence:
+        description: HTTPS evidence URL for backup, migration and idempotent rerun
+        required: true
+        type: string
+      confirmation:
+        description: Type DEPLOY to confirm provider mutation
+        required: true
+        type: string
+
+concurrency:
+  group: deploy-${{ inputs.environment }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  deploy:
+    name: Deploy API, Admin and Web
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: ${{ inputs.environment }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_TEAM_ID: ${{ vars.VERCEL_TEAM_ID }}
+      VERCEL_GITHUB_REPO_ID: ${{ vars.VERCEL_GITHUB_REPO_ID }}
+      VERCEL_ADMIN_PROJECT: ${{ vars.VERCEL_ADMIN_PROJECT }}
+      VERCEL_WEB_PROJECT: ${{ vars.VERCEL_WEB_PROJECT }}
+      VERCEL_TARGET: ${{ vars.VERCEL_TARGET }}
+      AMANOR_SMOKE_ENVIRONMENT: ${{ inputs.environment }}
+      AMANOR_SMOKE_API_URL: ${{ vars.AMANOR_SMOKE_API_URL }}
+      AMANOR_SMOKE_ADMIN_URL: ${{ vars.AMANOR_SMOKE_ADMIN_URL }}
+      AMANOR_SMOKE_WEB_URL: ${{ vars.AMANOR_SMOKE_WEB_URL }}
+      AMANOR_SMOKE_EDGE_AUTHORIZATION: ${{ secrets.AMANOR_SMOKE_EDGE_AUTHORIZATION }}
+    steps:
+      - name: Check out exact reviewed revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ inputs.revision }}
+          persist-credentials: false
+
+      - name: Validate immutable candidate and environment custody
+        env:
+          REQUESTED_REVISION: ${{ inputs.revision }}
+          MIGRATION_EVIDENCE: ${{ inputs.migration_evidence }}
+          DEPLOY_CONFIRMATION: ${{ inputs.confirmation }}
+        run: node scripts/validate-deployment-dispatch.mjs
+
+      - name: Require successful hosted gates for exact revision
+        env:
+          REQUESTED_REVISION: ${{ inputs.revision }}
+          GH_REPOSITORY: ${{ github.repository }}
+        run: node scripts/verify-hosted-gates.mjs
+
+      - name: Deploy exact revision to Render and Vercel
+        env:
+          REQUESTED_REVISION: ${{ inputs.revision }}
+        run: node scripts/deploy-provider-revision.mjs
+
+      - name: Verify three deployed origins
+        run: node scripts/wait-for-deployment-smoke.mjs

@@ -34,9 +34,8 @@ GitHub environment namespaces now mirror the three remote phases in the
 deployment contract. `staging` and `production` allow deployment only from
 protected branches; `preview` remains branch-agnostic so pull-request preview
 revisions can be represented. These namespaces contain no secrets, variables,
-reviewers or deployments and no workflow currently targets them. They are
-trust-boundary preparation, not evidence that Render, Vercel, MongoDB,
-Cloudinary or any other provider environment is provisioned.
+reviewers or deployments. The manual deployment workflow targets each namespace but remains fail-closed until its environment-scoped provider credentials,
+resource identifiers and origins are supplied. This is trust-boundary preparation, not evidence that Render, Vercel, MongoDB, Cloudinary or any other provider environment is provisioned.
 
 GitHub Actions is repository-restricted to GitHub-owned actions plus the four
 named third-party action families used by the reviewed workflows. All actions,
@@ -51,9 +50,10 @@ disabling SHA enforcement or granting repository-wide write permission.
 ## Deployment-environment integration record
 
 - Status: `Not integrated`
-- Preview workflow/job and pull-request deployment evidence: `Not recorded`
-- Staging workflow/job and protected-main deployment evidence: `Not recorded`
-- Production workflow/job and approved-promotion evidence: `Not recorded`
+- Manual preview/staging/production workflow definition: `Implemented; not executed`
+- Preview workflow/job and pull-request deployment evidence: `Not run`
+- Staging workflow/job and protected-main deployment evidence: `Not run`
+- Production workflow/job and approved-promotion evidence: `Not run`
 - Web/Admin/API provider resources mapped per namespace: `Not provisioned`
 - Environment-scoped secret and variable inventory reconciliation: `Not run`
 - Preview/staging noindex and edge-access verification: `Not run`

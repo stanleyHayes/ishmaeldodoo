@@ -20,9 +20,12 @@ review enforcement remain pending the controlled workflow transition in the
 repository-governance record.
 
 GitHub `preview`, `staging` and `production` namespaces exist, with staging and
-production limited to protected branches. No deployment workflow, secret,
-reviewer or provider resource is bound to them yet; complete the controlled
-deployment-environment integration record before treating them as provisioned.
+production limited to protected branches. The manual workflow binds deployment
+jobs to the selected namespace, exact reviewed SHA, hosted Quality/CodeQL pass,
+migration evidence, separate Render/Vercel provider APIs and three-origin smoke.
+No environment secret, variable, reviewer or provider resource is configured
+yet; complete the controlled deployment-environment integration record before
+treating any namespace as provisioned or deployed.
 
 ## Candidate entry criteria
 

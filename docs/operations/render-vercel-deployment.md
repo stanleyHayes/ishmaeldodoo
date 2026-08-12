@@ -107,6 +107,14 @@ Before binding, it independently requires Render `live`, both Vercel releases
 timestamps and smoke evidence that does not predate the provider result.
 Tokens, provider responses and hook URLs are never written.
 
+The provider step also writes an atomic, redacted `provider-attempt.json`
+after every accepted trigger and polled state. The artifact upload runs even
+when a later provider, smoke or binding step fails, preserving the exact
+deployment IDs/projects, last states and failed phase needed for diagnosis and
+rollback. The attempt journal contains no request bodies, response payloads,
+tokens or exception text and is diagnostic only; it cannot substitute for the
+strict successful manifest.
+
 1. Resolve D01 and provision the API, public Web and Admin domains.
 2. Create separate MongoDB application, migration and retention users.
 3. Create the Render Blueprint with WebAuthn and Room disabled.

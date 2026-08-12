@@ -1,4 +1,7 @@
 import assert from "node:assert/strict";
+import { mkdtemp, readFile } from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 import test from "node:test";
 import { deployProviderRevision } from "./deploy-provider-revision.mjs";
 
@@ -22,6 +25,8 @@ const response = (value) =>
   });
 
 test("waits for exact API, Admin and Web revisions in order", async () => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "amanor-provider-"));
+  const attemptPath = path.join(directory, "attempt.json");
   const calls = [];
   const values = [
     { id: "dep-render1", commit: { id: revision } },
@@ -40,7 +45,10 @@ test("waits for exact API, Admin and Web revisions in order", async () => {
     },
   ];
   const evidence = await deployProviderRevision({
-    environment,
+    environment: {
+      ...environment,
+      AMANOR_DEPLOYMENT_ATTEMPT_PATH: attemptPath,
+    },
     wait: async () => undefined,
     fetchImpl: async (url, options = {}) => {
       calls.push({ url: String(url), options });
@@ -75,6 +83,10 @@ test("waits for exact API, Admin and Web revisions in order", async () => {
       state: "READY",
     },
   });
+  const attempt = JSON.parse(await readFile(attemptPath, "utf8"));
+  assert.equal(attempt.outcome, "succeeded");
+  assert.equal(attempt.phase, "complete");
+  assert.deepEqual(attempt.deployments, evidence.deployments);
 });
 
 test("fails before frontend deployment when Render reports a different revision", async () => {
@@ -93,6 +105,8 @@ test("fails before frontend deployment when Render reports a different revision"
 });
 
 test("fails before Web deployment when Admin enters a terminal error", async () => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "amanor-provider-"));
+  const attemptPath = path.join(directory, "attempt.json");
   const values = [
     { id: "dep-render1", commit: { id: revision } },
     { id: "dep-render1", commit: { id: revision }, status: "live" },
@@ -105,11 +119,30 @@ test("fails before Web deployment when Admin enters a terminal error", async () 
   ];
   await assert.rejects(
     deployProviderRevision({
-      environment,
+      environment: {
+        ...environment,
+        AMANOR_DEPLOYMENT_ATTEMPT_PATH: attemptPath,
+      },
       wait: async () => undefined,
       fetchImpl: async () => response(values.shift()),
     }),
     /Admin CMS deployment failed/iu,
   );
   assert.equal(values.length, 0);
+  const attempt = JSON.parse(await readFile(attemptPath, "utf8"));
+  assert.equal(attempt.outcome, "failed");
+  assert.equal(attempt.phase, "admin");
+  assert.deepEqual(attempt.deployments, {
+    api: {
+      serviceId: "srv-amanorapi",
+      deploymentId: "dep-render1",
+      state: "live",
+    },
+    admin: {
+      project: "amanor-admin",
+      deploymentId: "dpl_admin1",
+      state: "ERROR",
+    },
+  });
+  assert.ok(!JSON.stringify(attempt).includes("token"));
 });

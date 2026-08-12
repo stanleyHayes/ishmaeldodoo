@@ -83,6 +83,7 @@ jobs:
         env:
           REQUESTED_REVISION: ${{ inputs.revision }}
           AMANOR_DEPLOYMENT_EVIDENCE_PATH: deployment-evidence/provider-deployments.json
+          AMANOR_DEPLOYMENT_ATTEMPT_PATH: deployment-evidence/provider-attempt.json
         run: node scripts/deploy-provider-revision.mjs
 
       - name: Verify three deployed origins
@@ -103,9 +104,10 @@ jobs:
         run: node scripts/bind-deployment-evidence.mjs
 
       - name: Retain immutable deployment evidence
+        if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: deployment-${{ inputs.environment }}-${{ inputs.revision }}
           path: deployment-evidence
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 90

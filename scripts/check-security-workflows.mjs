@@ -227,11 +227,13 @@ for (const invariant of [
   "verify-hosted-gates.mjs",
   "AMANOR_HOSTED_GATES_EVIDENCE_PATH: deployment-evidence/hosted-gates.json",
   "deploy-provider-revision.mjs",
+  "AMANOR_DEPLOYMENT_ATTEMPT_PATH: deployment-evidence/provider-attempt.json",
   "wait-for-deployment-smoke.mjs",
   "bind-deployment-evidence.mjs",
   "AMANOR_MIGRATION_EVIDENCE: ${{ inputs.migration_evidence }}",
   "AMANOR_MIGRATION_EVIDENCE_SHA256: ${{ inputs.migration_evidence_sha256 }}",
   "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7",
+  "if: always()",
   "retention-days: 90",
 ])
   assert.ok(

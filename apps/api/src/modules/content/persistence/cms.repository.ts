@@ -285,15 +285,32 @@ export class CmsRepository {
         },
         { upsert: true, session },
       );
-      await database.collection<VersionDocument>("content_versions").updateOne(
-        {
-          documentType: input.publication.documentType,
-          documentId: input.publication.documentId,
-          version: input.publication.version,
-        },
-        { $set: { state: "published", updatedAt: new Date() } },
-        { session },
-      );
+      const versionUpdate = await database
+        .collection<VersionDocument>("content_versions")
+        .updateOne(
+          {
+            documentType: input.publication.documentType,
+            documentId: input.publication.documentId,
+            version: input.publication.version,
+            // Optimistic guard: the version must STILL be in a publishable state
+            // at commit time. The publish/rollback flows validate state and the
+            // two-person reviewer outside this transaction; without this guard a
+            // concurrent request_changes (which moves the version to draft/in_review
+            // via the guarded replaceVersion) could be force-published, bypassing
+            // the workflow and the independent-approval rule. The set is the union
+            // of publishable target states - publish (approved/scheduled/published)
+            // and rollback (published/superseded) - and deliberately excludes the
+            // unapproved draft/in_review states. A miss aborts the whole
+            // transaction, so nothing is published.
+            state: {
+              $in: ["approved", "scheduled", "published", "superseded"],
+            },
+          },
+          { $set: { state: "published", updatedAt: new Date() } },
+          { session },
+        );
+      if (versionUpdate.matchedCount === 0)
+        throw new Error("Content changed concurrently; reload and retry");
       if (previous && previous.version !== input.publication.version) {
         const remainingLocales = await database
           .collection<Publication>("publications")

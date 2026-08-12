@@ -1,3 +1,4 @@
+import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import {
   executeLoadStage,
@@ -31,8 +32,43 @@ for (const field of [
   "Security approval/date",
 ])
   if (!record.includes(field)) throw new Error(`Load record misses ${field}`);
-if (!record.includes("Not run") || !record.includes("Not approved"))
-  throw new Error("Load record must default to an unexecuted state");
+const pendingRecordSentinels = [
+  "- Status: `Not run`",
+  "- Environment: `Not recorded`",
+  "- Staging revisions (Web/Admin/API): `Not recorded`",
+  "- Baseline kind/source/observed at: `Not recorded`",
+  "- Baseline requests per second: `Not recorded`",
+  "- 100x target requests per second: `Not recorded`",
+  "- Surge start/end: `Not recorded`",
+  "- Load-plan checksum: `Not recorded`",
+  "- Result checksum: `Not recorded`",
+  "- Public request count/achieved rate/error rate/p95: `Not recorded`",
+  "- Protocol Desk attempts/success/p95: `Not recorded`",
+  "- Restricted Protocol references evidence location: `Not recorded`",
+  "- Web/API/Mongo/queue/edge graphs: `Not attached`",
+  "- Synthetic-record cleanup evidence: `Not recorded`",
+  "- Operations approval/date: `Not approved`",
+  "- Product approval/date: `Not approved`",
+  "- Security approval/date: `Not approved`",
+];
+
+function validatePendingRecord(candidate) {
+  for (const sentinel of pendingRecordSentinels)
+    assert.ok(
+      candidate.includes(sentinel),
+      `Load record no longer proves the pre-execution state: ${sentinel}`,
+    );
+}
+
+validatePendingRecord(record);
+for (const sentinel of pendingRecordSentinels) {
+  const mutated = record.replace(sentinel, "[prematurely changed]");
+  assert.throws(
+    () => validatePendingRecord(mutated),
+    undefined,
+    `Load record accepted mutation of required sentinel: ${sentinel}`,
+  );
+}
 
 let templateRejected = false;
 try {
@@ -163,5 +199,5 @@ if (
   throw new Error("Direct scheduler did not preserve safe synthetic traffic");
 
 process.stdout.write(
-  "Load rehearsal enforces a dated baseline, exact 100x surge, 6 strict checks and concurrent Protocol Desk functionality.\n",
+  `Load rehearsal enforces a dated baseline, exact 100x surge, 6 strict checks and concurrent Protocol Desk functionality; ${pendingRecordSentinels.length} pre-execution evidence mutations fail closed.\n`,
 );

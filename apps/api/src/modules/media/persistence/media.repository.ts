@@ -35,6 +35,16 @@ export class MediaRepository {
   async create(asset: MediaAsset): Promise<void> {
     await this.collection().insertOne(asset);
   }
+  async existsByPublicId(
+    publicId: string,
+    resourceType: MediaAsset["resourceType"],
+  ): Promise<boolean> {
+    const existing = await this.collection().findOne(
+      { publicId, resourceType },
+      { projection: { _id: 1 } },
+    );
+    return existing !== null;
+  }
   async find(assetId: string): Promise<MediaAsset | null> {
     return this.collection().findOne({ assetId }, { projection: { _id: 0 } });
   }

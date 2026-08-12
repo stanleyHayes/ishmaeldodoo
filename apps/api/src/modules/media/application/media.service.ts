@@ -33,6 +33,14 @@ const permittedFormats: Readonly<
   raw: new Set(["pdf"]),
 };
 
+function isDuplicateKeyError(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    (error as { code?: unknown }).code === 11000
+  );
+}
+
 @Injectable()
 export class MediaService {
   constructor(
@@ -54,6 +62,15 @@ export class MediaService {
     actor: EditorialActor,
   ): Promise<MediaAsset> {
     this.assertMediaRole(actor);
+    // Reject an already-registered identifier before touching Cloudinary. This
+    // stops a media-role user from re-registering (and, via the duplicate-key
+    // cleanup path below, destroying) an asset uploaded by someone else.
+    if (
+      await this.repository.existsByPublicId(input.publicId, input.resourceType)
+    )
+      throw new Error(
+        "A media asset for this identifier is already registered",
+      );
     const verified = await this.cloudinary.verifyAsset(
       input.publicId,
       input.resourceType,
@@ -84,6 +101,13 @@ export class MediaService {
     try {
       await this.repository.create(asset);
     } catch (error) {
+      // A unique-key collision means another registration already owns this
+      // asset; destroying it would delete that owner's live asset, so only
+      // clean up the freshly uploaded orphan on other (transient) failures.
+      if (isDuplicateKeyError(error))
+        throw new Error(
+          "A media asset for this identifier is already registered",
+        );
       try {
         await this.cloudinary.destroy(input.publicId, input.resourceType);
       } catch {

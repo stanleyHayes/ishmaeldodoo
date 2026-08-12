@@ -39,6 +39,7 @@ function fixture(bytes = 1_000, format = "jpg") {
   };
   const repository = {
     create: vi.fn().mockResolvedValue(undefined),
+    existsByPublicId: vi.fn().mockResolvedValue(false),
     find: vi.fn(),
     findPublic: vi.fn(),
     list: vi.fn(),
@@ -134,6 +135,33 @@ describe("MediaService", () => {
         roles: ["editor"],
       }),
     ).rejects.toThrow(/requires reconciliation/i);
+  });
+
+  it("refuses to re-register an already-registered asset without touching the provider", async () => {
+    const { service, cloudinary, repository } = fixture();
+    repository.existsByPublicId.mockResolvedValue(true);
+    await expect(
+      service.completeUpload(input, { id: "editor-1", roles: ["editor"] }),
+    ).rejects.toThrow(/already registered/i);
+    expect(repository.existsByPublicId).toHaveBeenCalledWith(
+      input.publicId,
+      "image",
+    );
+    // The existing asset must not be verified, destroyed or overwritten.
+    expect(cloudinary.verifyAsset).not.toHaveBeenCalled();
+    expect(cloudinary.destroy).not.toHaveBeenCalled();
+    expect(repository.create).not.toHaveBeenCalled();
+  });
+
+  it("never destroys the provider asset on a unique-key registry collision", async () => {
+    const { service, cloudinary, repository } = fixture();
+    repository.create.mockRejectedValue({ code: 11000 });
+    await expect(
+      service.completeUpload(input, { id: "editor-1", roles: ["editor"] }),
+    ).rejects.toThrow(/already registered/i);
+    // A duplicate key means another registration owns the asset; deleting it
+    // would destroy that owner's live asset.
+    expect(cloudinary.destroy).not.toHaveBeenCalled();
   });
 
   it("invalidates Cloudinary before retiring the registry record", async () => {

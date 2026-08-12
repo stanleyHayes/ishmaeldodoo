@@ -17,3 +17,6 @@ This policy is the deployment contract for the independently hosted public web, 
 ## Required evidence before launch
 
 Export the active ruleset, redact account identifiers, and attach it to the launch record. From staging, prove one allowed request and one blocked/challenged request for each rule class; prove `429` does not cache; inspect origin logs for request/trace correlation; test rollback to the previous ruleset; record operator, timestamps and notification results. Security approval and a provider-side bot false-positive review are mandatory before AMANOR-034 can move to `DONE`.
+
+Record the full provider configuration and staging drill in the controlled
+[`edge-abuse-rehearsal-record.md`](../../docs/security/templates/edge-abuse-rehearsal-record.md).

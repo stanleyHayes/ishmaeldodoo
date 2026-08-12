@@ -31,6 +31,10 @@ Before staging acceptance, prove both preservation and spoof resistance against 
 
 This drill validates the provider path; local unit tests and a configured hop count do not. Keep Cloudflare WAF enforcement external to the application rate limit so neither control silently substitutes for the other.
 
+Capture the trusted-proxy proof together with the wider WAF/bot/abuse exercise
+in the controlled
+[`edge-abuse-rehearsal-record.md`](../security/templates/edge-abuse-rehearsal-record.md).
+
 ### Migration promotion gate
 
 Create a separate MongoDB migration identity and store `MONGODB_MIGRATION_URI` only in the protected release environment that executes:

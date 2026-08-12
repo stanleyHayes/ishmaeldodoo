@@ -307,6 +307,21 @@ const handover = await readFile(
   new URL("../docs/handover/README.md", import.meta.url),
   "utf8",
 );
+const edgePolicy = await readFile(
+  new URL("../infra/security/edge-abuse-policy.md", import.meta.url),
+  "utf8",
+);
+const deploymentRunbook = await readFile(
+  new URL("../docs/operations/render-vercel-deployment.md", import.meta.url),
+  "utf8",
+);
+const edgeRecord = await readFile(
+  new URL(
+    "../docs/security/templates/edge-abuse-rehearsal-record.md",
+    import.meta.url,
+  ),
+  "utf8",
+);
 for (const namespace of [
   "press-kit-ip",
   "media-enquiry-ip",
@@ -374,6 +389,63 @@ assert.ok(
   ),
 );
 
+const pendingEdgeSentinels = [
+  "- Status: `Not run`",
+  "- Environment, release and Web/Admin/API revisions: `Not recorded`",
+  "- Cloudflare account/zone, ruleset revision and redacted export: `Not recorded`",
+  "- Public, Admin and API custom origins plus direct-origin state: `Not recorded`",
+  "- Exercise window, operators and controlled source locations: `Not scheduled`",
+  "- HTTPS redirect, TLS/HSTS and approved-host enforcement: `Not run`",
+  "- Admin identity-aware access and non-browser denial: `Not run`",
+  "- Managed WAF malformed-method/body/encoding/traversal rules: `Not run`",
+  "- Route-specific body limits for analytics/auth/forms/CMS: `Not run`",
+  "- Authentication/public-submit/analytics/read edge rate policies: `Not run`",
+  "- Bot challenge for verified-bad automation: `Not run`",
+  "- Accessibility, no-JavaScript, low-bandwidth and institutional false-positive review: `Not run`",
+  "- Signed revalidation bypass requires origin signature validation: `Not run`",
+  "- X-Request-ID and traceparent preservation without edge-data analytics leakage: `Not run`",
+  "- Trusted-proxy one-hop path and 31 spoofed-header requests: `Not run`",
+  "- Second controlled source receives independent application allowance: `Not run`",
+  "- Custom and direct Render paths produce equal limiter identity: `Not run`",
+  "- Direct Render/Vercel origins restricted after path validation: `Not run`",
+  "- Distributed-IP credential-stuffing and public-form abuse result: `Not run`",
+  "- Oversized JSON/form, conflicting length and invalid transfer result: `Not run`",
+  "- Slow-request and connection-exhaustion result: `Not run`",
+  "- Bot-provider/WAF outage and fail-safe behavior: `Not run`",
+  "- Edge and Mongo application limits independently enforced: `Not run`",
+  "- 429/403/challenge responses are bounded, non-reflective and not cached: `Not run`",
+  "- Alert delivery, acknowledgement, recovery and dashboard evidence: `Not run`",
+  "- Previous-ruleset rollback and post-rollback smoke: `Not run`",
+  "- Legitimate traffic and institutional mailbox/provider callbacks unaffected: `Not run`",
+  "- Synthetic data, temporary access and provider artifacts cleaned up: `Not run`",
+  "- IPs, emails, tokens, cookies, payloads and bot scores non-disclosure review: `Not run`",
+  "- Defects, owners, dates and successful retest evidence: `None recorded`",
+  "- Security approval/date: `Not approved`",
+  "- Operations approval/date: `Not approved`",
+  "- Accessibility/Privacy approval/date: `Not approved`",
+  "- Product approval/date: `Not approved`",
+];
+
+function validatePendingEdge(candidate) {
+  for (const sentinel of pendingEdgeSentinels)
+    assert.ok(
+      candidate.includes(sentinel),
+      `Edge abuse record no longer proves pending state: ${sentinel}`,
+    );
+}
+
+validatePendingEdge(edgeRecord);
+for (const sentinel of pendingEdgeSentinels)
+  assert.throws(() =>
+    validatePendingEdge(edgeRecord.replace(sentinel, "[prematurely changed]")),
+  );
+const edgeLink = "edge-abuse-rehearsal-record.md";
+assert.ok(edgePolicy.includes(edgeLink));
+assert.ok(deploymentRunbook.includes(edgeLink));
+assert.ok(
+  handover.includes("../security/templates/edge-abuse-rehearsal-record.md"),
+);
+
 console.log(
-  `Security headers, CSP origins, API hardening, privileged-read audit and abuse controls are internally consistent; ${pendingAssessmentSentinels.length} independent-assessment pending-state mutations fail closed.`,
+  `Security headers, CSP origins, API hardening, privileged-read audit and abuse controls are internally consistent; ${pendingAssessmentSentinels.length} independent-assessment and ${pendingEdgeSentinels.length} edge-abuse pending-state mutations fail closed.`,
 );

@@ -7,14 +7,15 @@ supported when its maintainers explicitly say otherwise.
 
 ## Current compatibility decision
 
-Registry metadata was reviewed on 11 August 2026 after a root `npm outdated`
-check. Every direct dependency is at its current wanted release. The only newer
-versions reported are deliberately held at the latest supported major:
+Registry metadata and the installed graph were reviewed on 12 August 2026 after
+a root `npm outdated` check. Every direct dependency is at its current wanted
+release. The only newer versions reported are deliberately held at the latest
+supported major:
 
-| Package    | Locked version | Newer registry version | Reason not adopted                                                                                                                                                                                                                 |
-| ---------- | -------------: | ---------------------: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ESLint     |         9.39.5 |                 10.8.1 | Next.js 16.3.0 currently installs `eslint-plugin-react@7.37.5`, `eslint-plugin-jsx-a11y@6.10.2` and `eslint-plugin-import@2.32.0`; their published peer ranges stop at ESLint 9. An ESLint 10 dry run requires npm peer overrides. |
-| TypeScript |          6.0.3 |                  7.0.2 | `typescript-eslint@8.67.0`, also used by `eslint-config-next@16.3.0`, publishes `typescript >=4.8.4 <6.1.0`. TypeScript 7 is outside that range.                                                                                   |
+| Package    | Locked version | Newer registry version | Reason not adopted                                                                                                                                                                                                                                                                                                                                |
+| ---------- | -------------: | ---------------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ESLint     |         9.39.5 |                 10.8.1 | Next.js 16.3.0 currently installs `eslint-plugin-react@7.37.5`, `eslint-plugin-jsx-a11y@6.10.2` and `eslint-plugin-import@2.32.0`; their published peer ranges stop at ESLint 9. A clean ESLint 10 dry run requires npm peer overrides, then Next's bundled React rule crashes while loading because it still uses the ESLint 9 rule-context API. |
+| TypeScript |          6.0.3 |                  7.0.2 | `typescript-eslint@8.67.0`, also used by `eslint-config-next@16.3.0`, publishes `typescript >=4.8.4 <6.1.0`. TypeScript 7 is outside that range.                                                                                                                                                                                                  |
 
 These are compatibility holds, not permanent pins. Dependabot checks npm and
 GitHub Actions weekly. Compatible patch and minor updates are grouped; unrelated

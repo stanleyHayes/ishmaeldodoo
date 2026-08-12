@@ -35,3 +35,7 @@ API-only secrets belong only to the independently deployed NestJS service. In pa
 5. Roll back only the affected image by digest. Keep API contracts backward compatible for at least the active and previous frontend revisions.
 
 CI exercises both runtime images, generates separate SPDX SBOMs, fails on fixable high or critical vulnerabilities, and retains SBOM/SARIF evidence for 90 days. Registry publication, environment provisioning, signing, and a staging rollback rehearsal remain hosting-dependent release gates.
+
+Complete those hosting-dependent gates for Web, Admin/CMS and API together in
+the controlled
+[image supply-chain acceptance record](../security/templates/image-supply-chain-acceptance-record.md).

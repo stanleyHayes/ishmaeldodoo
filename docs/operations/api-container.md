@@ -25,3 +25,8 @@ The verifier requires the `infra_default` test network. It builds the image, sta
 7. Roll back by immutable image digest only when the prior application remains compatible with the forward-only database shape.
 
 Production promotion still requires image signing, registry retention rules, staging deployment, and rollback rehearsal.
+
+Record the exact API digest beside the independently built Web and Admin/CMS
+digests in the controlled
+[image supply-chain acceptance record](../security/templates/image-supply-chain-acceptance-record.md).
+The signature, provenance, SPDX and scan must all bind that same digest.

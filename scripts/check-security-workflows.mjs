@@ -8,6 +8,10 @@ const governance = await readFile(
   "utf8",
 );
 const disclosurePolicy = await readFile("SECURITY.md", "utf8");
+const supplyChainAcceptance = await readFile(
+  "docs/security/templates/image-supply-chain-acceptance-record.md",
+  "utf8",
+);
 
 for (const invariant of [
   "pull_request:",
@@ -69,6 +73,72 @@ for (const evidence of [
   assert.ok(
     governance.includes(evidence),
     `Repository governance lost verified history-protection evidence: ${evidence}`,
+  );
+
+const pendingSupplyChainSentinels = [
+  "- Status: `Not run`",
+  "- Environment, release and immutable source revision: `Not recorded`",
+  "- Registry provider, account, region and repository identifiers: `Not selected`",
+  "- Build workflow run, runner identity and trusted-builder revision: `Not recorded`",
+  "- Signing method, issuer and expected identity policy: `Not approved`",
+  "- Transparency log or managed audit-log evidence: `Not recorded`",
+  "- Registry tag immutability and digest-only deployment proof: `Not run`",
+  "- Registry retention, deletion protection and vulnerability-rescan policy: `Not approved`",
+  "- Build isolation, least privilege and credential-lifetime evidence: `Not run`",
+  "- Source revision and lockfile digests match provenance subjects: `Not run`",
+  "- Provenance builder/workflow/ref/repository identity verified: `Not run`",
+  "- Signature identity and certificate/managed-key policy verified: `Not run`",
+  "- Signature, provenance, SBOM and scan all bind each exact image digest: `Not run`",
+  "- High/critical fixable vulnerability result is zero for all three images: `Not run`",
+  "- Render/Vercel release artifacts map to the reviewed deployable digests: `Not run`",
+  "- Promotion rejects unsigned, mismatched, mutable-tag and untrusted-builder artifacts: `Not run`",
+  "- Prior Web/Admin/API rollback digests remain available and verifiable: `Not run`",
+  "- Signing identity/key compromise, revocation and emergency rebuild drill: `Not run`",
+  "- Superseded test tags/artifacts and temporary credentials removed: `Not run`",
+  "- Defects, severity, owners, target dates and retest evidence: `None recorded`",
+  "- Engineering/Release approval and date: `Not approved`",
+  "- Security approval and date: `Not approved`",
+  "- Operations acceptance and date: `Not approved`",
+];
+
+function validatePendingSupplyChain(candidate) {
+  for (const sentinel of pendingSupplyChainSentinels)
+    assert.ok(
+      candidate.includes(sentinel),
+      `Image supply-chain record no longer proves pending state: ${sentinel}`,
+    );
+  for (const deployable of ["Public Web", "Admin/CMS", "NestJS API"])
+    assert.match(
+      candidate,
+      new RegExp(
+        `^\\| ${deployable.replace("/", "\\/")}\\s+\\| Not recorded\\s+\\| Not recorded\\s+\\| Not recorded\\s+\\| Not recorded\\s+\\| Not run\\s+\\| Not run\\s+\\|$`,
+        "mu",
+      ),
+      `Image supply-chain record lost pending ${deployable} artifact row`,
+    );
+}
+
+validatePendingSupplyChain(supplyChainAcceptance);
+for (const sentinel of pendingSupplyChainSentinels)
+  assert.throws(
+    () =>
+      validatePendingSupplyChain(
+        supplyChainAcceptance.replace(sentinel, "[prematurely changed]"),
+      ),
+    undefined,
+    `Image supply-chain record accepted premature mutation: ${sentinel}`,
+  );
+for (const deployable of ["Public Web", "Admin/CMS", "NestJS API"])
+  assert.throws(
+    () =>
+      validatePendingSupplyChain(
+        supplyChainAcceptance.replace(
+          new RegExp(`^\\| ${deployable.replace("/", "\\/")}.*$`, "mu"),
+          "[prematurely changed]",
+        ),
+      ),
+    undefined,
+    `Image supply-chain record accepted premature ${deployable} row mutation`,
   );
 
 for (const evidence of [
@@ -141,5 +211,5 @@ assert.equal(
 );
 
 process.stdout.write(
-  `Security CI preserves CodeQL SAST and three image SARIF vulnerability gates; active main-history protection is recorded while ${pendingRequiredCheckSentinels.length} required-check transition fields fail closed.\n`,
+  `Security CI preserves CodeQL SAST and three image SARIF vulnerability gates; active main-history protection is recorded while ${pendingRequiredCheckSentinels.length} required-check and ${pendingSupplyChainSentinels.length + 3} image supply-chain fields fail closed.\n`,
 );

@@ -16,6 +16,10 @@ const exactKeys = (value, keys, label) =>
     `${label} keys`,
   );
 const digest = (buffer) => createHash("sha256").update(buffer).digest("hex");
+const validTimestamp = (value, label) => {
+  assert.equal(typeof value, "string", `${label} must be a timestamp`);
+  assert.ok(Number.isFinite(Date.parse(value)), `${label} must be a timestamp`);
+};
 const expectedChecks = [
   "independentOrigins",
   "protectedNonProduction",
@@ -96,10 +100,49 @@ export async function bindDeploymentEvidence(environment = process.env) {
     environment,
     "AMANOR_SMOKE_ENVIRONMENT",
   );
+  assert.ok(
+    ["preview", "staging", "production"].includes(deploymentEnvironment),
+    "deployment environment is invalid",
+  );
   assert.equal(provider.sourceRevision, revision);
   assert.equal(provider.environment, deploymentEnvironment);
+  validTimestamp(provider.createdAt, "provider createdAt");
+  assert.match(provider.deployments.api.serviceId, /^srv-[A-Za-z0-9]+$/u);
+  assert.match(provider.deployments.api.deploymentId, /^dep-[A-Za-z0-9]+$/u);
+  assert.equal(provider.deployments.api.state, "live");
+  for (const application of ["admin", "web"]) {
+    assert.match(
+      provider.deployments[application].project,
+      /^[A-Za-z0-9][A-Za-z0-9._-]*$/u,
+    );
+    assert.match(
+      provider.deployments[application].deploymentId,
+      /^dpl_[A-Za-z0-9]+$/u,
+    );
+    assert.equal(provider.deployments[application].state, "READY");
+  }
+  assert.notEqual(
+    provider.deployments.admin.project,
+    provider.deployments.web.project,
+    "Admin and Web must use distinct Vercel projects",
+  );
+  assert.notEqual(
+    provider.deployments.admin.deploymentId,
+    provider.deployments.web.deploymentId,
+    "Admin and Web must use distinct Vercel deployments",
+  );
   assert.equal(smoke.environment, deploymentEnvironment);
+  validTimestamp(smoke.checkedAt, "smoke checkedAt");
+  assert.ok(
+    Date.parse(smoke.checkedAt) >= Date.parse(provider.createdAt),
+    "smoke evidence predates provider deployment evidence",
+  );
   assert.equal(hostedGates.sourceRevision, revision);
+  validTimestamp(hostedGates.verifiedAt, "hosted gates verifiedAt");
+  assert.ok(
+    Date.parse(hostedGates.verifiedAt) <= Date.parse(provider.createdAt),
+    "provider deployment evidence predates hosted gate verification",
+  );
   assert.equal(
     hostedGates.repository,
     required(environment, "AMANOR_DEPLOYMENT_REPOSITORY"),
@@ -121,6 +164,19 @@ export async function bindDeploymentEvidence(environment = process.env) {
     );
   }
   exactKeys(smoke.origins, ["api", "admin", "web"], "smoke origins");
+  for (const [application, origin] of Object.entries(smoke.origins)) {
+    const url = new URL(origin);
+    assert.equal(
+      url.protocol,
+      "https:",
+      `${application} smoke origin protocol`,
+    );
+    assert.equal(url.username, "", `${application} smoke origin credentials`);
+    assert.equal(url.password, "", `${application} smoke origin credentials`);
+    assert.equal(url.pathname, "/", `${application} smoke origin path`);
+    assert.equal(url.search, "", `${application} smoke origin query`);
+    assert.equal(url.hash, "", `${application} smoke origin fragment`);
+  }
   exactKeys(smoke.checks, expectedChecks, "smoke checks");
   assert.deepEqual(Object.values(smoke.checks), Array(7).fill("passed"));
   assert.equal(new Set(Object.values(smoke.origins)).size, 3);

@@ -10,7 +10,7 @@ const provider = {
   schemaVersion: 1,
   sourceRevision: revision,
   environment: "staging",
-  createdAt: "2026-08-12T00:00:00.000Z",
+  createdAt: "2026-08-12T00:00:45.000Z",
   deployments: {
     api: { serviceId: "srv-api", deploymentId: "dep-api", state: "live" },
     admin: { project: "admin", deploymentId: "dpl_admin", state: "READY" },
@@ -72,7 +72,11 @@ const environment = (directory) => ({
   AMANOR_MIGRATION_EVIDENCE: "https://evidence.example.test/migration/123",
   AMANOR_MIGRATION_EVIDENCE_SHA256: `sha256:${"b".repeat(64)}`,
 });
-async function fixture(providerValue = provider, smokeValue = smoke) {
+async function fixture(
+  providerValue = provider,
+  smokeValue = smoke,
+  hostedGatesValue = hostedGates,
+) {
   const directory = await mkdtemp(path.join(os.tmpdir(), "amanor-deploy-"));
   await Promise.all([
     writeFile(
@@ -82,7 +86,7 @@ async function fixture(providerValue = provider, smokeValue = smoke) {
     writeFile(path.join(directory, "smoke.json"), JSON.stringify(smokeValue)),
     writeFile(
       path.join(directory, "hosted-gates.json"),
-      JSON.stringify(hostedGates),
+      JSON.stringify(hostedGatesValue),
     ),
   ]);
   return directory;
@@ -112,6 +116,56 @@ test("rejects environment mismatch and secret-like evidence", async () => {
   await assert.rejects(
     bindDeploymentEvidence(
       environment(await fixture({ ...provider, secret: "must-not-escape" })),
+    ),
+  );
+});
+
+test("rejects forged provider terminal state and deployment identity", async () => {
+  for (const deployments of [
+    {
+      ...provider.deployments,
+      api: { ...provider.deployments.api, state: "build_failed" },
+    },
+    {
+      ...provider.deployments,
+      admin: { ...provider.deployments.admin, state: "ERROR" },
+    },
+    {
+      ...provider.deployments,
+      web: {
+        ...provider.deployments.web,
+        deploymentId: provider.deployments.admin.deploymentId,
+      },
+    },
+    {
+      ...provider.deployments,
+      web: {
+        ...provider.deployments.web,
+        project: provider.deployments.admin.project,
+      },
+    },
+  ])
+    await assert.rejects(
+      bindDeploymentEvidence(
+        environment(await fixture({ ...provider, deployments })),
+      ),
+    );
+});
+
+test("rejects malformed and chronologically impossible evidence", async () => {
+  await assert.rejects(
+    bindDeploymentEvidence(
+      environment(await fixture({ ...provider, createdAt: "not-a-date" })),
+    ),
+  );
+  await assert.rejects(
+    bindDeploymentEvidence(
+      environment(
+        await fixture(provider, {
+          ...smoke,
+          checkedAt: "2026-08-11T23:59:59.000Z",
+        }),
+      ),
     ),
   );
 });

@@ -102,6 +102,9 @@ manifest binds the repository, workflow run/attempt, deployment environment,
 exact SHA, HTTPS migration-evidence reference and its supplied artifact digest
 to SHA-256 digests of all three JSON evidence files, preventing evidence from
 separate runs or a later-mutated migration record from being substituted.
+Before binding, it independently requires Render `live`, both Vercel releases
+`READY`, provider-valid IDs, distinct Admin/Web projects and deployments, valid
+timestamps and smoke evidence that does not predate the provider result.
 Tokens, provider responses and hook URLs are never written.
 
 1. Resolve D01 and provision the API, public Web and Admin domains.

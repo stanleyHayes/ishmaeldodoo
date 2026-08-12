@@ -19,3 +19,13 @@ passed.
 
 No VoiceOver audio transcript, NVDA result, TalkBack result, experienced-user
 approval or external conformance statement is claimed by this record.
+
+`npm run check:accessibility-structure` binds the current VoiceOver partial
+scope and every explicit NVDA, TalkBack, experienced-user and external-audit
+boundary. Automated axe, WebKit approximation, Android emulation or one
+remaining `NOT RUN` row cannot conceal a premature manual-accessibility claim.
+Before any row advances, extend the validator in the same reviewed change to
+require the exact release/environment, named reviewer, assistive-technology and
+browser versions, covered scenarios, durable evidence, defects/retests and
+dated Accessibility approval; do not delete the pending boundary without an
+executed-state replacement.

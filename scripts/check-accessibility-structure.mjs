@@ -1,3 +1,4 @@
+import assert from "node:assert/strict";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -31,6 +32,7 @@ function sourceFiles(directory) {
 const files = sourceFiles("apps/web/src");
 const source = files.map((file) => readFileSync(file, "utf8")).join("\n");
 const count = assertFocusableMainTargets(source, "Public application", 13);
+const manualMatrix = readFileSync("docs/quality/manual-at-matrix.md", "utf8");
 
 const layout = readFileSync("apps/web/src/app/layout.tsx", "utf8");
 const skipLink = readFileSync(
@@ -58,6 +60,40 @@ try {
   if (!/cannot receive focus/u.test(String(error))) throw error;
 }
 
+const manualEvidenceSentinels = [
+  "`PARTIAL PASS - 11 Aug 2026`",
+  "Wider page/template coverage, Safari comparison and review by an experienced VoiceOver user remain.",
+  "| NVDA",
+  "Windows with current Firefox and Chrome",
+  "| `NOT RUN`                    | Requires the controlled Windows assistive-technology lab and a named reviewer.",
+  "| TalkBack",
+  "Physical mid-range Android and Samsung Internet/Chrome",
+  "| `NOT RUN`                    | Requires the physical device/network lab already tracked by AMANOR-138.",
+  "| Independent WCAG 2.2 AA audit",
+  "| `NOT COMMISSIONED`",
+  "AMANOR-142 remains blocked until an external auditor is appointed and staging is available.",
+  "No VoiceOver audio transcript, NVDA result, TalkBack result, experienced-user",
+  "approval or external conformance statement is claimed by this record.",
+];
+
+function validateManualEvidence(candidate) {
+  for (const sentinel of manualEvidenceSentinels)
+    assert.ok(
+      candidate.includes(sentinel),
+      `Manual AT matrix no longer preserves its evidence boundary: ${sentinel}`,
+    );
+}
+
+validateManualEvidence(manualMatrix);
+for (const sentinel of manualEvidenceSentinels) {
+  const mutated = manualMatrix.replace(sentinel, "[prematurely changed]");
+  assert.throws(
+    () => validateManualEvidence(mutated),
+    undefined,
+    `Manual AT matrix accepted mutation of required boundary: ${sentinel}`,
+  );
+}
+
 process.stdout.write(
-  `All ${count} public main-content targets receive programmatic focus; the non-focusable fixture failed closed.\n`,
+  `All ${count} public main-content targets receive programmatic focus; the non-focusable fixture and ${manualEvidenceSentinels.length} manual AT evidence mutations failed closed.\n`,
 );

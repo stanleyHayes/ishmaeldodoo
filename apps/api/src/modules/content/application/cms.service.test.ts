@@ -94,7 +94,12 @@ function fixture(
 describe("CmsService", () => {
   it("uses bounded cursor pagination for document discovery", async () => {
     const { service, repository } = fixture();
-    await expect(service.listDocuments("page", 250, "home")).resolves.toEqual({
+    await expect(
+      service.listDocuments("page", 250, "home", {
+        id: "editor-1",
+        roles: ["editor"],
+      }),
+    ).resolves.toEqual({
       items: [],
     });
     expect(repository.listDocuments).toHaveBeenCalledWith("page", 100, "home");
@@ -718,7 +723,13 @@ describe("CmsService", () => {
     repository.listAudit.mockResolvedValue([{ eventId: "event-1" }]);
     const generatedAt = new Date("2026-08-09T20:00:00Z");
     await expect(
-      service.exportAudit("source", "source-1", 250, generatedAt),
+      service.exportAudit(
+        "source",
+        "source-1",
+        250,
+        { id: "reviewer-1", roles: ["reviewer"] },
+        generatedAt,
+      ),
     ).resolves.toEqual({
       format: "amanor-editorial-audit-v2",
       generatedAt,
@@ -727,6 +738,46 @@ describe("CmsService", () => {
       events: [{ eventId: "event-1" }],
       integrity: { status: "valid", checkedEvents: 0 },
     });
+  });
+
+  it("restricts editorial-audit reads to reviewers", async () => {
+    const { service, repository } = fixture();
+    const editor = { id: "editor-9", roles: ["editor"] as const };
+    // content:read but not content:review must not read governance history.
+    await expect(
+      service.listAudit("source", "source-1", 100, editor),
+    ).rejects.toThrow(/content:review permission/i);
+    await expect(
+      service.exportAudit("source", "source-1", 100, editor),
+    ).rejects.toThrow(/content:review permission/i);
+    await expect(
+      service.verifyAuditIntegrity("source", "source-1", editor),
+    ).rejects.toThrow(/content:review permission/i);
+    repository.listAudit.mockResolvedValue([{ eventId: "ok" }]);
+    await expect(
+      service.listAudit("source", "source-1", 100, {
+        id: "reviewer-9",
+        roles: ["reviewer"],
+      }),
+    ).resolves.toEqual([{ eventId: "ok" }]);
+  });
+
+  it("requires content-read to browse versions and document listings", async () => {
+    const { service, repository } = fixture();
+    const outsider = { id: "outsider-1", roles: [] as const };
+    await expect(
+      service.listVersions("source", "source-1", outsider),
+    ).rejects.toThrow(/content:read permission/i);
+    await expect(
+      service.listDocuments("page", 50, undefined, outsider),
+    ).rejects.toThrow(/content:read permission/i);
+    repository.listDocuments.mockResolvedValue({ items: [] });
+    await expect(
+      service.listDocuments("page", 50, undefined, {
+        id: "translator-9",
+        roles: ["translator"],
+      }),
+    ).resolves.toEqual({ items: [] });
   });
 
   it("restricts unpublish and delegates the atomic takedown", async () => {

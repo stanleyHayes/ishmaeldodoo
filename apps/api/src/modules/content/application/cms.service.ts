@@ -140,15 +140,19 @@ export class CmsService {
   async listVersions(
     documentType: ContentKind,
     documentId: string,
+    actor: EditorialActor,
   ): Promise<readonly ContentVersion[]> {
+    this.assertPermission(actor, "content:read", "read content versions");
     return this.repository.listVersions(documentType, documentId);
   }
 
   async listDocuments(
     documentType: ContentKind,
-    limit = 50,
-    cursor?: string,
+    limit: number,
+    cursor: string | undefined,
+    actor: EditorialActor,
   ): Promise<ContentDocumentPage> {
+    this.assertPermission(actor, "content:read", "list content documents");
     return this.repository.listDocuments(
       documentType,
       Math.max(1, Math.min(limit, 100)),
@@ -260,8 +264,10 @@ export class CmsService {
   async listAudit(
     documentType: ContentKind,
     documentId: string,
-    limit = 100,
+    limit: number,
+    actor: EditorialActor,
   ): Promise<readonly EditorialAuditEvent[]> {
+    this.assertPermission(actor, "content:review", "read the editorial audit");
     return this.repository.listAudit(
       documentType,
       documentId,
@@ -272,7 +278,8 @@ export class CmsService {
   async exportAudit(
     documentType: ContentKind,
     documentId: string,
-    limit = 250,
+    limit: number,
+    actor: EditorialActor,
     now = new Date(),
   ): Promise<AuditExport> {
     return {
@@ -280,15 +287,21 @@ export class CmsService {
       generatedAt: now,
       documentType,
       documentId,
-      events: await this.listAudit(documentType, documentId, limit),
-      integrity: await this.verifyAuditIntegrity(documentType, documentId),
+      events: await this.listAudit(documentType, documentId, limit, actor),
+      integrity: await this.verifyAuditIntegrity(
+        documentType,
+        documentId,
+        actor,
+      ),
     };
   }
 
   async verifyAuditIntegrity(
     documentType: ContentKind,
     documentId: string,
+    actor: EditorialActor,
   ): Promise<EditorialAuditIntegrity> {
+    this.assertPermission(actor, "content:review", "verify audit integrity");
     return this.repository.verifyAuditIntegrity(documentType, documentId);
   }
 

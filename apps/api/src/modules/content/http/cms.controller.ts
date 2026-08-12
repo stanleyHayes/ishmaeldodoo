@@ -85,10 +85,14 @@ export class CmsController {
   async versions(
     @Param("documentType") rawType: string,
     @Param("documentId") documentId: string,
+    @Req() request: AuthenticatedRequest,
   ): Promise<readonly ContentVersion[]> {
-    return this.cms.listVersions(
-      this.kind(rawType),
-      this.documentId(documentId),
+    return this.execute(() =>
+      this.cms.listVersions(
+        this.kind(rawType),
+        this.documentId(documentId),
+        this.actor(request),
+      ),
     );
   }
 
@@ -99,16 +103,20 @@ export class CmsController {
   async audit(
     @Param("documentType") rawType: string,
     @Param("documentId") documentId: string,
+    @Req() request: AuthenticatedRequest,
     @Query("limit") rawLimit?: string,
   ): Promise<readonly EditorialAuditEvent[]> {
     this.kind(rawType);
     const limit = rawLimit === undefined ? 100 : Number(rawLimit);
     if (!Number.isInteger(limit) || limit < 1 || limit > 250)
       throw new BadRequestException("Audit limit must be between 1 and 250");
-    return this.cms.listAudit(
-      this.kind(rawType),
-      this.documentId(documentId),
-      limit,
+    return this.execute(() =>
+      this.cms.listAudit(
+        this.kind(rawType),
+        this.documentId(documentId),
+        limit,
+        this.actor(request),
+      ),
     );
   }
 
@@ -119,15 +127,19 @@ export class CmsController {
   async auditExport(
     @Param("documentType") rawType: string,
     @Param("documentId") documentId: string,
+    @Req() request: AuthenticatedRequest,
     @Query("limit") rawLimit?: string,
   ): Promise<AuditExport> {
     const limit = rawLimit === undefined ? 250 : Number(rawLimit);
     if (!Number.isInteger(limit) || limit < 1 || limit > 250)
       throw new BadRequestException("Audit limit must be between 1 and 250");
-    return this.cms.exportAudit(
-      this.kind(rawType),
-      this.documentId(documentId),
-      limit,
+    return this.execute(() =>
+      this.cms.exportAudit(
+        this.kind(rawType),
+        this.documentId(documentId),
+        limit,
+        this.actor(request),
+      ),
     );
   }
 
@@ -136,10 +148,14 @@ export class CmsController {
   async auditIntegrity(
     @Param("documentType") rawType: string,
     @Param("documentId") documentId: string,
+    @Req() request: AuthenticatedRequest,
   ): Promise<EditorialAuditIntegrity> {
-    return this.cms.verifyAuditIntegrity(
-      this.kind(rawType),
-      this.documentId(documentId),
+    return this.execute(() =>
+      this.cms.verifyAuditIntegrity(
+        this.kind(rawType),
+        this.documentId(documentId),
+        this.actor(request),
+      ),
     );
   }
 
@@ -250,6 +266,7 @@ export class CmsController {
   })
   async documents(
     @Param("documentType") rawType: string,
+    @Req() request: AuthenticatedRequest,
     @Query("limit") rawLimit?: string,
     @Query("cursor") rawCursor?: string,
   ): Promise<ContentDocumentPage> {
@@ -258,7 +275,14 @@ export class CmsController {
       throw new BadRequestException("Document limit must be between 1 and 100");
     const cursor =
       rawCursor === undefined ? undefined : this.documentId(rawCursor);
-    return this.cms.listDocuments(this.kind(rawType), limit, cursor);
+    return this.execute(() =>
+      this.cms.listDocuments(
+        this.kind(rawType),
+        limit,
+        cursor,
+        this.actor(request),
+      ),
+    );
   }
 
   @Get("source-audit/report")

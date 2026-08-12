@@ -109,7 +109,12 @@ describe("CmsController HTTP permission boundary", () => {
       .get("/v1/cms/content/page?limit=25&cursor=home")
       .set("Authorization", "Bearer signed")
       .expect(200);
-    expect(cms.listDocuments).toHaveBeenCalledWith("page", 25, "home");
+    expect(cms.listDocuments).toHaveBeenCalledWith(
+      "page",
+      25,
+      "home",
+      expect.objectContaining({ id: "editor-1", roles: ["editor"] }),
+    );
     await request(app.getHttpServer())
       .get("/v1/cms/content/page?limit=101")
       .set("Authorization", "Bearer signed")
@@ -198,7 +203,12 @@ describe("CmsController HTTP permission boundary", () => {
       .get("/v1/cms/content/source/source-1/audit?limit=25")
       .set("Authorization", "Bearer signed")
       .expect(200);
-    expect(cms.listAudit).toHaveBeenCalledWith("source", "source-1", 25);
+    expect(cms.listAudit).toHaveBeenCalledWith(
+      "source",
+      "source-1",
+      25,
+      expect.objectContaining({ id: "editor-1", roles: ["editor"] }),
+    );
     await request(app.getHttpServer())
       .get("/v1/cms/content/source/source-1/audit?limit=1000")
       .set("Authorization", "Bearer signed")
@@ -215,7 +225,12 @@ describe("CmsController HTTP permission boundary", () => {
       .get("/v1/cms/content/source/source-1/audit/export?limit=200")
       .set("Authorization", "Bearer signed")
       .expect(200);
-    expect(cms.exportAudit).toHaveBeenCalledWith("source", "source-1", 200);
+    expect(cms.exportAudit).toHaveBeenCalledWith(
+      "source",
+      "source-1",
+      200,
+      expect.objectContaining({ id: "editor-1", roles: ["editor"] }),
+    );
     cms.rollback.mockResolvedValue({
       documentType: "source",
       documentId: "source-1",
@@ -248,7 +263,11 @@ describe("CmsController HTTP permission boundary", () => {
       .set("Authorization", "Bearer signed")
       .expect(200)
       .expect({ status: "valid", checkedEvents: 4, headSequence: 4 });
-    expect(cms.verifyAuditIntegrity).toHaveBeenCalledWith("source", "source-1");
+    expect(cms.verifyAuditIntegrity).toHaveBeenCalledWith(
+      "source",
+      "source-1",
+      expect.objectContaining({ id: "editor-1", roles: ["editor"] }),
+    );
   });
 
   it("maps authenticated takedown requests to the audited service", async () => {

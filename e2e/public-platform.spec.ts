@@ -151,6 +151,16 @@ test("renders only the consent-safe bilingual Legacy scholar projection", async 
     page.getByRole("heading", { level: 2, name: "Scholar journeys" }),
   ).toBeVisible();
   await expect(page.getByText("Ama Mensah")).toBeVisible();
+  const portrait = page.getByRole("img", {
+    name: "Ama Mensah at the university library",
+  });
+  await expect(portrait).toBeVisible();
+  await expect(portrait).toHaveAttribute("src", /res\.cloudinary\.com/);
+  await expect(
+    page.locator(".legacy-portrait figcaption", {
+      hasText: "Project AMANOR · Consent-cleared editorial use",
+    }),
+  ).toBeVisible();
   await expect(page.getByText(/not a financial impact report/i)).toBeVisible();
   await expect(page.getByText(/consent version/i)).toHaveCount(0);
 
@@ -162,6 +172,18 @@ test("renders only the consent-safe bilingual Legacy scholar projection", async 
   await expect(
     page.getByText(/ne constitue pas un rapport d’impact financier/i),
   ).toBeVisible();
+  await expect(
+    page.getByRole("img", {
+      name: "Ama Mensah à la bibliothèque universitaire",
+    }),
+  ).toBeVisible();
+
+  await page.goto("https://localhost:3210/legacy?mode=sahel");
+  await expect(page.getByText("Ama Mensah")).toBeVisible();
+  await expect(page.getByText("A consent-cleared public story.")).toBeVisible();
+  await expect(
+    page.getByRole("img", { name: /Ama Mensah at the university library/i }),
+  ).toHaveCount(0);
 });
 
 test("keeps the public design system usable in day and night at every required width", async ({

@@ -47,7 +47,12 @@ export default async function globalSetup(): Promise<void> {
     database.collection("protocol_sequences").deleteMany({}),
     database.collection("contact_enquiries").deleteMany({}),
     database.collection("media_assets").deleteMany({
-      assetId: "00000000-0000-4000-8000-000000000101",
+      assetId: {
+        $in: [
+          "00000000-0000-4000-8000-000000000101",
+          "00000000-0000-4000-8000-000000000102",
+        ],
+      },
     }),
     database.collection("content_versions").deleteMany({
       $or: [
@@ -897,6 +902,7 @@ export default async function globalSetup(): Promise<void> {
       field: localized("Public economics", "Économie publique"),
       cohortYear: 2024,
       status: "Active",
+      photo: "00000000-0000-4000-8000-000000000102",
       story: localized(
         "A consent-cleared public story.",
         "Un parcours public publié avec consentement.",
@@ -1006,6 +1012,30 @@ export default async function globalSetup(): Promise<void> {
     licence: "Editorial use",
     transformationPolicy: "editorial",
     retentionPolicy: "standard",
+    legalHold: false,
+    sourceRef: "source-e2e",
+    status: "active",
+    createdBy: "e2e-editor",
+    createdAt: now,
+  });
+  await database.collection("media_assets").insertOne({
+    assetId: "00000000-0000-4000-8000-000000000102",
+    publicId: "amanor/legacy/ama-mensah",
+    secureUrl: "https://res.cloudinary.com/demo/image/upload/sample.jpg",
+    resourceType: "image",
+    format: "jpg",
+    width: 864,
+    height: 576,
+    bytes: 120_253,
+    version: 1,
+    altText: localized(
+      "Ama Mensah at the university library",
+      "Ama Mensah à la bibliothèque universitaire",
+    ),
+    credit: "Project AMANOR",
+    licence: "Consent-cleared editorial use",
+    transformationPolicy: "editorial",
+    retentionPolicy: "consent-bound",
     legalHold: false,
     sourceRef: "source-e2e",
     status: "active",

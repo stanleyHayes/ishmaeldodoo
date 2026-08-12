@@ -4,13 +4,13 @@ Create one dated copy of this record per session. Do not record passwords, token
 
 ## Session
 
-- Environment:
-- Source/release revision:
-- Date and timezone:
-- Trainer:
-- Observer:
-- Participants and assigned roles:
-- Production-like limitations:
+- Environment: `Not recorded`
+- Source/release revision: `Not recorded`
+- Date and timezone: `Not scheduled`
+- Trainer: `Not assigned`
+- Observer: `Not assigned`
+- Participants and assigned roles: `Not assigned`
+- Production-like limitations: `Not assessed`
 
 ## Scenarios
 
@@ -32,8 +32,8 @@ Create one dated copy of this record per session. Do not record passwords, token
 
 For each participant, record whether they can independently find their runbook, perform allowed actions, recognise forbidden actions, stop on unsafe failure, preserve privacy and escalate to the correct owner. Record gaps as tracked tasks; attendance alone is not competency evidence.
 
-- Trainer sign-off:
-- Participant acknowledgements:
-- Product acceptance:
-- Security/Privacy acceptance where applicable:
-- Rehearsal defects added to ledger:
+- Trainer sign-off: `Not signed`
+- Participant acknowledgements: `Not signed`
+- Product acceptance: `Not approved`
+- Security/Privacy acceptance where applicable: `Not approved`
+- Rehearsal defects added to ledger: `Not assessed`

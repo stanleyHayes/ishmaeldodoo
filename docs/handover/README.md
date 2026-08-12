@@ -57,3 +57,12 @@ This index is the controlled entry point for operating the independently deploye
 - [ ] Handover demo completed and acceptance certificate signed.
 
 No checkbox may be inferred from automated tests. The named owner must attach dated evidence. Secrets, confidential enquiries and personal-data exports must never be placed in this package.
+
+While training is unexecuted, `npm run check:handover` binds its exact session
+identity, eleven role-based scenario rows, competency acknowledgements and
+Trainer/Product/Security/Privacy acceptance fields. One remaining `Not run` or
+`Blocked` row cannot conceal a premature training or handover claim. Before the
+first real session, extend the validator in the same reviewed change to require
+the immutable release, timestamps, named participants/roles, durable per-row
+evidence, tracked defects and separate dated approvals; do not delete the
+pending-state guard without executed-state validation.

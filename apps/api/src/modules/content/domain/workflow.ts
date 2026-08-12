@@ -63,7 +63,21 @@ const permittedTransitions: Readonly<
 
 const reviewerRoles = new Set(["principal", "reviewer"]);
 
+/**
+ * Whether publishing this document requires a second person — decided on the
+ * server from the document itself, never from a caller-supplied flag. The
+ * `policySensitive` option on `transitionContent` can only *add* to this; it
+ * can never turn it off, so a client cannot bypass two-person control by
+ * omitting the flag.
+ *
+ * Canonical identity is always governance-sensitive: no single person may
+ * change the Principal's name, title or biography unilaterally. Tagged signals
+ * (positions and foresight) carry the same requirement. Broadening this to
+ * arbitrary policy pages needs a per-document sensitivity marker and a product
+ * decision on which pages qualify; that remains open (see the ledger).
+ */
 export function requiresIndependentApproval(version: ContentVersion): boolean {
+  if (version.documentType === "identity") return true;
   if (version.documentType !== "signal") return false;
   const payload = version.payload;
   return Boolean(

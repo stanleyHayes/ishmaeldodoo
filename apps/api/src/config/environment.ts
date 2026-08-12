@@ -590,10 +590,15 @@ function assertOutboundEndpoint(
   options: Readonly<{ requireHttps: boolean }>,
 ): URL {
   const url = new URL(value);
+  const loopback = ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname);
   if (
     url.username ||
     url.password ||
-    url.port ||
+    // A port is an SSRF lever to arbitrary internal services, so it is
+    // prohibited on real hosts. Loopback dev/staging origins legitimately run
+    // on non-default ports (e.g. Next.js on :3000) and must match
+    // PUBLIC_WEB_ORIGIN, so a port is permitted there.
+    (url.port && !loopback) ||
     url.search ||
     url.hash ||
     !["http:", "https:"].includes(url.protocol)
@@ -601,10 +606,7 @@ function assertOutboundEndpoint(
     throw new Error(`${key} contains prohibited URL parts`);
   if (options.requireHttps && url.protocol !== "https:")
     throw new Error(`${key} must use HTTPS`);
-  if (
-    url.protocol === "http:" &&
-    !["localhost", "127.0.0.1", "[::1]"].includes(url.hostname)
-  )
+  if (url.protocol === "http:" && !loopback)
     throw new Error(`${key} permits plaintext only on loopback`);
   return url;
 }

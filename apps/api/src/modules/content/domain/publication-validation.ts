@@ -160,6 +160,22 @@ export function validateForPublication(
     }
   }
 
+  // Canonical identity is always two-person: a publish-time backstop mirrors the
+  // approve-step gate in workflow.ts, so an "approved" identity that skipped the
+  // transition or had its reviewer tampered with is still rejected here.
+  if (kind === "identity" && typeof payload === "object" && payload !== null) {
+    const record = payload as { approvedBy?: unknown };
+    if (
+      !context.authorId ||
+      !context.reviewerId ||
+      context.authorId === context.reviewerId ||
+      record.approvedBy !== context.reviewerId
+    )
+      errors.push(
+        "approvedBy: canonical identity requires a different recorded approver",
+      );
+  }
+
   if (kind === "signal" && typeof payload === "object" && payload !== null) {
     const signal = payload as {
       tags?: unknown;

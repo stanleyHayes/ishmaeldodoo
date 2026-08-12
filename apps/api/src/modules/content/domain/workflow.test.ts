@@ -60,6 +60,68 @@ describe("editorial workflow", () => {
     );
   });
 
+  it("makes canonical identity two-person server-side, not by a caller flag", () => {
+    // The bypass this guards against: a reviewer authors an identity change and
+    // approves it alone, without passing policySensitive. Identity must be
+    // independent-approval on the server regardless of options.
+    const identity: ContentVersion = {
+      documentType: "identity",
+      documentId: "canonical",
+      version: 1,
+      state: "in_review",
+      authorId: "reviewer-1",
+      payload: {},
+    };
+    expect(() =>
+      transitionContent(identity, "approve", {
+        id: "reviewer-1",
+        roles: ["reviewer"],
+      }),
+    ).toThrow(/different approver/i);
+    const approved = transitionContent(identity, "approve", {
+      id: "reviewer-2",
+      roles: ["reviewer"],
+    });
+    expect(approved.state).toBe("approved");
+    expect(approved.reviewerId).toBe("reviewer-2");
+    expect(approved.payload).toEqual(
+      expect.objectContaining({ approvedBy: "reviewer-2" }),
+    );
+  });
+
+  it("backs the identity two-person rule at publish time too", () => {
+    // Same author and reviewer, or a mismatched recorded approver, must fail the
+    // publish-time backstop even if the state says approved.
+    const base = {
+      displayName: localised("Name", "Nom"),
+      title: localised("Title", "Titre"),
+    };
+    const sameActor = validateForPublication("identity", base, "en-GB", {
+      authorId: "person-1",
+      reviewerId: "person-1",
+    });
+    expect(sameActor.valid).toBe(false);
+    const forged = validateForPublication(
+      "identity",
+      { ...base, approvedBy: "author-1" },
+      "en-GB",
+      { authorId: "author-1", reviewerId: "reviewer-2" },
+    );
+    expect(forged.valid).toBe(false);
+    const independent = validateForPublication(
+      "identity",
+      { ...base, approvedBy: "reviewer-2" },
+      "en-GB",
+      { authorId: "author-1", reviewerId: "reviewer-2" },
+    );
+    // The independence rule itself passes; any remaining errors are schema-level,
+    // not the approver rule.
+    expect(
+      independent.valid ||
+        !independent.errors.some((error) => error.includes("approvedBy")),
+    ).toBe(true);
+  });
+
   it("rejects invalid transitions and scheduling without a date", () => {
     expect(() =>
       transitionContent(version, "publish", {

@@ -220,6 +220,22 @@ describe("API environment", () => {
       ).toThrow(/PUBLIC_WEB_ORIGIN|prohibited URL parts/u);
   });
 
+  it("permits a port only on loopback revalidation origins", () => {
+    expect(
+      validateEnvironment({
+        NODE_ENV: "development",
+        PUBLIC_WEB_ORIGIN: "http://localhost:3000",
+        WEB_REVALIDATION_URL: "http://localhost:3000/api/revalidate",
+      }).WEB_REVALIDATION_URL,
+    ).toBe("http://localhost:3000/api/revalidate");
+    expect(() =>
+      validateEnvironment({
+        PUBLIC_WEB_ORIGIN: "https://www.example.test",
+        WEB_REVALIDATION_URL: "https://www.example.test:8443/api/revalidate",
+      }),
+    ).toThrow(/prohibited URL parts/u);
+  });
+
   it("validates rotatable service and revalidation key rings", () => {
     const secret = "a-service-secret-with-at-least-thirty-two-bytes";
     expect(

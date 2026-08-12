@@ -115,6 +115,86 @@ test("keeps French punctuation non-breaking across public routes", async ({
   expect(failures, "breakable French punctuation").toEqual([]);
 });
 
+test("renders the three bilingual CMS-backed legal pages with reciprocal metadata", async ({
+  page,
+}) => {
+  const pages = [
+    {
+      path: "/legal/privacy",
+      frenchPath: "/fr/legal/privacy",
+      heading: "Privacy notice",
+      frenchHeading: "Avis de confidentialité",
+      section: "Your data rights",
+      frenchSection: "Vos droits sur les données",
+    },
+    {
+      path: "/legal/terms",
+      frenchPath: "/fr/legal/terms",
+      heading: "Terms of use",
+      frenchHeading: "Conditions d’utilisation",
+      section: "Responsible use",
+      frenchSection: "Utilisation responsable",
+    },
+    {
+      path: "/legal/disclosure",
+      frenchPath: "/fr/legal/disclosure",
+      heading: "Independence disclosure",
+      frenchHeading: "Déclaration d’indépendance",
+      section: "Personal capacity",
+      frenchSection: "Capacité personnelle",
+    },
+  ] as const;
+
+  for (const legalPage of pages) {
+    for (const width of [360, 768, 1024, 1440]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto(`https://localhost:3210${legalPage.path}`);
+      await useStandardMode(page);
+      await expect(
+        page.getByRole("heading", { level: 1, name: legalPage.heading }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("heading", { name: legalPage.section }),
+      ).toBeVisible();
+      await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+        "href",
+        new RegExp(`${legalPage.path}$`, "u"),
+      );
+      await expect(
+        page.locator('link[rel="alternate"][hreflang="fr-FR"]'),
+      ).toHaveAttribute("href", new RegExp(`${legalPage.frenchPath}$`, "u"));
+      expect(
+        await page.evaluate(
+          "document.documentElement.scrollWidth <= document.documentElement.clientWidth",
+        ),
+      ).toBe(true);
+    }
+
+    await page.goto(`https://localhost:3210${legalPage.frenchPath}`);
+    await useStandardMode(page);
+    await expect(
+      page.getByRole("heading", { level: 1, name: legalPage.frenchHeading }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: legalPage.frenchSection }),
+    ).toBeVisible();
+    await expect(
+      page.locator('link[rel="alternate"][hreflang="en-GB"]'),
+    ).toHaveAttribute("href", new RegExp(`${legalPage.path}$`, "u"));
+  }
+
+  const footer = page.getByRole("contentinfo");
+  await expect(
+    footer.getByRole("link", { name: "Confidentialité" }),
+  ).toHaveAttribute("href", "/fr/legal/privacy");
+  await expect(
+    footer.getByRole("link", { name: "Conditions" }),
+  ).toHaveAttribute("href", "/fr/legal/terms");
+  await expect(
+    footer.getByRole("link", { name: "Déclaration" }),
+  ).toHaveAttribute("href", "/fr/legal/disclosure");
+});
+
 test("renders the published bilingual Signal Board with governed ledger semantics", async ({
   page,
 }) => {

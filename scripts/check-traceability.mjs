@@ -213,6 +213,28 @@ function validateBilingualEditorBrowserEvidence() {
 
 validateBilingualEditorBrowserEvidence();
 
+function validateLegalBrowserEvidence() {
+  const row = plan
+    .split("\n")
+    .find((line) => line.startsWith("| AMANOR-065 |"));
+  if (!row) throw new Error("Missing AMANOR-065 primary ledger row");
+  const normalizedRow = row.toLowerCase();
+  for (const requirement of [
+    "privacy, terms and disclosure",
+    "360/768/1024/1440",
+    "all three desktop engines",
+    "reciprocal metadata",
+    "localized footer",
+  ])
+    if (!normalizedRow.includes(requirement.toLowerCase()))
+      throw new Error(`AMANOR-065 is missing browser evidence: ${requirement}`);
+  for (const external of ["approved legal copy", "Legal/DPC sign-off"])
+    if (!row.includes(external))
+      throw new Error(`AMANOR-065 lost external gate: ${external}`);
+}
+
+validateLegalBrowserEvidence();
+
 function validateSignalBoard(id) {
   const columns = columnsFor(rows.get(id).line);
   if (columns[1] !== "PARTIAL")

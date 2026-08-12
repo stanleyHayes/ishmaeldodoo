@@ -67,6 +67,9 @@ export default async function globalSetup(): Promise<void> {
               "legacy",
               "contact",
               "record",
+              "legal-privacy",
+              "legal-terms",
+              "legal-disclosure",
               "takedown-chromium",
               "takedown-firefox",
               "takedown-webkit",
@@ -103,6 +106,9 @@ export default async function globalSetup(): Promise<void> {
               "legacy",
               "contact",
               "record",
+              "legal-privacy",
+              "legal-terms",
+              "legal-disclosure",
               "takedown-chromium",
               "takedown-firefox",
               "takedown-webkit",
@@ -139,6 +145,9 @@ export default async function globalSetup(): Promise<void> {
           "legacy",
           "contact",
           "record",
+          "legal-privacy",
+          "legal-terms",
+          "legal-disclosure",
           "takedown-chromium",
           "takedown-firefox",
           "takedown-webkit",
@@ -452,6 +461,84 @@ export default async function globalSetup(): Promise<void> {
           sourceRefs: ["source-e2e"],
         },
       ],
+      noIndex: false,
+    }),
+    publicationRecord("page", "legal-privacy", {
+      slug: "/legal/privacy",
+      title: localized("Privacy notice", "Avis de confidentialité"),
+      summary: localized(
+        "How this independent platform handles personal information.",
+        "Comment cette plateforme indépendante traite les données personnelles.",
+      ),
+      sections: [
+        {
+          key: "data-rights",
+          heading: localized("Your data rights", "Vos droits sur les données"),
+          body: localized(
+            "Contact the platform to request access, correction or deletion where the law permits.",
+            "Contactez la plateforme pour demander l’accès, la rectification ou la suppression lorsque la loi le permet.",
+          ),
+          sourceRefs: ["source-e2e"],
+        },
+      ],
+      seoTitle: localized("Privacy notice", "Avis de confidentialité"),
+      seoDescription: localized(
+        "Read the platform privacy notice.",
+        "Consultez l’avis de confidentialité de la plateforme.",
+      ),
+      noIndex: false,
+    }),
+    publicationRecord("page", "legal-terms", {
+      slug: "/legal/terms",
+      title: localized("Terms of use", "Conditions d’utilisation"),
+      summary: localized(
+        "The terms that govern use of this independent platform.",
+        "Les conditions qui régissent l’utilisation de cette plateforme indépendante.",
+      ),
+      sections: [
+        {
+          key: "responsible-use",
+          heading: localized("Responsible use", "Utilisation responsable"),
+          body: localized(
+            "Use published material lawfully and preserve its source context.",
+            "Utilisez les contenus publiés légalement et conservez leur contexte de source.",
+          ),
+          sourceRefs: ["source-e2e"],
+        },
+      ],
+      seoTitle: localized("Terms of use", "Conditions d’utilisation"),
+      seoDescription: localized(
+        "Read the platform terms of use.",
+        "Consultez les conditions d’utilisation de la plateforme.",
+      ),
+      noIndex: false,
+    }),
+    publicationRecord("page", "legal-disclosure", {
+      slug: "/legal/disclosure",
+      title: localized("Independence disclosure", "Déclaration d’indépendance"),
+      summary: localized(
+        "This personal platform is independent and is not an official government website.",
+        "Cette plateforme personnelle est indépendante et ne constitue pas un site officiel du gouvernement.",
+      ),
+      sections: [
+        {
+          key: "capacity",
+          heading: localized("Personal capacity", "Capacité personnelle"),
+          body: localized(
+            "Published views and activities are presented in a personal capacity unless explicitly stated otherwise.",
+            "Les opinions et activités publiées sont présentées à titre personnel, sauf indication explicite contraire.",
+          ),
+          sourceRefs: ["source-e2e"],
+        },
+      ],
+      seoTitle: localized(
+        "Independence disclosure",
+        "Déclaration d’indépendance",
+      ),
+      seoDescription: localized(
+        "Read the platform independence disclosure.",
+        "Consultez la déclaration d’indépendance de la plateforme.",
+      ),
       noIndex: false,
     }),
     publicationRecord("page", "speaking", {
@@ -971,6 +1058,9 @@ export default async function globalSetup(): Promise<void> {
     ["page", "legacy"],
     ["page", "contact"],
     ["page", "record"],
+    ["page", "legal-privacy"],
+    ["page", "legal-terms"],
+    ["page", "legal-disclosure"],
     ["identity", "canonical"],
     ["source", "source-e2e"],
     ["source", "source-homepage"],

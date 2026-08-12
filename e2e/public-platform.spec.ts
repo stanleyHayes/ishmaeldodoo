@@ -355,6 +355,96 @@ test("keeps the Sahel Press Room functional without JavaScript", async ({
   ).toBeVisible();
 });
 
+test("keeps the bilingual Press Room interactive across identity, downloads and media handoff", async ({
+  page,
+}, testInfo) => {
+  for (const width of [360, 768, 1024, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("https://localhost:3210/press");
+    await useStandardMode(page);
+    await expect(
+      page.getByRole("heading", {
+        level: 1,
+        name: "Dr Ishmael Nii Amanor Dodoo",
+      }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Canonical identity" }),
+    ).toBeVisible();
+    await expect(
+      page.getByText("Current role · Independent platform"),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Copy" }).first(),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "source-e2e" }),
+    ).toHaveAttribute("href", "/record/sources#source-e2e");
+    expect(
+      await page.evaluate(
+        "document.documentElement.scrollWidth <= document.documentElement.clientWidth",
+      ),
+    ).toBe(true);
+  }
+
+  const suffix = testInfo.project.name.replace(/[^a-z0-9]/giu, "-");
+  const pressKit = page.locator("form.press-kit-form").first();
+  await pressKit.getByLabel("Your name").fill("Ama Mensah");
+  await pressKit.getByLabel("Outlet").fill("Public Evidence News");
+  await pressKit
+    .getByLabel("Email address")
+    .fill(`press-${suffix}@example.test`);
+  const pressKitDownload = page.waitForEvent("download");
+  await pressKit.getByRole("button", { name: "Generate press kit" }).click();
+  const pressKitFile = await pressKitDownload;
+  expect(pressKitFile.suggestedFilename()).toMatch(
+    /^amanor-press-kit-.*\.pdf$/u,
+  );
+  expect(await pressKitFile.failure()).toBeNull();
+
+  const dossier = page.locator("section.living-dossier form");
+  await dossier.getByLabel("Your name").fill("Ama Mensah");
+  await dossier.getByLabel("Organisation").fill("Public Evidence News");
+  await dossier
+    .getByLabel("Email address")
+    .fill(`dossier-${suffix}@example.test`);
+  await dossier
+    .getByLabel("Purpose of the document")
+    .fill("Prepare a sourced briefing for an institutional interview.");
+  const dossierDownload = page.waitForEvent("download");
+  await dossier.getByRole("button", { name: "Generate dossier" }).click();
+  const dossierFile = await dossierDownload;
+  expect(dossierFile.suggestedFilename()).toMatch(
+    /^amanor-.*dossier-.*\.pdf$/u,
+  );
+  expect(await dossierFile.failure()).toBeNull();
+
+  await page.getByRole("link", { name: "Send a media enquiry" }).click();
+  await expect(page).toHaveURL("https://localhost:3210/press/contact");
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Media contact" }),
+  ).toBeVisible();
+  await expect(page.getByLabel("Deadline")).toBeVisible();
+
+  await page.goto("https://localhost:3210/fr/press");
+  await expect(
+    page.getByRole("heading", { name: "Identité canonique" }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Fonction actuelle · Plateforme indépendante"),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Copier" }).first(),
+  ).toBeVisible();
+  await expect(page.getByRole("link", { name: "source-e2e" })).toHaveAttribute(
+    "href",
+    "/fr/record/sources#source-e2e",
+  );
+  await expect(
+    page.getByRole("link", { name: "Envoyer une demande presse" }),
+  ).toHaveAttribute("href", "/fr/press/contact");
+});
+
 test("defers governed speaking video until a Sahel visitor opts in", async ({
   page,
 }) => {

@@ -169,6 +169,28 @@ validateF12(rows.get("F12").line);
 validateRecordPrintEvidence();
 validateP01SignalEvidence(rows.get("P01").line);
 
+function validatePressBrowserEvidence() {
+  const columns = columnsFor(rows.get("P07").line);
+  for (const requirement of [
+    "Bilingual responsive Press Room",
+    "Press Kit",
+    "Living Dossier PDF downloads",
+    "media-contact handoff",
+    "no-script Sahel fallback",
+  ])
+    if (!columns[2].includes(requirement))
+      throw new Error(`P07 traceability is missing ${requirement}`);
+  if (!columns[3].includes("`e2e/public-platform.spec.ts`"))
+    throw new Error("P07 traceability is missing direct browser evidence");
+  if (columns[4].includes("live-browser"))
+    throw new Error("P07 still records verified browser scope as outstanding");
+  for (const external of ["Signed production", "Resend", "real delivery"])
+    if (!columns[4].includes(external))
+      throw new Error(`P07 traceability lost external gate: ${external}`);
+}
+
+validatePressBrowserEvidence();
+
 function validateSignalBoard(id) {
   const columns = columnsFor(rows.get(id).line);
   if (columns[1] !== "PARTIAL")

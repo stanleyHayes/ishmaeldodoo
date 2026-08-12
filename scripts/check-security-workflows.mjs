@@ -12,6 +12,53 @@ const supplyChainAcceptance = await readFile(
   "docs/security/templates/image-supply-chain-acceptance-record.md",
   "utf8",
 );
+const pinnedActions = new Map([
+  ["actions/checkout", ["3d3c42e5aac5ba805825da76410c181273ba90b1", "v7"]],
+  ["actions/setup-node", ["820762786026740c76f36085b0efc47a31fe5020", "v7"]],
+  [
+    "actions/upload-artifact",
+    ["043fb46d1a93c77aae656e7c1c64a875d1fc6a0a", "v7"],
+  ],
+  [
+    "gitleaks/gitleaks-action",
+    ["e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e", "v3"],
+  ],
+  ["dorny/paths-filter", ["ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d", "v4"]],
+  ["anchore/sbom-action", ["e22c389904149dbc22b58101806040fa8d37a610", "v0"]],
+  ["anchore/scan-action", ["e1165082ffb1fe366ebaf02d8526e7c4989ea9d2", "v7"]],
+  ["github/codeql-action", ["5595ccaf912efad79be6eef63a5619ff05969be3", "v4"]],
+]);
+
+for (const source of [codeql, quality]) {
+  const actionUses = [
+    ...source.matchAll(/^\s*uses:\s+([^\s#]+)(?:\s+#\s+(\S+))?$/gmu),
+  ];
+  assert.ok(actionUses.length > 0, "Workflow must contain external actions");
+  for (const [, reference, comment] of actionUses) {
+    const separator = reference.lastIndexOf("@");
+    const action = reference.slice(0, separator);
+    const revision = reference.slice(separator + 1);
+    const baseAction = action.startsWith("github/codeql-action/")
+      ? "github/codeql-action"
+      : action;
+    const expected = pinnedActions.get(baseAction);
+    assert.ok(
+      expected,
+      `Workflow uses an unreviewed external action ${action}`,
+    );
+    assert.match(revision, /^[0-9a-f]{40}$/u, `${action} is not SHA-pinned`);
+    assert.equal(
+      revision,
+      expected[0],
+      `${action} drifted from reviewed commit`,
+    );
+    assert.equal(
+      comment,
+      expected[1],
+      `${action} lost its reviewed tag comment`,
+    );
+  }
+}
 
 for (const invariant of [
   "pull_request:",
@@ -23,9 +70,9 @@ for (const invariant of [
   "languages: ${{ matrix.language }}",
   "build-mode: none",
   "queries: security-extended",
-  "actions/checkout@v7",
-  "github/codeql-action/init@v4",
-  "github/codeql-action/analyze@v4",
+  `actions/checkout@${pinnedActions.get("actions/checkout")[0]}`,
+  `github/codeql-action/init@${pinnedActions.get("github/codeql-action")[0]}`,
+  `github/codeql-action/analyze@${pinnedActions.get("github/codeql-action")[0]}`,
 ])
   assert.ok(codeql.includes(invariant), `CodeQL workflow lost ${invariant}`);
 
@@ -35,14 +82,14 @@ assert.ok(
 );
 
 for (const runtimeAction of [
-  "actions/checkout@v7",
-  "actions/setup-node@v7",
-  "actions/upload-artifact@v7",
-  "dorny/paths-filter@v4",
-  "gitleaks/gitleaks-action@v3",
+  "actions/checkout",
+  "actions/setup-node",
+  "actions/upload-artifact",
+  "dorny/paths-filter",
+  "gitleaks/gitleaks-action",
 ])
   assert.ok(
-    quality.includes(runtimeAction),
+    quality.includes(`${runtimeAction}@${pinnedActions.get(runtimeAction)[0]}`),
     `Quality workflow lost current Node 24 action ${runtimeAction}`,
   );
 
@@ -52,7 +99,7 @@ for (const image of ["api", "web", "admin"]) {
   assert.match(
     quality,
     new RegExp(
-      `github/codeql-action/upload-sarif@v4[\\s\\S]{0,180}sarif_file: ${file}`,
+      `github/codeql-action/upload-sarif@${pinnedActions.get("github/codeql-action")[0]}[\\s\\S]{0,220}sarif_file: ${file}`,
       "u",
     ),
     `${image} image findings are not uploaded to code scanning`,
@@ -60,7 +107,14 @@ for (const image of ["api", "web", "admin"]) {
 }
 
 assert.equal(
-  (quality.match(/uses: anchore\/scan-action@v7/gu) ?? []).length,
+  (
+    quality.match(
+      new RegExp(
+        `uses: anchore/scan-action@${pinnedActions.get("anchore/scan-action")[0]}`,
+        "gu",
+      ),
+    ) ?? []
+  ).length,
   3,
   "All three independently deployed images require vulnerability scans",
 );

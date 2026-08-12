@@ -43,6 +43,13 @@ A thrown error or interrupted process is not a pass. Capture provider graphs for
 
 Stop immediately on data leakage, real email delivery, sustained threshold breach, provider distress or loss of observability. After the run, verify a sampled synthetic request remains usable through the protected Desk workflow, quarantine/delete every returned synthetic reference, confirm normal queues and alerts recover, and attach the completed record from `docs/operations/templates/load-rehearsal-record.md`. AMANOR-141 remains in progress until the record and provider graphs are signed.
 
+The completed record must bind the exact staging topology and limits to the
+candidate release, identify quota/cost and abort approvals, cover the exact
+surge window in every provider graph, reconcile every returned reference, prove
+one sampled request remains usable through triage-to-close without real
+delivery, and show normal capacity, queues, readiness, telemetry and alerts
+after cleanup.
+
 Until production-like staging exists, `npm run check:load` binds every pending
 baseline, plan, result, graph, Protocol Desk, cleanup and approval field in the
 record. A single leftover placeholder cannot conceal a premature passing claim.

@@ -43,6 +43,7 @@ This index is the controlled entry point for operating the independently deploye
 - Controlled [retention and deletion rehearsal record](../operations/templates/retention-deletion-rehearsal-record.md) for TTL expiry, Protocol pseudonymisation, Room deletion, Cloudinary disposal, restored-backup reconciliation and independent approvals.
 - Controlled [source and claim audit record](../operations/templates/source-claim-audit-record.md) for exact bilingual graph coverage, claim quality, rights/consent, defect closure and Content/Legal approval without sampling.
 - Controlled [media inventory reconciliation record](../operations/templates/media-inventory-reconciliation-record.md) for exact registry/Cloudinary parity, bilingual accessibility metadata, rights/retention review, gap ownership, cleanup and Content/Legal approval.
+- Controlled [institutional email delivery record](../operations/templates/institutional-email-delivery-record.md) for all nine templates across `.gov.gh`, `.un.org` and an EU institutional mailbox with delivery/read proof and four-party approval.
 - Monthly, quarterly and six-month [measurement cadence](../operations/measurement-cadence.md) evidence.
 - Versioned [release notes](release-notes.md) and completed [training evidence](training-evidence.md).
 

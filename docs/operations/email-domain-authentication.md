@@ -26,4 +26,9 @@ The command resolves DNS directly, follows a single DKIM CNAME delegation when p
 3. Operations sends the approved bilingual templates to controlled `.gov.gh`, `.un.org`, and EU institutional test mailboxes and records delivery/read results without retaining message content in tickets.
 4. Any failed alignment, unexpected extra SPF record, downgraded DMARC policy, or provider re-verification blocks release.
 
+Record the 9-template by 3-mailbox execution in the controlled
+[`institutional-email-delivery-record.md`](templates/institutional-email-delivery-record.md).
+Every matrix cell requires both delivery and read evidence; provider acceptance
+alone and sampled templates do not close AMANOR-144.
+
 The root gate runs six adversarial offline fixtures. That proves policy enforcement in code; it does not prove that a real domain is configured.

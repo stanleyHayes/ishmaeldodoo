@@ -71,3 +71,8 @@ Variables use `{{variableName}}`. HTML substitutions are escaped. An undeclared,
 3. Successful delivery to `.gov.gh`, `.un.org`, and EU institutional test mailboxes.
 4. A staging provider-outage drill proving retry, alerting, recovery, and no duplicate delivery.
 5. A Principal-controlled mailbox and real-phone exercise proving the four fragment links, explicit confirmation, one-time consumption, and sibling revocation.
+
+The first three gates above use the controlled
+[`institutional-email-delivery-record.md`](templates/institutional-email-delivery-record.md),
+whose template keys must remain identical to the runtime correspondence
+catalogue.

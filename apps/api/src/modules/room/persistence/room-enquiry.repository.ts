@@ -30,6 +30,9 @@ export type RoomEnquiryRecord = Readonly<{
   deletion: Readonly<{
     status: "pending" | "failed" | "done";
     attempts: number;
+    // Recorded when the ciphertext is purged; consumed by the backup/restore
+    // verification (scripts/verify-mongo-backup-restore.mjs) and retention audit.
+    deletedAt?: Date;
   }>;
 }>;
 

@@ -204,6 +204,36 @@ function validateSignalBoard(id) {
 validateSignalBoard("P06");
 validateSignalBoard("F06");
 
+function validateLegacy(id) {
+  const columns = columnsFor(rows.get(id).line);
+  if (columns[1] !== "PARTIAL")
+    throw new Error(
+      `${id} must remain PARTIAL until its Trust and production-content approvals exist`,
+    );
+  for (const requirement of ["consent", "public", "financial-impact"])
+    if (!columns[2].includes(requirement))
+      throw new Error(`${id} traceability is missing ${requirement}`);
+  for (const evidence of [
+    "apps/api/src/modules/content/application/cms.service.test.ts",
+    "apps/api/src/platform/mongo/mongo.integration.test.ts",
+    "apps/web/src/components/content/legacy-scholars.test.tsx",
+    "e2e/public-platform.spec.ts",
+  ])
+    if (!columns[3].includes(`\`${evidence}\``))
+      throw new Error(
+        `${id} traceability is missing direct evidence: ${evidence}`,
+      );
+  for (const gate of [
+    "Approved Trust data",
+    "production consent-cleared stories",
+  ])
+    if (!columns[4].includes(gate))
+      throw new Error(`${id} traceability is missing external gate: ${gate}`);
+}
+
+validateLegacy("P10");
+validateLegacy("F09");
+
 function validatePlanStatus(taskId, allowedStatuses) {
   const row = plan.split("\n").find((line) => line.startsWith(`| ${taskId} |`));
   if (!row) throw new Error(`Missing primary ledger row: ${taskId}`);
@@ -220,7 +250,7 @@ for (const taskId of ["AMANOR-056", "AMANOR-070", "AMANOR-072"])
   validatePlanStatus(taskId, ["IN REVIEW", "DONE"]);
 validatePlanStatus("AMANOR-073", ["IN PROGRESS", "IN REVIEW", "DONE"]);
 for (const taskId of ["AMANOR-060", "AMANOR-075"])
-  validatePlanStatus(taskId, ["IN PROGRESS", "IN REVIEW", "DONE"]);
+  validatePlanStatus(taskId, ["IN REVIEW", "DONE"]);
 
 const operationCount = Object.values(openApi.paths ?? {}).reduce(
   (count, item) =>

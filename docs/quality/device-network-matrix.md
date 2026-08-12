@@ -33,3 +33,12 @@ The automated mobile projects are isolated to `e2e/device-network.spec.ts`; desk
 8. Record defects separately. A rerun closes a row only with the fixed revision and linked evidence.
 
 Use [the controlled report template](templates/device-lab-report.md). AMANOR-138 cannot enter review solely from Playwright emulation; the mid-range Android and Samsung Internet rows must pass on physical hardware, and Product/QA/Accessibility must sign the report.
+
+Until that lab exists, `npm run check:devices` binds the report's exact release
+candidate, staging origin, window, operator, three physical-device rows,
+synthetic Desk cleanup and QA/Product/Accessibility approval fields. One
+remaining placeholder or a Playwright attachment cannot conceal a premature
+physical-device claim. Before the first real lab, extend the validator in the
+same reviewed change to require exact hardware/browser/network measurements,
+durable per-row evidence, cleanup proof and separate dated approvals; do not
+delete the pending-state guard without executed-state validation.

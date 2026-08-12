@@ -3869,6 +3869,88 @@ integration("MongoDB replica-set integration", () => {
     ).resolves.toMatchObject({ items: [] });
   });
 
+  it("lists only exact published scholars with granted consent and strips consent records", async () => {
+    const database = mongoose.connection.db;
+    if (!database) throw new Error("Test database is not connected");
+    const repository = new CmsRepository(mongoose.connection);
+    const service = new CmsService(repository);
+    const localized = (en: string, fr: string) => ({
+      "en-GB": en,
+      "fr-FR": fr,
+      status: { "en-GB": "current" as const, "fr-FR": "current" as const },
+      sourceUpdatedAt: new Date("2026-08-01T00:00:00.000Z"),
+    });
+    const scholar = await service.createDraft(
+      "scholar",
+      "consented-scholar",
+      {
+        name: "Ama Mensah",
+        country: "GH",
+        institution: "Public University",
+        field: localized("Economics", "Économie"),
+        cohortYear: 2024,
+        status: "Active",
+        story: localized("A governed story", "Un parcours contrôlé"),
+        consentStatus: "granted",
+        consentDate: new Date("2026-01-01T00:00:00.000Z"),
+        consentVersion: "scholar-v1",
+      },
+      { id: "trust-author", roles: ["trust_admin"] },
+    );
+    const submitted = await service.transition(
+      "scholar",
+      "consented-scholar",
+      scholar.version,
+      "submit",
+      { id: "trust-author", roles: ["trust_admin"] },
+      {},
+    );
+    const approved = await service.transition(
+      "scholar",
+      "consented-scholar",
+      submitted.version,
+      "approve",
+      { id: "scholar-reviewer", roles: ["reviewer"] },
+      {},
+    );
+    await service.publish(
+      "scholar",
+      "consented-scholar",
+      approved.version,
+      "fr-FR",
+      {
+        id: "scholar-reviewer",
+        roles: ["reviewer"],
+      },
+    );
+    const result = await service.listPublicScholars("fr-FR");
+    expect(result).toMatchObject({
+      scholars: [
+        {
+          documentId: "consented-scholar",
+          field: "Économie",
+          story: "Un parcours contrôlé",
+        },
+      ],
+      translation: { stale: false },
+    });
+    expect(result.scholars[0]).not.toHaveProperty("consentStatus");
+    expect(result.scholars[0]).not.toHaveProperty("consentDate");
+    expect(result.scholars[0]).not.toHaveProperty("consentVersion");
+
+    await database.collection("content_versions").updateOne(
+      {
+        documentType: "scholar",
+        documentId: "consented-scholar",
+        version: approved.version,
+      },
+      { $set: { "payload.consentStatus": "withdrawn" } },
+    );
+    await expect(service.listPublicScholars("fr-FR")).resolves.toMatchObject({
+      scholars: [],
+    });
+  });
+
   it("aggregates only exact locale-published Atlas versions with a deterministic 60-node cap", async () => {
     const database = mongoose.connection.db;
     if (!database) throw new Error("Test database is not connected");

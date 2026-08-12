@@ -59,6 +59,7 @@ export default async function globalSetup(): Promise<void> {
               "speaking-request",
               "archive",
               "signals",
+              "legacy",
               "contact",
               "record",
               "takedown-chromium",
@@ -68,7 +69,9 @@ export default async function globalSetup(): Promise<void> {
           },
         },
         {
-          documentType: { $in: ["archiveItem", "speakingTheme", "atlasNode"] },
+          documentType: {
+            $in: ["archiveItem", "speakingTheme", "atlasNode", "scholar"],
+          },
         },
         {
           documentType: "signal",
@@ -92,6 +95,7 @@ export default async function globalSetup(): Promise<void> {
               "speaking-request",
               "archive",
               "signals",
+              "legacy",
               "contact",
               "record",
               "takedown-chromium",
@@ -101,7 +105,9 @@ export default async function globalSetup(): Promise<void> {
           },
         },
         {
-          documentType: { $in: ["archiveItem", "speakingTheme", "atlasNode"] },
+          documentType: {
+            $in: ["archiveItem", "speakingTheme", "atlasNode", "scholar"],
+          },
         },
         {
           documentType: "signal",
@@ -125,6 +131,7 @@ export default async function globalSetup(): Promise<void> {
           "speaking-request",
           "archive",
           "signals",
+          "legacy",
           "contact",
           "record",
           "takedown-chromium",
@@ -136,6 +143,7 @@ export default async function globalSetup(): Promise<void> {
           "regional-investment",
           ...browserNames.map((name) => `policy-signal-${name}`),
           "published-signal-e2e",
+          "legacy-scholar-e2e",
           "canonical",
           "record-forest",
           "record-system",
@@ -491,6 +499,21 @@ export default async function globalSetup(): Promise<void> {
       seoDescription: localized(
         "Review published Signals and their evidence.",
         "Consultez les signaux publiés et leurs preuves.",
+      ),
+      noIndex: false,
+    }),
+    publicationRecord("page", "legacy", {
+      slug: "/legacy",
+      title: localized("Legacy", "Héritage"),
+      summary: localized(
+        "Consent-cleared scholar journeys without unapproved impact claims.",
+        "Des parcours de chercheurs publiés avec consentement, sans affirmations d’impact non approuvées.",
+      ),
+      sections: [],
+      seoTitle: localized("Legacy", "Héritage"),
+      seoDescription: localized(
+        "Published scholar journeys.",
+        "Parcours publiés de chercheurs.",
       ),
       noIndex: false,
     }),
@@ -867,6 +890,21 @@ export default async function globalSetup(): Promise<void> {
       reviewDue: new Date("2026-11-10T00:00:00.000Z"),
       approvedBy: "e2e-reviewer",
     }),
+    publicationRecord("scholar", "legacy-scholar-e2e", {
+      name: "Ama Mensah",
+      country: "GH",
+      institution: "Public University",
+      field: localized("Public economics", "Économie publique"),
+      cohortYear: 2024,
+      status: "Active",
+      story: localized(
+        "A consent-cleared public story.",
+        "Un parcours public publié avec consentement.",
+      ),
+      consentStatus: "granted",
+      consentDate: new Date("2026-01-01T00:00:00.000Z"),
+      consentVersion: "scholar-v1",
+    }),
   ]);
   const seededVersions = await database
     .collection("content_versions")
@@ -907,6 +945,7 @@ export default async function globalSetup(): Promise<void> {
     ["page", "speaking"],
     ["page", "archive"],
     ["page", "signals"],
+    ["page", "legacy"],
     ["page", "contact"],
     ["page", "record"],
     ["identity", "canonical"],
@@ -919,6 +958,7 @@ export default async function globalSetup(): Promise<void> {
     ["atlasNode", "record-sahel"],
     ["atlasNode", "record-return"],
     ["signal", "published-signal-e2e"],
+    ["scholar", "legacy-scholar-e2e"],
     ...Array.from(
       { length: 5 },
       (_, offset) => ["atlasNode", `homepage-proof-${offset + 5}`] as const,

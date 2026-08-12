@@ -142,6 +142,28 @@ test("renders the published bilingual Signal Board with governed ledger semantic
   );
 });
 
+test("renders only the consent-safe bilingual Legacy scholar projection", async ({
+  page,
+}) => {
+  await page.goto("https://localhost:3210/legacy");
+  await useStandardMode(page);
+  await expect(
+    page.getByRole("heading", { level: 2, name: "Scholar journeys" }),
+  ).toBeVisible();
+  await expect(page.getByText("Ama Mensah")).toBeVisible();
+  await expect(page.getByText(/not a financial impact report/i)).toBeVisible();
+  await expect(page.getByText(/consent version/i)).toHaveCount(0);
+
+  await page.goto("https://localhost:3210/fr/legacy");
+  await expect(
+    page.getByRole("heading", { level: 2, name: "Parcours des chercheurs" }),
+  ).toBeVisible();
+  await expect(page.getByText("Économie publique")).toBeVisible();
+  await expect(
+    page.getByText(/ne constitue pas un rapport d’impact financier/i),
+  ).toBeVisible();
+});
+
 test("keeps the public design system usable in day and night at every required width", async ({
   page,
 }) => {

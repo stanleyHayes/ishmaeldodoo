@@ -48,3 +48,13 @@ Use the [quarterly review template](templates/quarterly-product-review.md) to co
 Use the [six-month report template](templates/six-month-outcome-report.md). Preserve all eight brief targets exactly, show numerator/denominator and method where applicable, disclose feature exposure and data-quality limitations, and separate correlation from causal claims. A missed or unmeasurable target is reported honestly with an owner/date; it is never removed from the scorecard.
 
 Search-result ownership and canonical-title adoption are controlled manual audits with dated query/article populations and reviewer evidence. Atlas median duration is currently unavailable because the approved event catalogue intentionally does not collect duration. Office Hours and The Room remain `Not launched` until their separately gated features ship. Those facts may change only through approved product/privacy/security decisions and current runtime evidence.
+
+Before production launch, `npm run check:analytics` binds the exact pending
+monthly quality/digest, quarterly review and six-month baseline/outcome/sign-off
+states. One remaining `Not run` or `Not launched` field cannot conceal a
+premature measurement or outcome claim. Before the first real cycle, extend the
+validator in the same reviewed change to require immutable release/catalogue
+revisions, complete upstream record references, approved evidence-state values,
+durable aggregate/manual-audit evidence, owned decisions and the complete dated
+approval set; do not delete the pending-state guard without an executed-state
+replacement.

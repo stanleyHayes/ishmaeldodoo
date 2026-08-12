@@ -1,3 +1,4 @@
+import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { evaluateAnalyticsPanel } from "./lib/product-dashboard-qa.mjs";
 
@@ -290,10 +291,81 @@ for (const heading of [
 for (const outcomeId of requiredOutcomeIds)
   if (!templates["six-month-outcome-report"].includes(`\`${outcomeId}\``))
     throw new Error(`Six-month report is missing ${outcomeId}`);
-for (const [name, template] of Object.entries(templates))
-  if (!template.includes("Not run") && !template.includes("Not launched"))
-    throw new Error(`${name} must default to an honest unexecuted state`);
+const pendingMeasurementSentinels = {
+  "monthly-data-quality-review": [
+    "- Reporting month: `Not run`",
+    "- Environment/release: `Not run`",
+    "- Dashboard/event catalogue revisions: `Not run`",
+    "- Reviewers: `Not assigned`",
+    "- Status: `Not run`",
+    "- No-choice/refusal silence verified: `Not run`",
+    "- Synthetic canary expected/observed counts: `Not run`",
+    "- Provider outage, duplicate or delayed ingestion window: `Not run`",
+    "- Raw-event export remains disabled: `Not run`",
+    "- Minimum group suppression verified: `Not run`",
+    "- Product Lead: `Not signed`",
+    "- Privacy owner: `Not signed`",
+    "- Engineering owner: `Not signed`",
+    "- Approved metrics for digest: `None`",
+  ],
+  "monthly-measurement-digest": [
+    "- Reporting month: `Not run`",
+    "- Production release/window: `Not run`",
+    "- Data-quality record: `Not run`",
+    "- Prepared/approved: `Not assigned` / `Not signed`",
+    "- Evidence state: `Not launched`",
+    "- What changed, in plain language: `Office Hours has not launched.`",
+    "- Supporting aggregates and limitations: `Readership is not ballot participation.`",
+  ],
+  "quarterly-product-review": [
+    "- Quarter/window: `Not run`",
+    "- Releases reviewed: `Not run`",
+    "- Monthly digests: `Not run`",
+    "- Participants/approver: `Not assigned` / `Not signed`",
+    "- Principal decision: `Not signed`",
+    "- Product Lead: `Not signed`",
+    "- Deferred items and rationale: `None recorded`",
+  ],
+  "six-month-outcome-report": [
+    "- Production baseline/date: `Not launched`",
+    "- Measurement window: `Not run`",
+    "- Releases/dashboard/catalogue revisions: `Not run`",
+    "- Prepared/approved: `Not assigned` / `Not signed`",
+    "| `atlas_legibility`          | Median Atlas time at least 150 seconds                                 | Unavailable    | Not collected                  | Duration instrumentation is not approved | Unavailable  | Product/Privacy decision required  |",
+    "| `youth_conversion`          | At least 150 Office Hours ballot entries per cycle                     | Not launched   | Not launched                   | Office Hours dependency                  | Not launched | Product decision required          |",
+    "| `confidential_trust`        | At least 10 Room enquiries and zero security incidents                 | Not launched   | Not launched                   | Room dependency and incident record      | Not launched | Security/Product decision required |",
+    "- Principal: `Not signed`",
+    "- Product Lead: `Not signed`",
+    "- Privacy owner: `Not signed`",
+    "- Security owner for Room/incident result: `Not signed`",
+  ],
+};
+
+function validatePendingMeasurement(name, candidate) {
+  for (const sentinel of pendingMeasurementSentinels[name])
+    assert.ok(
+      candidate.includes(sentinel),
+      `${name} no longer proves its pre-execution state: ${sentinel}`,
+    );
+}
+
+let measurementMutationCount = 0;
+for (const [name, template] of Object.entries(templates)) {
+  validatePendingMeasurement(name, template);
+  for (const sentinel of pendingMeasurementSentinels[name]) {
+    measurementMutationCount += 1;
+    assert.throws(
+      () =>
+        validatePendingMeasurement(
+          name,
+          template.replace(sentinel, "[prematurely changed]"),
+        ),
+      undefined,
+      `${name} accepted mutation of required sentinel: ${sentinel}`,
+    );
+  }
+}
 
 process.stdout.write(
-  `Product dashboard covers ${manifest.panels.length} outcomes using ${allowedEvents.size} approved events with group suppression at ${manifest.privacy.minimumGroupSize}; cadence preserves ${requiredOutcomeIds.length} month-six targets.\n`,
+  `Product dashboard covers ${manifest.panels.length} outcomes using ${allowedEvents.size} approved events with group suppression at ${manifest.privacy.minimumGroupSize}; cadence preserves ${requiredOutcomeIds.length} month-six targets and rejects ${measurementMutationCount} premature measurement-state mutations.\n`,
 );

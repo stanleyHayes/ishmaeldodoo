@@ -19,7 +19,7 @@
 | Area                        | State   | Expected change | Observed aggregate | Finding/action |
 | --------------------------- | ------- | --------------- | ------------------ | -------------- |
 | English/French page views   | Not run | Not run         | Not run            | Not run        |
-| Standard/Sahel mode         | Not run | Not run         | Not run            | Not run        |
+| Standard/Lite mode          | Not run | Not run         | Not run            | Not run        |
 | Desk start/completion       | Not run | Not run         | Not run            | Not run        |
 | Press Kit                   | Not run | Not run         | Not run            | Not run        |
 | Atlas interactions          | Not run | Not run         | Not run            | Not run        |

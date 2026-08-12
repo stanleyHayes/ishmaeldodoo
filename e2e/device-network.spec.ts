@@ -86,16 +86,16 @@ test("keeps the bilingual public shell usable under constrained Android emulatio
   await expect(page.locator("html")).toHaveAttribute("lang", "fr-FR");
 });
 
-test("preserves Sahel and Protocol Desk behavior under the declared network", async ({
+test("preserves Lite and Protocol Desk behavior under the declared network", async ({
   page,
 }, testInfo) => {
   await page.goto("https://localhost:3210/", { waitUntil: "domcontentloaded" });
   if (testInfo.project.name.endsWith("2g")) {
-    await expect(page.locator("html")).toHaveAttribute("data-mode", "sahel", {
+    await expect(page.locator("html")).toHaveAttribute("data-mode", "lite", {
       timeout: 45_000,
     });
     await expect(
-      page.getByRole("button", { name: "Exit Sahel mode" }),
+      page.getByRole("button", { name: "Exit Lite mode" }),
     ).toBeVisible();
     await page.goto("https://localhost:3210/record/atlas", {
       waitUntil: "domcontentloaded",
@@ -105,10 +105,7 @@ test("preserves Sahel and Protocol Desk behavior under the declared network", as
       page.getByRole("heading", { name: "Accessible table" }),
     ).toBeVisible();
   } else {
-    await expect(page.locator("html")).not.toHaveAttribute(
-      "data-mode",
-      "sahel",
-    );
+    await expect(page.locator("html")).not.toHaveAttribute("data-mode", "lite");
   }
 
   await page.goto("https://localhost:3210/speaking/request", {

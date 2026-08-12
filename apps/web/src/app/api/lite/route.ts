@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { safeReturnPath } from "../../../lib/i18n/locale";
-import { sahelCookieName, sahelMaxAgeSeconds } from "../../../lib/sahel/mode";
+import { liteCookieName, liteMaxAgeSeconds } from "../../../lib/lite/mode";
 
 export function GET(request: Request): NextResponse {
   const url = new URL(request.url);
@@ -12,9 +12,9 @@ export function GET(request: Request): NextResponse {
   if (enabled) destination.searchParams.set("lite", "1");
   else destination.searchParams.delete("lite");
   const response = NextResponse.redirect(destination, 303);
-  response.cookies.set(sahelCookieName, enabled ? "1" : "dismissed", {
+  response.cookies.set(liteCookieName, enabled ? "1" : "dismissed", {
     httpOnly: false,
-    maxAge: sahelMaxAgeSeconds,
+    maxAge: liteMaxAgeSeconds,
     path: "/",
     sameSite: "lax",
     secure: url.protocol === "https:",

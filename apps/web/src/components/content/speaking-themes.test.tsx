@@ -208,7 +208,7 @@ describe("SpeakingThemes", () => {
     });
   });
 
-  it("keeps Sahel media server-only and restores governed media explicitly", () => {
+  it("keeps Lite media server-only and restores governed media explicitly", () => {
     const withMedia = {
       ...speaking,
       items: [
@@ -256,7 +256,7 @@ describe("SpeakingThemes", () => {
       screen.getByRole("link", { name: "Load this media in standard mode" }),
     ).toHaveAttribute(
       "href",
-      "/api/sahel?enabled=0&return=%2Fspeaking%23public-value",
+      "/api/lite?enabled=0&return=%2Fspeaking%23public-value",
     );
     expect(
       screen.getByRole("link", { name: "Transcript and context" }),

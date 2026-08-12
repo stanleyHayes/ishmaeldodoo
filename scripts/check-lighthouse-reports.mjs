@@ -29,7 +29,7 @@ for (const entry of manifest) {
     (item) => item.resourceType === "script",
   );
   const isAtlas = new URL(entry.url).pathname.startsWith("/record/atlas");
-  const isSahel = new URL(entry.url).searchParams.get("lite") === "1";
+  const isLite = new URL(entry.url).searchParams.get("lite") === "1";
   const checks = {
     accessibility: report.categories.accessibility.score === 1,
     lcp: report.audits["largest-contentful-paint"].numericValue <= 1_800,
@@ -37,7 +37,7 @@ for (const entry of manifest) {
     initialScript: isAtlas || script?.transferSize <= 120 * 1_024,
     total:
       report.audits["total-byte-weight"].numericValue <=
-      (isSahel ? 200 : 500) * 1_024,
+      (isLite ? 200 : 500) * 1_024,
     atlasInteractive:
       !isAtlas || report.audits.interactive.numericValue <= 2_500,
   };
@@ -60,5 +60,5 @@ for (const [route, count] of routeCounts) {
 }
 
 console.log(
-  "Lighthouse reports meet accessibility 100, LCP 1.8 s and CLS 0.05; Sahel reports stay within 200 KiB, non-Atlas scripts within 120 KiB, and the interactive Atlas within 500 KiB and 2.5 s TTI.",
+  "Lighthouse reports meet accessibility 100, LCP 1.8 s and CLS 0.05; Lite reports stay within 200 KiB, non-Atlas scripts within 120 KiB, and the interactive Atlas within 500 KiB and 2.5 s TTI.",
 );

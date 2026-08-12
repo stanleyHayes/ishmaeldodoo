@@ -34,8 +34,8 @@ describe("InvitationAcceptance", () => {
     fireEvent.change(screen.getByLabelText("New password"), {
       target: { value: "a-new-secure-administrator-password" },
     });
-    fireEvent.change(screen.getByLabelText("Current authenticator code"), {
-      target: { value: "123456" },
+    fireEvent.paste(screen.getByLabelText("Digit 1 of 6"), {
+      clipboardData: { getData: () => "123456" },
     });
     fireEvent.click(
       screen.getByRole("button", { name: "Complete secure setup" }),

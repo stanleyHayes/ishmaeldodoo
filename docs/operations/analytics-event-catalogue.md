@@ -1,12 +1,12 @@
 # Privacy-preserving analytics event catalogue
 
-Analytics is optional and disabled until a visitor explicitly grants consent through the first-party `/api/analytics/consent` boundary. Refusal and absence are equivalent for collection: no event reaches the provider. Essential audience, locale, theme and Sahel preferences remain separate from analytics consent.
+Analytics is optional and disabled until a visitor explicitly grants consent through the first-party `/api/analytics/consent` boundary. Refusal and absence are equivalent for collection: no event reaches the provider. Essential audience, locale, theme and Lite preferences remain separate from analytics consent.
 
 | Event                     | Purpose                                               | Permitted dimensions          |
 | ------------------------- | ----------------------------------------------------- | ----------------------------- |
 | `pageview`                | Aggregate route reach                                 | route, locale, mode           |
 | `audience_selected`       | Understand voluntary dossier-door use                 | route, locale, audience       |
-| `sahel_mode_enabled`      | Measure low-bandwidth mode adoption                   | route, locale, mode           |
+| `lite_mode_enabled`       | Measure low-bandwidth mode adoption                   | route, locale, mode           |
 | `atlas_filter_applied`    | Measure Atlas exploration without filter values       | route, locale, audience, mode |
 | `atlas_record_opened`     | Measure aggregate Atlas detail use without record IDs | route, locale, audience, mode |
 | `press_kit_requested`     | Measure Press Kit demand without requester identity   | route, locale, mode           |

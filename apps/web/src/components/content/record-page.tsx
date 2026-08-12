@@ -17,7 +17,7 @@ type RecordAct = Readonly<{
   heading: string;
   body: string;
   sourceRefs: readonly string[];
-  recordAct: "forest" | "system" | "sahel" | "return";
+  recordAct: "forest" | "system" | "lite" | "return";
   dateline: string;
   fieldImage: string;
   imageCaption: string;
@@ -35,7 +35,7 @@ type RecordPayload = Readonly<{
   summary: string;
   sections: readonly RecordAct[];
 }>;
-const actOrder = ["forest", "system", "sahel", "return"] as const;
+const actOrder = ["forest", "system", "lite", "return"] as const;
 
 function stringArray(value: unknown): value is string[] {
   return (

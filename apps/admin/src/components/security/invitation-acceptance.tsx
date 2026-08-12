@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { acceptInvitation, getInvitationSetup } from "../../lib/api/client";
 import { AdminWorkspace } from "../admin-workspace";
+import { SegmentedCodeInput } from "./segmented-code-input";
 
 export function InvitationGateway() {
   const token = useSearchParams()?.get("invitation");
@@ -19,6 +20,7 @@ export function InvitationAcceptance({ token }: Readonly<{ token: string }>) {
   >("loading");
   const [submitting, setSubmitting] = useState(false);
   const [recoveryCodes, setRecoveryCodes] = useState<readonly string[]>([]);
+  const [code, setCode] = useState("");
 
   useEffect(() => {
     void getInvitationSetup(token).then(
@@ -116,22 +118,21 @@ export function InvitationAcceptance({ token }: Readonly<{ token: string }>) {
               />
             </div>
             <div className="field field--code">
-              <label htmlFor="setup-code">Current authenticator code</label>
-              <input
-                id="setup-code"
+              <span className="field-label" id="setup-code-label">
+                Current authenticator code
+              </span>
+              <SegmentedCodeInput
                 name="mfaCode"
-                inputMode="numeric"
-                autoComplete="one-time-code"
-                pattern="[0-9]{6}"
-                minLength={6}
-                maxLength={6}
-                required
+                labelId="setup-code-label"
+                groups={[6]}
+                disabled={submitting}
+                onValueChange={setCode}
               />
             </div>
             <button
               className="primary-button"
               type="submit"
-              disabled={submitting}
+              disabled={submitting || code.length !== 6}
             >
               {submitting ? "Completing setup" : "Complete secure setup"}
             </button>

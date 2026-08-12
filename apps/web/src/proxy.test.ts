@@ -48,59 +48,59 @@ describe("locale proxy", () => {
     ).toBe("day");
   });
 
-  it("persists query Sahel mode and forwards request context", () => {
+  it("persists query Lite mode and forwards request context", () => {
     const response = proxy(
       new NextRequest("https://example.test/record?lite=1"),
     );
     expect(response.status).toBe(200);
-    expect(response.cookies.get("amanor-sahel")?.value).toBe("1");
-    expect(response.headers.get("x-middleware-request-x-amanor-sahel")).toBe(
+    expect(response.cookies.get("amanor-lite")?.value).toBe("1");
+    expect(response.headers.get("x-middleware-request-x-amanor-lite")).toBe(
       "1",
     );
   });
 
-  it("renders query Sahel mode without mutating preference during RSC prefetch", () => {
+  it("renders query Lite mode without mutating preference during RSC prefetch", () => {
     const response = proxy(
       new NextRequest("https://example.test/record?lite=1", {
         headers: {
-          cookie: "amanor-sahel=dismissed",
+          cookie: "amanor-lite=dismissed",
           "next-router-prefetch": "1",
           rsc: "1",
         },
       }),
     );
     expect(response.status).toBe(200);
-    expect(response.headers.get("x-middleware-request-x-amanor-sahel")).toBe(
+    expect(response.headers.get("x-middleware-request-x-amanor-lite")).toBe(
       "1",
     );
-    expect(response.cookies.get("amanor-sahel")).toBeUndefined();
+    expect(response.cookies.get("amanor-lite")).toBeUndefined();
   });
 
   it("lets explicit mode queries win but never lets stored mode override dismissal", () => {
     const dismissed = proxy(
       new NextRequest("https://example.test/", {
         headers: {
-          cookie: "amanor-sahel=dismissed",
+          cookie: "amanor-lite=dismissed",
         },
       }),
     );
-    expect(dismissed.headers.get("x-middleware-request-x-amanor-sahel")).toBe(
+    expect(dismissed.headers.get("x-middleware-request-x-amanor-lite")).toBe(
       "0",
     );
 
     const explicit = proxy(
       new NextRequest("https://example.test/?lite=1", {
         headers: {
-          cookie: "amanor-sahel=dismissed",
+          cookie: "amanor-lite=dismissed",
         },
       }),
     );
-    expect(explicit.headers.get("x-middleware-request-x-amanor-sahel")).toBe(
+    expect(explicit.headers.get("x-middleware-request-x-amanor-lite")).toBe(
       "1",
     );
   });
 
-  it("serves the Sahel homepage with a complete no-script policy", () => {
+  it("serves the Lite homepage with a complete no-script policy", () => {
     const response = proxy(new NextRequest("https://example.test/?lite=1"));
     const policy = response.headers.get("content-security-policy");
     expect(policy).toContain("default-src 'self'");
@@ -109,7 +109,7 @@ describe("locale proxy", () => {
     expect(policy).toContain("form-action 'self'");
   });
 
-  it("serves the progressively enhanced Sahel Press Room without scripts", () => {
+  it("serves the progressively enhanced Lite Press Room without scripts", () => {
     const response = proxy(
       new NextRequest("https://example.test/press?lite=1"),
     );
@@ -122,10 +122,10 @@ describe("locale proxy", () => {
     expect(contact.headers.get("content-security-policy")).toBeNull();
   });
 
-  it("serves the Atlas table twin by default in persistent Sahel mode", () => {
+  it("serves the Atlas table twin by default in persistent Lite mode", () => {
     const response = proxy(
       new NextRequest("https://example.test/fr/record/atlas?theme=financing", {
-        headers: { cookie: "amanor-sahel=1" },
+        headers: { cookie: "amanor-lite=1" },
       }),
     );
     expect(response.status).toBe(307);
@@ -134,15 +134,15 @@ describe("locale proxy", () => {
     );
   });
 
-  it("allows an explicit interactive-map opt-in without losing Sahel context", () => {
+  it("allows an explicit interactive-map opt-in without losing Lite context", () => {
     const response = proxy(
       new NextRequest("https://example.test/record/atlas?map=1", {
-        headers: { cookie: "amanor-sahel=1" },
+        headers: { cookie: "amanor-lite=1" },
       }),
     );
     expect(response.status).toBe(200);
     expect(response.headers.get("location")).toBeNull();
-    expect(response.headers.get("x-middleware-request-x-amanor-sahel")).toBe(
+    expect(response.headers.get("x-middleware-request-x-amanor-lite")).toBe(
       "1",
     );
   });

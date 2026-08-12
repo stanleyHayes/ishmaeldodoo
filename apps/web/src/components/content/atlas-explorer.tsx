@@ -75,7 +75,7 @@ export function AtlasExplorer({
       name: "atlas_record_opened",
       route,
       locale,
-      ...(lite ? { mode: "sahel" as const } : {}),
+      ...(lite ? { mode: "lite" as const } : {}),
     });
   }
 
@@ -157,7 +157,7 @@ export function AtlasExplorer({
             name: "atlas_record_opened",
             route,
             locale,
-            ...(lite ? { mode: "sahel" as const } : {}),
+            ...(lite ? { mode: "lite" as const } : {}),
           });
         });
         markerStore.set(item.slug, marker);

@@ -7,7 +7,7 @@
 - Desk Officer, Principal and observer identities/roles: `Not assigned`
 - Principal-owned phone model, OS and browser build: `Not recorded`
 - Viewport/orientation and Wi-Fi/mobile-network measurements: `Not recorded`
-- English/French and standard/Sahel coverage: `Not run`
+- English/French and standard/Lite coverage: `Not run`
 
 ## Request and Desk handling
 

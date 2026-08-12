@@ -15,7 +15,7 @@ analytics, the email provider or an ordinary Admin/CMS account is compromised.
 
 Two constraints shaped the choice as much as the security target:
 
-1. The site must work on mid-range Android and Samsung Internet under Sahel Mode
+1. The site must work on mid-range Android and Samsung Internet under Lite Mode
    (F11, AMANOR-138). A suite that needs a large third-party crypto bundle
    conflicts with the sub-200 KiB route budget and with "dedicated minimal
    bundles, no third-party scripts" in the threat model.

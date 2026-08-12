@@ -17,7 +17,7 @@ import {
 } from "./key-holder";
 
 const plaintext: RoomPlaintext = {
-  subject: "Sahel facility structuring",
+  subject: "Lite facility structuring",
   message:
     "A sufficiently detailed confidential message for the restricted client.",
   fromName: "A Counterparty",

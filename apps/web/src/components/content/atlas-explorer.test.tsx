@@ -92,7 +92,7 @@ describe("AtlasExplorer", () => {
     fireEvent.click(screen.getByRole("button", { name: /First place/i }));
     expect(window.location.search).toBe("?node=first");
   });
-  it("keeps the map opt-in under Sahel mode while timeline selection updates detail", () => {
+  it("keeps the map opt-in under Lite mode while timeline selection updates detail", () => {
     render(
       <AtlasExplorer
         items={items}
@@ -121,7 +121,7 @@ describe("AtlasExplorer", () => {
       name: "atlas_record_opened",
       route: "/record/atlas",
       locale: "en-GB",
-      mode: "sahel",
+      mode: "lite",
     });
     expect(
       JSON.stringify(vi.mocked(trackAnalyticsEvent).mock.calls),

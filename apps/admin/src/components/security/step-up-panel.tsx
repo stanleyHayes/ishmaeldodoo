@@ -20,6 +20,7 @@ import {
   rotateRecoveryCodes,
   stepUp,
 } from "../../lib/api/client";
+import { SegmentedCodeInput } from "./segmented-code-input";
 
 export function StepUpPanel() {
   const [state, setState] = useState<"idle" | "working" | "ready" | "error">(
@@ -30,6 +31,7 @@ export function StepUpPanel() {
     readonly HardwareKeySummary[]
   >([]);
   const [hardwareMessage, setHardwareMessage] = useState("");
+  const [code, setCode] = useState("");
 
   useEffect(() => {
     void listHardwareKeys()
@@ -144,20 +146,21 @@ export function StepUpPanel() {
       </div>
       <form className="administrator-invitation" onSubmit={submit}>
         <div className="field field--code">
-          <label htmlFor="step-up-code">Current authenticator code</label>
-          <input
-            id="step-up-code"
+          <span className="field-label" id="step-up-code-label">
+            Current authenticator code
+          </span>
+          <SegmentedCodeInput
             name="mfaCode"
-            inputMode="numeric"
-            autoComplete="one-time-code"
-            pattern="[0-9]{6}"
-            minLength={6}
-            maxLength={6}
-            required
+            labelId="step-up-code-label"
+            groups={[6]}
             disabled={state === "working"}
+            onValueChange={setCode}
           />
         </div>
-        <button type="submit" disabled={state === "working"}>
+        <button
+          type="submit"
+          disabled={state === "working" || code.length !== 6}
+        >
           {state === "working" ? "Verifying" : "Verify recent MFA"}
         </button>
       </form>

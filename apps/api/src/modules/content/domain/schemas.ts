@@ -640,7 +640,7 @@ const pageSectionSchema = z.object({
   heading: localizedTextSchema.optional(),
   body: localizedTextSchema,
   sourceRefs: z.array(sourceReferenceSchema).default([]),
-  recordAct: z.enum(["forest", "system", "sahel", "return"]).optional(),
+  recordAct: z.enum(["forest", "system", "lite", "return"]).optional(),
   dateline: localizedTextSchema.optional(),
   fieldImage: z.string().uuid().optional(),
   imageCaption: localizedTextSchema.optional(),
@@ -737,7 +737,7 @@ export const pageSchema = z
     }
     if (page.slug !== "/record") return;
     const acts = page.sections.map((section) => section.recordAct);
-    const requiredActs = ["forest", "system", "sahel", "return"] as const;
+    const requiredActs = ["forest", "system", "lite", "return"] as const;
     if (
       page.sections.length !== 4 ||
       requiredActs.some((act, index) => acts[index] !== act)

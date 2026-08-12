@@ -1,11 +1,11 @@
-export const sahelCookieName = "amanor-sahel";
-export const sahelStorageName = "amanor-sahel";
-export const sahelDismissedName = "amanor-sahel-auto-dismissed";
-export const sahelMaxAgeSeconds = 60 * 60 * 24 * 30;
+export const liteCookieName = "amanor-lite";
+export const liteStorageName = "amanor-lite";
+export const liteDismissedName = "amanor-lite-auto-dismissed";
+export const liteMaxAgeSeconds = 60 * 60 * 24 * 30;
 
-export function isSahelValue(value: unknown): boolean {
+export function isLiteValue(value: unknown): boolean {
   const candidate = Array.isArray(value) ? value[0] : value;
-  return candidate === "1" || candidate === "sahel";
+  return candidate === "1" || candidate === "lite";
 }
 
 export function isConstrainedConnection(connection: unknown): boolean {

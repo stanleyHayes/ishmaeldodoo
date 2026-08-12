@@ -39,15 +39,15 @@ export function evaluateAnalyticsPanel(panel, events) {
           ? (counts.protocol_desk_completed ?? 0) / started
           : (panel.zeroDenominator ?? null);
       }
-      if (panel.measure === "activation_count_and_sahel_share") {
+      if (panel.measure === "activation_count_and_lite_share") {
         const pageviews = counts.pageview ?? 0;
-        const sahelPageviews = groupedEvents.filter(
-          (event) => event.name === "pageview" && event.mode === "sahel",
+        const litePageviews = groupedEvents.filter(
+          (event) => event.name === "pageview" && event.mode === "lite",
         ).length;
         value = {
-          activations: counts.sahel_mode_enabled ?? 0,
-          sahelShare: pageviews
-            ? sahelPageviews / pageviews
+          activations: counts.lite_mode_enabled ?? 0,
+          liteShare: pageviews
+            ? litePageviews / pageviews
             : (panel.zeroDenominator ?? null),
         };
       }

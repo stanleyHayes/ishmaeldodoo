@@ -13,7 +13,7 @@ const input = {
 describe("press kit proxy", () => {
   afterEach(() => vi.unstubAllGlobals());
 
-  it("accepts a native Sahel form and returns the generated attachment", async () => {
+  it("accepts a native Lite form and returns the generated attachment", async () => {
     const fetchMock = vi.fn().mockResolvedValue(
       new Response("%PDF-test", {
         status: 201,

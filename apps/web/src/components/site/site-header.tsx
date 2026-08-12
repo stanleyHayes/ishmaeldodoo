@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { localizePath, type SupportedLocale } from "../../lib/i18n/locale";
 import { ThemeToggle } from "./theme-toggle";
-import { SahelToggle } from "./sahel-toggle";
+import { LiteToggle } from "./lite-toggle";
 import type { Theme, ThemePreference } from "../../lib/theme/night-economy";
 
 const primaryNavigation = [
@@ -18,15 +18,15 @@ const primaryNavigation = [
 export function SiteHeader({
   locale = "en-GB",
   pathname = "/",
-  sahel = false,
-  sahelAutoDismissed = false,
+  lite = false,
+  liteAutoDismissed = false,
   theme = "day",
   themePreference = "auto",
 }: Readonly<{
   locale?: SupportedLocale;
   pathname?: string;
-  sahel?: boolean;
-  sahelAutoDismissed?: boolean;
+  lite?: boolean;
+  liteAutoDismissed?: boolean;
   theme?: Theme;
   themePreference?: ThemePreference;
 }>) {
@@ -56,31 +56,31 @@ export function SiteHeader({
             <Link href={localizePath("/search", locale)}>
               {isFrench ? "Recherche" : "Search"}
             </Link>
-            {sahel ? (
-              <div className="sahel-control">
+            {lite ? (
+              <div className="lite-control">
                 <Link
-                  href={`/api/sahel?enabled=0&return=${encodeURIComponent(pathname)}`}
+                  href={`/api/lite?enabled=0&return=${encodeURIComponent(pathname)}`}
                   prefetch={false}
                   aria-pressed="true"
                   role="button"
                 >
-                  {isFrench ? "Quitter le mode Sahel" : "Exit Sahel mode"}
+                  {isFrench ? "Quitter le mode Lite" : "Exit Lite mode"}
                 </Link>
                 <span>
                   {isFrench
                     ? "Conçu pour fonctionner avec une connexion sahélienne."
-                    : "Built to work on a Sahel connection."}
+                    : "Built to work on a Lite connection."}
                 </span>
               </div>
             ) : (
-              <SahelToggle
+              <LiteToggle
                 active={false}
-                autoDismissed={sahelAutoDismissed}
+                autoDismissed={liteAutoDismissed}
                 locale={locale}
                 pathname={pathname}
               />
             )}
-            {sahel ? (
+            {lite ? (
               <span className="theme-control">
                 <Link
                   className="utility-action"

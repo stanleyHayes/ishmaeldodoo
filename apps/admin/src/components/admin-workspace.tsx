@@ -11,6 +11,10 @@ import { StepUpPanel } from "./security/step-up-panel";
 import { ContentWorkspace } from "./content/content-workspace";
 import { ProtocolDeskWorkspace } from "./protocol/protocol-desk-workspace";
 import { MediaWorkspace } from "./media/media-workspace";
+import { SegmentedCodeInput } from "./security/segmented-code-input";
+
+const MFA_CODE_LENGTH = 6;
+const RECOVERY_CODE_LENGTH = 19;
 
 type AdminRole = AuthSessionResponse["user"]["roles"][number];
 type AdminUser = AuthSessionResponse["user"];
@@ -99,6 +103,9 @@ function LoginForm({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [useRecovery, setUseRecovery] = useState(false);
+  const [code, setCode] = useState("");
+  const codeComplete =
+    code.length === (useRecovery ? RECOVERY_CODE_LENGTH : MFA_CODE_LENGTH);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -165,38 +172,50 @@ function LoginForm({
           </div>
           {useRecovery ? (
             <div className="field field--code">
-              <label htmlFor="recoveryCode">Single-use recovery code</label>
-              <input
-                id="recoveryCode"
+              <span className="field-label" id="recoveryCode-label">
+                Single-use recovery code
+              </span>
+              <SegmentedCodeInput
                 name="recoveryCode"
-                autoComplete="off"
-                pattern="[A-Z2-9]{4}(-[A-Z2-9]{4}){3}"
-                placeholder="ABCD-2345-EFGH-6789"
-                required
+                labelId="recoveryCode-label"
+                describedById="recoveryCode-help"
+                groups={[4, 4, 4, 4]}
+                separator="-"
+                inputMode="text"
+                allow={/[A-Z2-9]/}
+                transform={(raw) => raw.toUpperCase()}
                 disabled={submitting}
+                onValueChange={setCode}
               />
+              <p className="field-help" id="recoveryCode-help">
+                Enter one unused recovery code.
+              </p>
             </div>
           ) : (
             <div className="field field--code">
-              <label htmlFor="mfaCode">Authenticator code</label>
-              <input
-                id="mfaCode"
+              <span className="field-label" id="mfaCode-label">
+                Authenticator code
+              </span>
+              <SegmentedCodeInput
                 name="mfaCode"
-                inputMode="numeric"
-                autoComplete="one-time-code"
-                pattern="[0-9]{6}"
-                minLength={6}
-                maxLength={6}
-                required
+                labelId="mfaCode-label"
+                describedById="mfaCode-help"
+                groups={[6]}
                 disabled={submitting}
+                onValueChange={setCode}
               />
-              <p className="field-help">Enter the current six-digit code.</p>
+              <p className="field-help" id="mfaCode-help">
+                Enter the current six-digit code.
+              </p>
             </div>
           )}
           <button
             className="text-button"
             type="button"
-            onClick={() => setUseRecovery((current) => !current)}
+            onClick={() => {
+              setUseRecovery((current) => !current);
+              setCode("");
+            }}
             disabled={submitting}
           >
             {useRecovery ? "Use authenticator instead" : "Use a recovery code"}
@@ -209,7 +228,7 @@ function LoginForm({
           <button
             className="primary-button"
             type="submit"
-            disabled={submitting}
+            disabled={submitting || !codeComplete}
           >
             {submitting ? "Checking credentials" : "Sign in"}
           </button>

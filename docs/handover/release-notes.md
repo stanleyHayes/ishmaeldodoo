@@ -11,7 +11,7 @@ This is not a production release. The repository currently provides independentl
 - Disabled-by-default WebAuthn security-key enrollment, revocation and assertion with five-minute `hwk` elevation; production activation still requires approved RP domains, authenticator policy and physical custody/recovery evidence.
 - Cloudinary signed upload, verified registry, metadata/focal-point governance and protected retirement.
 - Protocol Desk intake, triage, decision boundary, correspondence queue, Protocol Note, SLA escalation and provider-neutral availability.
-- Privacy-gated analytics proxy, Sahel Mode, Night Economy Mode, discoverability surfaces and portable observability policy.
+- Privacy-gated analytics proxy, Lite Mode, Night Economy Mode, discoverability surfaces and portable observability policy.
 - Independent production container builds, OpenAPI/generated contracts, automated unit/integration/browser/coverage/security/performance gates.
 
 ### Known launch blockers

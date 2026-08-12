@@ -21,7 +21,7 @@ export function AtlasFilterAnalytics({
       name: "atlas_filter_applied",
       route,
       locale,
-      ...(lite ? { mode: "sahel" as const } : {}),
+      ...(lite ? { mode: "lite" as const } : {}),
     });
   }, [filtered, lite, locale, route]);
 

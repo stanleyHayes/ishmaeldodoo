@@ -44,8 +44,8 @@ describe("StepUpPanel", () => {
       expiresIn: 300,
     });
     render(<StepUpPanel />);
-    fireEvent.change(screen.getByLabelText("Current authenticator code"), {
-      target: { value: "123456" },
+    fireEvent.paste(screen.getByLabelText("Digit 1 of 6"), {
+      clipboardData: { getData: () => "123456" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Verify recent MFA" }));
     await waitFor(() => expect(stepUp).toHaveBeenCalledWith("123456"));
@@ -113,8 +113,8 @@ describe("StepUpPanel", () => {
     });
 
     render(<StepUpPanel />);
-    fireEvent.change(screen.getByLabelText("Current authenticator code"), {
-      target: { value: "123456" },
+    fireEvent.paste(screen.getByLabelText("Digit 1 of 6"), {
+      clipboardData: { getData: () => "123456" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Verify recent MFA" }));
     await screen.findByRole("button", { name: "Enrol local security key" });

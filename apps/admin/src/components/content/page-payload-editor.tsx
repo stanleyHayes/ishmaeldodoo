@@ -16,7 +16,7 @@ type PageSection = {
   heading?: LocalizedField;
   body: LocalizedField;
   sourceRefs: string[];
-  recordAct?: "forest" | "system" | "sahel" | "return";
+  recordAct?: "forest" | "system" | "lite" | "return";
   dateline?: LocalizedField;
   fieldImage?: string;
   imageCaption?: LocalizedField;
@@ -506,7 +506,7 @@ export function PagePayloadEditor({
                   <option value="">Not a Record act</option>
                   <option value="forest">The Forest</option>
                   <option value="system">The System</option>
-                  <option value="sahel">The Sahel</option>
+                  <option value="lite">The Lite</option>
                   <option value="return">The Return</option>
                 </select>
               </div>

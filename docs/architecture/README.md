@@ -155,7 +155,7 @@ Replay of an already-rotated refresh token revokes its entire token family and e
 | Cloudinary              | Existing transformed assets remain edge-cached; CMS upload reports a recoverable failure.     |
 | Email                   | Transactional outbox retries with exponential backoff; no request decision is silently lost.  |
 | Calendar                | Local holds remain authoritative; adapter reconciles later and displays an operator warning.  |
-| Leaflet tiles           | Atlas table twin remains fully functional and becomes default in Sahel Mode.                  |
+| Leaflet tiles           | Atlas table twin remains fully functional and becomes default in Lite Mode.                   |
 | Doctrine provider       | Serve curated Positions content without a user-visible provider error.                        |
 | Analytics/observability | Product actions continue; telemetry is bounded and never blocks the user path.                |
 

@@ -174,7 +174,7 @@ describe("room submission contract", () => {
   it("strips any plaintext identity smuggled alongside the envelope", () => {
     const parsed = roomSubmissionSchema.parse({
       ...submission,
-      subject: "Sahel facility",
+      subject: "Lite facility",
       fromEmail: "someone@example.org",
       organisation: "Example Bank",
     });

@@ -22,7 +22,7 @@ function acceptedRequest() {
       },
       engagement: {
         type: "keynote",
-        eventName: "Sahel Futures Forum",
+        eventName: "Lite Futures Forum",
         startsAt: "2026-09-01T10:00:00.000Z",
         city: "Accra",
         country: "GH",

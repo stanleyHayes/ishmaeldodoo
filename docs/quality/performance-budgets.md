@@ -4,12 +4,12 @@ Brief section 10.4 is the authority. The local and CI gates deliberately separat
 
 ## Enforced on every change
 
-- `npm run check:sahel-budget` production-builds the public app and measures compressed HTML plus every referenced local static asset for all 18 approved English routes and their 18 French counterparts. Every `?lite=1` route must remain at or below 200 KiB. This includes P01-P13, Sources and all three legal pages.
-- `npm run test:lighthouse` runs production Lighthouse against the zero-script Home and Press Sahel paths, the semantic Atlas Sahel table and the interactive Leaflet Atlas. All reports require accessibility 100, LCP at most 1.8 seconds and CLS at most 0.05. Sahel reports require at most 200 KiB; non-Atlas scripts require at most 120 KiB; interactive Atlas requires at most 500 KiB and Lighthouse time-to-interactive at most 2.5 seconds.
+- `npm run check:lite-budget` production-builds the public app and measures compressed HTML plus every referenced local static asset for all 18 approved English routes and their 18 French counterparts. Every `?lite=1` route must remain at or below 200 KiB. This includes P01-P13, Sources and all three legal pages.
+- `npm run test:lighthouse` runs production Lighthouse against the zero-script Home and Press Lite paths, the semantic Atlas Lite table and the interactive Leaflet Atlas. All reports require accessibility 100, LCP at most 1.8 seconds and CLS at most 0.05. Lite reports require at most 200 KiB; non-Atlas scripts require at most 120 KiB; interactive Atlas requires at most 500 KiB and Lighthouse time-to-interactive at most 2.5 seconds.
 - `npm run check:standard-script-budget` measures the gzip-compressed modern script tags emitted by the production build for 18 English and 18 French non-Atlas routes. All currently miss the brief's 120 KiB target. Until D11 is signed, the gate prevents further regression above 145 KiB for ordinary routes and 215 KiB for the cryptographic Room; those interim ceilings are controls, not approved launch budgets.
-- The Atlas is exempt only from the 120 KiB JavaScript ceiling. Its table twin is not exempt from the universal Sahel total-weight ceiling.
+- The Atlas is exempt only from the 120 KiB JavaScript ceiling. Its table twin is not exempt from the universal Lite total-weight ceiling.
 
-The Sahel byte gate is intentionally broader than Lighthouse. Lighthouse supplies deeper representative lab diagnostics; the deterministic production-asset walk prevents an untested public route or locale from silently exceeding the universal low-bandwidth ceiling.
+The Lite byte gate is intentionally broader than Lighthouse. Lighthouse supplies deeper representative lab diagnostics; the deterministic production-asset walk prevents an untested public route or locale from silently exceeding the universal low-bandwidth ceiling.
 
 ## Evidence still required
 

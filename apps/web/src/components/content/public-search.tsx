@@ -15,7 +15,7 @@ export function PublicSearch({
   const archivePath = french ? "/fr/archive" : "/archive";
   const sourcesPath = french ? "/fr/record/sources" : "/record/sources";
   return (
-    <main id="main-content" className="site-frame search-page">
+    <main id="main-content" tabIndex={-1} className="site-frame search-page">
       <p className="section-context">
         {french ? "Navigation publique" : "Public navigation"}
       </p>

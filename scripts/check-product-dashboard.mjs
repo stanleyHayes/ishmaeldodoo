@@ -59,7 +59,7 @@ const allowedAnalyticsMeasures = new Set([
   "count",
   "count_by_event",
   "completed_divided_by_started",
-  "activation_count_and_sahel_share",
+  "activation_count_and_lite_share",
 ]);
 const requiredOutcomes = new Set([
   "reach",
@@ -69,7 +69,7 @@ const requiredOutcomes = new Set([
   "atlas",
   "signals",
   "office_hours",
-  "sahel_mode",
+  "lite_mode",
 ]);
 
 const pendingDeployedAcceptanceSentinels = [
@@ -97,7 +97,7 @@ const pendingDeployedAcceptanceSentinels = [
   "- Nine-event group suppressed and tenth-event aggregate released: `Not run`",
   "- Raw-event and visitor export disabled with access-denial proof: `Not run`",
   "- Eight dashboard panel IDs and saved-query parity: `Not run`",
-  "- Desk zero denominator, Sahel share and bilingual grouping QA: `Not run`",
+  "- Desk zero denominator, Lite share and bilingual grouping QA: `Not run`",
   "- Desk SLA aggregate datasource joined without request data: `Not run`",
   "- Africa/Accra timezone and 30-day default window: `Not run`",
   "- Desktop and narrow 24-hour/30-day/empty/suppressed screenshots: `Not recorded`",
@@ -209,25 +209,25 @@ const syntheticEvents = [
     name: "protocol_desk_started",
     route: "/speaking/request",
     locale: "en-GB",
-    mode: "sahel",
+    mode: "lite",
   })),
   ...Array.from({ length: 10 }, () => ({
     name: "protocol_desk_completed",
     route: "/speaking/request",
     locale: "en-GB",
-    mode: "sahel",
+    mode: "lite",
   })),
   ...Array.from({ length: 10 }, () => ({
-    name: "sahel_mode_enabled",
+    name: "lite_mode_enabled",
     route: "/record",
     locale: "fr-FR",
-    mode: "sahel",
+    mode: "lite",
   })),
   ...Array.from({ length: 6 }, () => ({
     name: "pageview",
     route: "/record",
     locale: "fr-FR",
-    mode: "sahel",
+    mode: "lite",
   })),
   ...Array.from({ length: 4 }, () => ({
     name: "pageview",
@@ -269,14 +269,14 @@ const funnel = evaluateAnalyticsPanel(
 if (funnel.length !== 1 || funnel[0]?.value !== 1)
   throw new Error("Synthetic Desk funnel arithmetic QA failed");
 
-const sahel = evaluateAnalyticsPanel(
-  analyticsPanels["sahel-mode"],
+const lite = evaluateAnalyticsPanel(
+  analyticsPanels["lite-mode"],
   syntheticEvents.filter(
     ({ locale, route }) => locale === "fr-FR" && route === "/record",
   ),
 ).find(({ key }) => key === "fr-FR");
-if (sahel?.value?.activations !== 10 || sahel?.value?.sahelShare !== 0.6)
-  throw new Error("Synthetic Sahel share arithmetic QA failed");
+if (lite?.value?.activations !== 10 || lite?.value?.liteShare !== 0.6)
+  throw new Error("Synthetic Lite share arithmetic QA failed");
 
 const forbiddenKeys = [
   "email",

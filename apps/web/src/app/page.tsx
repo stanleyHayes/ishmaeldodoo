@@ -11,7 +11,7 @@ import { getPublicContent } from "../lib/content/get-public-content";
 import type { SupportedLocale } from "../lib/i18n/locale";
 import { publicMetadata } from "../lib/discoverability/metadata";
 import { getPublicSignal } from "../lib/content/get-public-signal";
-import { isSahelValue, sahelCookieName } from "../lib/sahel/mode";
+import { isLiteValue, liteCookieName } from "../lib/lite/mode";
 
 export async function generateMetadata(): Promise<Metadata> {
   const result = await getPublicContent({
@@ -55,11 +55,11 @@ export default async function FoundationPage({
   const audience =
     audienceKey(parameters.door) ??
     audienceKey(cookieStore.get(audienceCookieName)?.value);
-  const explicitSahel =
-    isSahelValue(parameters.lite) || isSahelValue(parameters.mode);
-  const storedSahel = cookieStore.get(sahelCookieName)?.value;
-  const sahel =
-    explicitSahel || (storedSahel !== "dismissed" && isSahelValue(storedSahel));
+  const explicitLite =
+    isLiteValue(parameters.lite) || isLiteValue(parameters.mode);
+  const storedLite = cookieStore.get(liteCookieName)?.value;
+  const lite =
+    explicitLite || (storedLite !== "dismissed" && isLiteValue(storedLite));
   const identity =
     identityResult.status === "available"
       ? identityPayload(identityResult.content.payload)
@@ -71,7 +71,7 @@ export default async function FoundationPage({
       atlas={atlas.status === "available" ? atlas.items : []}
       identity={identity}
       signal={signalResult.status === "available" ? signalResult.signal : null}
-      sahel={sahel}
+      lite={lite}
     />
   );
 }

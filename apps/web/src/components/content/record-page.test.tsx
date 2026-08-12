@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { PublicContentResult } from "../../lib/content/public-content-client";
 import { RecordPage } from "./record-page";
 
-const acts = ["forest", "system", "sahel", "return"] as const;
+const acts = ["forest", "system", "lite", "return"] as const;
 const result: PublicContentResult = {
   status: "available",
   content: {

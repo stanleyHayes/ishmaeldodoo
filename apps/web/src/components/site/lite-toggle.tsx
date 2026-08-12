@@ -7,12 +7,12 @@ import { analyticsRoutes } from "../../lib/analytics-catalog";
 import { trackAnalyticsEvent } from "../../lib/analytics-client";
 import {
   isConstrainedConnection,
-  sahelCookieName,
-  sahelDismissedName,
-  sahelStorageName,
-} from "../../lib/sahel/mode";
+  liteCookieName,
+  liteDismissedName,
+  liteStorageName,
+} from "../../lib/lite/mode";
 
-export function SahelToggle({
+export function LiteToggle({
   active,
   autoDismissed = false,
   locale,
@@ -24,16 +24,16 @@ export function SahelToggle({
   pathname: string;
 }>) {
   const french = locale === "fr-FR";
-  const destination = `/api/sahel?enabled=${active ? "0" : "1"}&return=${encodeURIComponent(pathname)}`;
+  const destination = `/api/lite?enabled=${active ? "0" : "1"}&return=${encodeURIComponent(pathname)}`;
 
   useEffect(() => {
-    window.localStorage.setItem(sahelStorageName, active ? "1" : "0");
+    window.localStorage.setItem(liteStorageName, active ? "1" : "0");
     const explicitlyDismissed =
       autoDismissed ||
-      window.localStorage.getItem(sahelDismissedName) === "1" ||
+      window.localStorage.getItem(liteDismissedName) === "1" ||
       document.cookie
         .split(";")
-        .some((cookie) => cookie.trim() === `${sahelCookieName}=dismissed`);
+        .some((cookie) => cookie.trim() === `${liteCookieName}=dismissed`);
     if (
       !active &&
       !explicitlyDismissed &&
@@ -42,45 +42,45 @@ export function SahelToggle({
       )
     ) {
       window.location.replace(
-        `/api/sahel?enabled=1&return=${encodeURIComponent(pathname)}`,
+        `/api/lite?enabled=1&return=${encodeURIComponent(pathname)}`,
       );
     }
   }, [active, autoDismissed, pathname]);
 
   return (
-    <div className="sahel-control">
+    <div className="lite-control">
       <Link
         href={destination}
         prefetch={false}
         aria-pressed={active}
         role="button"
         onClick={() => {
-          window.localStorage.setItem(sahelStorageName, active ? "0" : "1");
-          if (active) window.localStorage.setItem(sahelDismissedName, "1");
+          window.localStorage.setItem(liteStorageName, active ? "0" : "1");
+          if (active) window.localStorage.setItem(liteDismissedName, "1");
           else {
-            window.localStorage.removeItem(sahelDismissedName);
+            window.localStorage.removeItem(liteDismissedName);
             if (analyticsRoutes.includes(pathname))
               void trackAnalyticsEvent({
-                name: "sahel_mode_enabled",
+                name: "lite_mode_enabled",
                 route: pathname,
                 locale,
-                mode: "sahel",
+                mode: "lite",
               });
           }
         }}
       >
         {active
           ? french
-            ? "Quitter le mode Sahel"
-            : "Exit Sahel mode"
+            ? "Quitter le mode Lite"
+            : "Exit Lite mode"
           : french
-            ? "Mode Sahel"
-            : "Sahel mode"}
+            ? "Mode Lite"
+            : "Lite mode"}
       </Link>
       <span>
         {french
           ? "Conçu pour fonctionner avec une connexion sahélienne."
-          : "Built to work on a Sahel connection."}
+          : "Built to work on a Lite connection."}
       </span>
     </div>
   );

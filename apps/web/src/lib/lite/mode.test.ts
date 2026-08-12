@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { isConstrainedConnection, isSahelValue } from "./mode";
+import { isConstrainedConnection, isLiteValue } from "./mode";
 
-describe("Sahel mode state", () => {
+describe("Lite mode state", () => {
   it("accepts only explicit lite values", () => {
-    expect(isSahelValue("1")).toBe(true);
-    expect(isSahelValue("sahel")).toBe(true);
-    expect(isSahelValue(["1", "0"])).toBe(true);
-    expect(isSahelValue("true")).toBe(false);
+    expect(isLiteValue("1")).toBe(true);
+    expect(isLiteValue("lite")).toBe(true);
+    expect(isLiteValue(["1", "0"])).toBe(true);
+    expect(isLiteValue("true")).toBe(false);
   });
 
   it("detects Save-Data, 2g and slow-2g connections", () => {

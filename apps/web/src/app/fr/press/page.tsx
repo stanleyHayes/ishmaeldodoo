@@ -30,7 +30,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function FrenchPressPage() {
-  const lite = (await headers()).get("x-amanor-sahel") === "1";
+  const lite = (await headers()).get("x-amanor-lite") === "1";
   const result = await getPublicContent({
     documentType: "identity",
     documentId: "canonical",

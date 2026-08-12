@@ -27,7 +27,7 @@ Use synthetic non-personal sessions in protected staging and record provider que
 3. Attempt unknown events, query-string routes, extra properties, identity/contact fields, request/reference IDs and record IDs; prove rejection before provider delivery.
 4. Prove provider outage or timeout returns no-content within the application deadline and does not block the user journey.
 5. Populate nine events in one group and prove suppression; add the tenth and prove the aggregate appears without exposing constituent events.
-6. Prove Desk funnel zero-denominator behavior, Sahel share arithmetic and French/English route grouping.
+6. Prove Desk funnel zero-denominator behavior, Lite share arithmetic and French/English route grouping.
 
 ## Screenshot evidence
 
@@ -39,7 +39,7 @@ Monthly, compare expected product releases and synthetic canaries to event volum
 
 The first six-month outcome report may use only aggregate, quality-reviewed results. Reach means consent-qualified page views, not unique people or the whole audience. Office Hours readership is not participation, and Desk completion is not acceptance. Those distinctions must remain visible in reports.
 
-Before provider deployment, `npm run check:analytics` runs non-personal synthetic events through the provider-neutral panel semantics. It verifies route filters, locale/mode grouping, exact counts, Desk completion arithmetic, Sahel share arithmetic, and suppression at nine events followed by release at ten. This local gate does not replace the staging provider-ingestion and screenshot evidence above.
+Before provider deployment, `npm run check:analytics` runs non-personal synthetic events through the provider-neutral panel semantics. It verifies route filters, locale/mode grouping, exact counts, Desk completion arithmetic, Lite share arithmetic, and suppression at nine events followed by release at ten. This local gate does not replace the staging provider-ingestion and screenshot evidence above.
 
 Record the S04 outcome, exact deployed release/provider/dashboard revisions,
 consent and ingestion QA, privacy settings, screenshots, cleanup, defects and

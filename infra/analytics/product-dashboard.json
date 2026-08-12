@@ -84,12 +84,12 @@
       "minimumGroupSize": 10
     },
     {
-      "id": "sahel-mode",
-      "outcome": "sahel_mode",
-      "title": "Sahel Mode activation and page views",
+      "id": "lite-mode",
+      "outcome": "lite_mode",
+      "title": "Lite Mode activation and page views",
       "source": "analytics",
-      "events": ["sahel_mode_enabled", "pageview"],
-      "measure": "activation_count_and_sahel_share",
+      "events": ["lite_mode_enabled", "pageview"],
+      "measure": "activation_count_and_lite_share",
       "groupBy": ["locale"],
       "minimumGroupSize": 10,
       "zeroDenominator": null

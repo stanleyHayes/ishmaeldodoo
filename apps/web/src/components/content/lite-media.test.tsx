@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { LiteAudio, LiteImage } from "./lite-media";
 
-describe("Sahel media controls", () => {
+describe("Lite media controls", () => {
   it("renders image alt text without a media request until opted in", () => {
     const { container } = render(
       <LiteImage

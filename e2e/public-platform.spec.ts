@@ -6,10 +6,10 @@ async function useStandardMode(page: Page): Promise<void> {
   destination.searchParams.delete("mode");
   const returnPath = `${destination.pathname}${destination.search}${destination.hash}`;
   await page.goto(
-    `${destination.origin}/api/sahel?enabled=0&return=${encodeURIComponent(returnPath)}`,
+    `${destination.origin}/api/lite?enabled=0&return=${encodeURIComponent(returnPath)}`,
   );
   await page.waitForLoadState("networkidle");
-  await expect(page.locator("html")).not.toHaveAttribute("data-mode", "sahel");
+  await expect(page.locator("html")).not.toHaveAttribute("data-mode", "lite");
 }
 
 test("keeps analytics optional, bilingual and usable on a narrow night-mode viewport", async ({
@@ -35,14 +35,14 @@ test("keeps analytics optional, bilingual and usable on a narrow night-mode view
 
   await notice.getByRole("button", { name: "Decline" }).click();
   await expect(page.getByText("No analytics", { exact: true })).toBeVisible();
-  await expect(page.locator("html")).not.toHaveAttribute("data-mode", "sahel");
+  await expect(page.locator("html")).not.toHaveAttribute("data-mode", "lite");
   expect(
     (await context.cookies()).find(
       (cookie) => cookie.name === "amanor-analytics",
     )?.value,
   ).toBe("denied");
   await page.reload();
-  await expect(page.locator("html")).not.toHaveAttribute("data-mode", "sahel");
+  await expect(page.locator("html")).not.toHaveAttribute("data-mode", "lite");
   await expect(
     page.getByRole("complementary", { name: "Privacy-respecting measurement" }),
   ).toHaveCount(0);
@@ -56,7 +56,7 @@ test("keeps analytics optional, bilingual and usable on a narrow night-mode view
     )?.value,
   ).toBe("granted");
   expect(
-    (await context.cookies()).find((cookie) => cookie.name === "amanor-sahel")
+    (await context.cookies()).find((cookie) => cookie.name === "amanor-lite")
       ?.value,
   ).toBe("dismissed");
 
@@ -309,7 +309,7 @@ test("renders only the consent-safe bilingual Legacy scholar projection", async 
     }),
   ).toBeVisible();
 
-  await page.goto("https://localhost:3210/legacy?mode=sahel");
+  await page.goto("https://localhost:3210/legacy?mode=lite");
   await expect(page.getByText("Ama Mensah")).toBeVisible();
   await expect(page.getByText("A consent-cleared public story.")).toBeVisible();
   await expect(
@@ -413,7 +413,7 @@ test("keeps the public design system usable in day and night at every required w
   expect(palettes.day).not.toEqual(palettes.night);
 });
 
-test("keeps the Sahel homepage functional without downloading JavaScript", async ({
+test("keeps the Lite homepage functional without downloading JavaScript", async ({
   page,
 }) => {
   const response = await page.goto("https://localhost:3210/?lite=1", {
@@ -422,8 +422,8 @@ test("keeps the Sahel homepage functional without downloading JavaScript", async
   expect(response?.headers()["content-security-policy"]).toContain(
     "script-src 'none'",
   );
-  await expect(page.locator("html")).toHaveAttribute("data-mode", "sahel");
-  await expect(page.getByText("No analytics in Sahel mode")).toBeVisible();
+  await expect(page.locator("html")).toHaveAttribute("data-mode", "lite");
+  await expect(page.getByText("No analytics in Lite mode")).toBeVisible();
   expect(
     await page.evaluate(
       "performance.getEntriesByType('resource').filter((entry) => entry.initiatorType === 'script').reduce((total, entry) => total + entry.transferSize, 0)",
@@ -442,11 +442,11 @@ test("keeps the Sahel homepage functional without downloading JavaScript", async
     page.getByLabel("Nine proof points").getByRole("link").first(),
   ).toContainText("Homepage proof 9");
   await expect(
-    page.getByRole("button", { name: "Exit Sahel mode" }),
+    page.getByRole("button", { name: "Exit Lite mode" }),
   ).toBeVisible();
 });
 
-test("keeps the Sahel Press Room functional without JavaScript", async ({
+test("keeps the Lite Press Room functional without JavaScript", async ({
   page,
 }, testInfo) => {
   const response = await page.goto("https://localhost:3210/press?lite=1", {
@@ -455,7 +455,7 @@ test("keeps the Sahel Press Room functional without JavaScript", async ({
   expect(response?.headers()["content-security-policy"]).toContain(
     "script-src 'none'",
   );
-  await expect(page.locator("html")).toHaveAttribute("data-mode", "sahel");
+  await expect(page.locator("html")).toHaveAttribute("data-mode", "lite");
   await expect(
     page.getByRole("heading", { name: "Canonical identity" }),
   ).toBeVisible();
@@ -469,10 +469,10 @@ test("keeps the Sahel Press Room functional without JavaScript", async ({
 
   const pressKit = page.locator("form[action='/api/press-kit']");
   await pressKit.getByLabel("Your name").fill("Ama Mensah");
-  await pressKit.getByLabel("Outlet").fill("Sahel Newsroom");
+  await pressKit.getByLabel("Outlet").fill("Lite Newsroom");
   await pressKit
     .getByLabel("Email address")
-    .fill(`press-sahel-${testInfo.project.name}@example.test`);
+    .fill(`press-lite-${testInfo.project.name}@example.test`);
   const downloadPromise = page.waitForEvent("download");
   await pressKit.getByRole("button", { name: "Generate press kit" }).click();
   const download = await downloadPromise;
@@ -576,11 +576,11 @@ test("keeps the bilingual Press Room interactive across identity, downloads and 
   ).toHaveAttribute("href", "/fr/press/contact");
 });
 
-test("defers governed speaking video until a Sahel visitor opts in", async ({
+test("defers governed speaking video until a Lite visitor opts in", async ({
   page,
 }) => {
   await page.goto("https://localhost:3210/speaking?lite=1");
-  await expect(page.locator("html")).toHaveAttribute("data-mode", "sahel");
+  await expect(page.locator("html")).toHaveAttribute("data-mode", "lite");
 
   const video = page.locator("video");
   const standardModeOptIn = page.getByRole("link", {
@@ -594,7 +594,7 @@ test("defers governed speaking video until a Sahel visitor opts in", async ({
   ).toHaveAttribute("href", "/archive#regional-broadcast");
 
   await standardModeOptIn.click();
-  await expect(page.locator("html")).not.toHaveAttribute("data-mode", "sahel");
+  await expect(page.locator("html")).not.toHaveAttribute("data-mode", "lite");
   await expect(video).toHaveAttribute(
     "src",
     "https://media.example.test/forum-2026.mp4",
@@ -634,7 +634,7 @@ test("persists and resets an adaptive audience without hiding the public shell",
   ).toBe("investor");
 
   await page.reload();
-  await expect(page.locator("html")).not.toHaveAttribute("data-mode", "sahel");
+  await expect(page.locator("html")).not.toHaveAttribute("data-mode", "lite");
   await expect(page.locator("[data-audience='investor']")).toBeVisible();
   await page.getByRole("link", { name: "Reset view" }).click();
   await expect(page.locator("[data-audience='general']")).toBeVisible();
@@ -1020,7 +1020,7 @@ test("submits a complete no-account Protocol Desk request to live NestJS and ret
     page.getByRole("heading", { name: "Your request has been received" }),
   ).toBeVisible();
   await expect(page.getByText(/^PD-\d{4}-\d{4,}$/u)).toBeVisible();
-  await expect(page.locator("html")).toHaveAttribute("data-mode", "sahel");
+  await expect(page.locator("html")).toHaveAttribute("data-mode", "lite");
 });
 
 test("rejects oversized public bodies before form processing", async ({

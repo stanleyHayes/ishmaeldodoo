@@ -96,13 +96,13 @@ try {
     const { total, assets } = await compressedRouteBytes(route);
     const kib = (total / 1024).toFixed(1);
     process.stdout.write(
-      `Sahel budget ${route}: ${kib} KiB compressed (${assets} static assets)\n`,
+      `Lite budget ${route}: ${kib} KiB compressed (${assets} static assets)\n`,
     );
     if (total > budgetBytes) failed = true;
   }
   if (failed)
     throw new Error(
-      `Sahel route exceeds the ${budgetBytes / 1024} KiB compressed budget`,
+      `Lite route exceeds the ${budgetBytes / 1024} KiB compressed budget`,
     );
 } catch (error) {
   if (serverError) process.stderr.write(serverError);

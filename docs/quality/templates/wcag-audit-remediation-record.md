@@ -5,7 +5,7 @@
 - Contract/scope reference and audit methodology: `Not recorded`
 - Production-like environment, release and Web/Admin/API revisions: `Not recorded`
 - Audit window and final-report immutable evidence location: `Not scheduled`
-- Public P01-P13 English/French standard/Sahel coverage: `Not run`
+- Public P01-P13 English/French standard/Lite coverage: `Not run`
 - Admin/CMS authentication, content, media and operations coverage: `Not run`
 - Protocol Desk, Contact and Room enabled/disabled boundary coverage: `Not run`
 - Desktop browsers and Windows/macOS assistive technologies: `Not run`

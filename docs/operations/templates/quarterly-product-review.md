@@ -17,7 +17,7 @@ Summarise the three monthly answers for record reach, Desk health and youth pipe
 
 ## Quality, privacy and accessibility
 
-Record data-quality defects, consent or retention changes, bilingual staleness, accessibility feedback, Sahel performance and security incidents. A proposed new metric must name the decision it changes and complete Privacy review before instrumentation.
+Record data-quality defects, consent or retention changes, bilingual staleness, accessibility feedback, Lite performance and security incidents. A proposed new metric must name the decision it changes and complete Privacy review before instrumentation.
 
 ## Approval
 

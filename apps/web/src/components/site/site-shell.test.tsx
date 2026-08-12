@@ -62,20 +62,20 @@ describe("public site shell", () => {
     ).toHaveAttribute("href", "/api/theme?theme=night&return=%2Ffr%2Frecord");
   });
 
-  it("renders a persistent bilingual Sahel control and its plain statement", () => {
+  it("renders a persistent bilingual Lite control and its plain statement", () => {
     const { rerender } = render(<SiteHeader />);
-    expect(screen.getByRole("button", { name: "Sahel mode" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "Lite mode" })).toHaveAttribute(
       "href",
-      "/api/sahel?enabled=1&return=%2F",
+      "/api/lite?enabled=1&return=%2F",
     );
     expect(
-      screen.getByText("Built to work on a Sahel connection."),
+      screen.getByText("Built to work on a Lite connection."),
     ).toBeInTheDocument();
 
-    rerender(<SiteHeader locale="fr-FR" pathname="/fr/record" sahel />);
+    rerender(<SiteHeader locale="fr-FR" pathname="/fr/record" lite />);
     expect(
-      screen.getByRole("button", { name: "Quitter le mode Sahel" }),
-    ).toHaveAttribute("href", "/api/sahel?enabled=0&return=%2Ffr%2Frecord");
+      screen.getByRole("button", { name: "Quitter le mode Lite" }),
+    ).toHaveAttribute("href", "/api/lite?enabled=0&return=%2Ffr%2Frecord");
   });
 
   it("removes the persistent engagement call to action from Selah", () => {

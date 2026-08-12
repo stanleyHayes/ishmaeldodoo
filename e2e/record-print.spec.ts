@@ -49,5 +49,5 @@ test("P02 remains responsive and the selected ledger prints as two A4 pages", as
   expect(text).toContain("The Two Ledgers");
   expect(text).toContain("Source appendix");
   expect(text).not.toContain("Skip to content");
-  expect(text).not.toContain("No analytics in Sahel mode");
+  expect(text).not.toContain("No analytics in Lite mode");
 });

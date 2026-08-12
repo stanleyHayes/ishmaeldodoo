@@ -81,14 +81,14 @@ export function AdaptiveHome({
   atlas,
   identity,
   signal,
-  sahel = false,
+  lite = false,
 }: Readonly<{
   locale: SupportedLocale;
   audience: AudienceKey | null;
   atlas: readonly PublicAtlasNode[];
   identity: Identity | null;
   signal: PublicSignal | null;
-  sahel?: boolean;
+  lite?: boolean;
 }>) {
   const french = locale === "fr-FR";
   const proofs = homepageProofs(atlas, audience);
@@ -281,7 +281,7 @@ export function AdaptiveHome({
           </ol>
         </section>
       ) : null}
-      {sahel ? (
+      {lite ? (
         <AudienceDoorsStatic locale={locale} selected={audience} />
       ) : (
         <AudienceDoors locale={locale} selected={audience} />

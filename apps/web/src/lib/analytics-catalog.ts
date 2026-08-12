@@ -27,7 +27,7 @@ export const analyticsRoutes = [
 export const analyticsEventNames = [
   "pageview",
   "audience_selected",
-  "sahel_mode_enabled",
+  "lite_mode_enabled",
   "atlas_filter_applied",
   "atlas_record_opened",
   "press_kit_requested",
@@ -40,5 +40,5 @@ export type AnalyticsEvent = Readonly<{
   route: string;
   locale: "en-GB" | "fr-FR";
   audience?: "government" | "investor" | "media" | "youth" | "philanthropy";
-  mode?: "standard" | "sahel";
+  mode?: "standard" | "lite";
 }>;

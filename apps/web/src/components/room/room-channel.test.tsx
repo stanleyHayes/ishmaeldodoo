@@ -30,7 +30,7 @@ function fill() {
     target: { value: "counterparty@example.org" },
   });
   fireEvent.change(screen.getByLabelText("Subject"), {
-    target: { value: "Sahel facility structuring" },
+    target: { value: "Lite facility structuring" },
   });
   fireEvent.change(screen.getByLabelText("Message"), {
     target: {

@@ -15,7 +15,7 @@ export const analyticsEventSchema = z
     audience: z
       .enum(["government", "investor", "media", "youth", "philanthropy"])
       .optional(),
-    mode: z.enum(["standard", "sahel"]).optional(),
+    mode: z.enum(["standard", "lite"]).optional(),
   })
   .strict();
 

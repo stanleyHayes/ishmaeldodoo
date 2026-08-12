@@ -243,7 +243,7 @@ function ThemeCard({
                     <div className="lite-media-placeholder">
                       <p>{item.caption}</p>
                       <a
-                        href={`/api/sahel?enabled=0&return=${encodeURIComponent(
+                        href={`/api/lite?enabled=0&return=${encodeURIComponent(
                           `${localizePath("/speaking", locale)}#${theme.slug}`,
                         )}`}
                       >

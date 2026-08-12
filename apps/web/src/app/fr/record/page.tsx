@@ -41,7 +41,7 @@ export default async function Page({
   ]);
   const params = await searchParams;
   const lite =
-    (params.mode === "sahel" || params.lite === "1") && params.media !== "1";
+    (params.mode === "lite" || params.lite === "1") && params.media !== "1";
   const media = Object.fromEntries(
     await Promise.all(
       (lite ? [] : recordFieldImageIds(content)).map(async (assetId) => {

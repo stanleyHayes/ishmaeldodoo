@@ -15,7 +15,7 @@ import type {
 } from "./room.js";
 
 const plaintext: RoomPlaintext = {
-  subject: "Sahel facility structuring",
+  subject: "Lite facility structuring",
   message:
     "We would like a confidential conversation about a blended finance facility and its governance.",
   fromName: "A Counterparty",

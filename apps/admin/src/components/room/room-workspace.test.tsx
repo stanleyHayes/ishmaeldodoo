@@ -58,7 +58,7 @@ const item: RoomInboxItem = {
 };
 
 const plaintext: RoomPlaintext = {
-  subject: "Sahel facility structuring",
+  subject: "Lite facility structuring",
   message: "A confidential message that must never leave this browser.",
   fromName: "A Counterparty",
   fromEmail: "counterparty@example.org",

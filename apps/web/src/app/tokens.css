@@ -5,7 +5,7 @@
   --accent: #0b4f6c;
   --accent-deep: #062f41;
   --gold: #b08d3f;
-  --sahel: #c1663b;
+  --lite: #c1663b;
   --muted: #5b6472;
   --rule: #e2ded7;
   --surface: #f2efea;
@@ -14,8 +14,8 @@
   --signal: #2e7d5b;
   --caution: #8c3a2e;
   --focus: var(--accent);
-  --font-display: "Newsreader Variable", Georgia, serif;
-  --font-body: "Inter Tight Variable", Arial, sans-serif;
+  --font-display: "Outfit Variable", "Segoe UI", Arial, sans-serif;
+  --font-body: "Outfit Variable", Arial, sans-serif;
   --font-data: "IBM Plex Mono", monospace;
   --content-max: 80rem;
   --page-gutter: clamp(1.25rem, 5.625vw, 4.5rem);
@@ -37,8 +37,8 @@
   --focus: #79b6cf;
 }
 
-[data-mode="sahel"] {
-  --font-display: Georgia, "Times New Roman", serif;
+[data-mode="lite"] {
+  --font-display: "Segoe UI", Arial, sans-serif;
   --font-body: Arial, Helvetica, sans-serif;
   --font-data: ui-monospace, "Courier New", monospace;
   --motion-fast: 0ms;

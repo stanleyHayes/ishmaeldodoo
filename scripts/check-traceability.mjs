@@ -176,7 +176,7 @@ function validatePressBrowserEvidence() {
     "Press Kit",
     "Living Dossier PDF downloads",
     "media-contact handoff",
-    "no-script Sahel fallback",
+    "no-script Lite fallback",
   ])
     if (!columns[2].includes(requirement))
       throw new Error(`P07 traceability is missing ${requirement}`);

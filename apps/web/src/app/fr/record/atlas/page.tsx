@@ -27,7 +27,7 @@ export default async function Page({
       tileUrl={webEnvironment.LEAFLET_TILE_URL}
       attribution={webEnvironment.LEAFLET_TILE_ATTRIBUTION}
       ledger={ledgerView(params)}
-      lite={params.mode === "sahel" || params.lite === "1"}
+      lite={params.mode === "lite" || params.lite === "1"}
       {...(typeof params.node === "string" ? { initialNode: params.node } : {})}
     />
   );

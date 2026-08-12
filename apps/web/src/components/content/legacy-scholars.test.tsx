@@ -32,7 +32,7 @@ describe("LegacyScholars", () => {
     expect(screen.queryByText(/consent version/i)).not.toBeInTheDocument();
   });
 
-  it("renders only governed image media and omits portraits in Sahel mode", () => {
+  it("renders only governed image media and omits portraits in Lite mode", () => {
     const photo = "00000000-0000-4000-8000-000000000201";
     const legacy: PublicLegacy = {
       scholars: [

@@ -25,7 +25,7 @@ body {
   margin: 0;
   background: var(--canvas);
   color: var(--text);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Outfit Variable", "Segoe UI", Arial, sans-serif;
   font-size: 1rem;
   line-height: 1.5;
 }
@@ -111,7 +111,8 @@ button:disabled {
   gap: 0.5rem;
 }
 
-.field label {
+.field label,
+.field .field-label {
   font-size: 0.875rem;
   font-weight: 700;
 }
@@ -154,6 +155,47 @@ button:disabled {
   font-family: "Courier New", monospace;
   font-size: 1.25rem;
   letter-spacing: 0.22em;
+}
+
+.segmented-code {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.segmented-code__group {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.segmented-code__separator {
+  color: var(--muted);
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.segmented-code__box {
+  width: 2.75rem;
+  min-height: 3.25rem;
+  border: 0.0625rem solid #667380;
+  border-radius: 0;
+  padding: 0;
+  background: var(--canvas);
+  color: var(--text);
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  caret-color: var(--accent);
+}
+
+.segmented-code__box:focus {
+  border-color: var(--accent);
+}
+
+.segmented-code__box:disabled {
+  opacity: 0.68;
 }
 
 .field-help,

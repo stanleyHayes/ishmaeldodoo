@@ -77,7 +77,7 @@ describe("SpeakingMedia", () => {
     vi.unstubAllGlobals();
   });
 
-  it("defers video in Sahel mode until the visitor explicitly opts in", async () => {
+  it("defers video in Lite mode until the visitor explicitly opts in", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(

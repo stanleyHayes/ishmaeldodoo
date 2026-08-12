@@ -152,7 +152,7 @@ describe("PressRoom", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders native downloads and text-first media without scripts in Sahel", () => {
+  it("renders native downloads and text-first media without scripts in Lite", () => {
     const { container } = render(
       <PressRoom result={result} portraits={assets} locale="en-GB" lite />,
     );

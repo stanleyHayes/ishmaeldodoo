@@ -2534,7 +2534,7 @@ button {
   }
 }
 
-.sahel-control {
+.lite-control {
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -2553,11 +2553,11 @@ button {
   text-underline-offset: 0.2em;
 }
 
-.sahel-control > a {
+.lite-control > a {
   color: inherit;
 }
 
-.sahel-control > span {
+.lite-control > span {
   position: absolute;
   z-index: 5;
   inset-block-start: calc(100% + 0.55rem);
@@ -2578,15 +2578,15 @@ button {
     transform var(--motion-fast);
 }
 
-.sahel-control:hover > span,
-.sahel-control:focus-within > span {
+.lite-control:hover > span,
+.lite-control:focus-within > span {
   opacity: 1;
   transform: translateY(0);
 }
 
-[data-mode="sahel"] *,
-[data-mode="sahel"] *::before,
-[data-mode="sahel"] *::after {
+[data-mode="lite"] *,
+[data-mode="lite"] *::before,
+[data-mode="lite"] *::after {
   animation-duration: 0.01ms !important;
   animation-iteration-count: 1 !important;
   scroll-behavior: auto !important;

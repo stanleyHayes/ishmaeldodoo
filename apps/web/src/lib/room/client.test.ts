@@ -69,7 +69,7 @@ async function manifestResponse(
 }
 
 const plaintext = {
-  subject: "Sahel facility structuring",
+  subject: "Lite facility structuring",
   message:
     "We would like a confidential conversation about a blended finance facility.",
   fromName: "A Counterparty",

@@ -161,7 +161,7 @@ export default async function globalSetup(): Promise<void> {
           "canonical",
           "record-forest",
           "record-system",
-          "record-sahel",
+          "record-lite",
           "record-return",
         ],
       },
@@ -272,7 +272,7 @@ export default async function globalSetup(): Promise<void> {
         locale: "en-GB",
         capacity: "personal",
         organisation: {
-          name: `Sahel Leadership Forum ${browserName}`,
+          name: `Lite Leadership Forum ${browserName}`,
           type: "multilateral",
           country: "GH",
           website: "https://forum.example",
@@ -633,13 +633,13 @@ export default async function globalSetup(): Promise<void> {
         "A synthetic, fully sourced long-form profile used only for browser verification.",
         "Un profil long synthétique et entièrement sourcé, utilisé uniquement pour la vérification du navigateur.",
       ),
-      sections: (["forest", "system", "sahel", "return"] as const).map(
+      sections: (["forest", "system", "lite", "return"] as const).map(
         (recordAct, index) => ({
           key: `act-${recordAct}`,
           recordAct,
           heading: localized(
-            ["The Forest", "The System", "The Sahel", "The Return"][index]!,
-            ["La forêt", "Le système", "Le Sahel", "Le retour"][index]!,
+            ["The Forest", "The System", "The Lite", "The Return"][index]!,
+            ["La forêt", "Le système", "Le Lite", "Le retour"][index]!,
           ),
           dateline: localized(
             `Field location · ${1998 + index * 8}`,
@@ -696,7 +696,7 @@ export default async function globalSetup(): Promise<void> {
       ),
       noIndex: false,
     }),
-    ...(["forest", "system", "sahel", "return"] as const).map((act, index) =>
+    ...(["forest", "system", "lite", "return"] as const).map((act, index) =>
       publicationRecord("atlasNode", `record-${act}`, {
         slug: `record-${act}`,
         label: localized(`Record ${act}`, `Parcours ${act}`),
@@ -1070,7 +1070,7 @@ export default async function globalSetup(): Promise<void> {
     ["speakingTheme", "regional-investment"],
     ["atlasNode", "record-forest"],
     ["atlasNode", "record-system"],
-    ["atlasNode", "record-sahel"],
+    ["atlasNode", "record-lite"],
     ["atlasNode", "record-return"],
     ["signal", "published-signal-e2e"],
     ["scholar", "legacy-scholar-e2e"],

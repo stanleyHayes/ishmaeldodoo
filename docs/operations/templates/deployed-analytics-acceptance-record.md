@@ -24,7 +24,7 @@
 - Nine-event group suppressed and tenth-event aggregate released: `Not run`
 - Raw-event and visitor export disabled with access-denial proof: `Not run`
 - Eight dashboard panel IDs and saved-query parity: `Not run`
-- Desk zero denominator, Sahel share and bilingual grouping QA: `Not run`
+- Desk zero denominator, Lite share and bilingual grouping QA: `Not run`
 - Desk SLA aggregate datasource joined without request data: `Not run`
 - Africa/Accra timezone and 30-day default window: `Not run`
 - Desktop and narrow 24-hour/30-day/empty/suppressed screenshots: `Not recorded`

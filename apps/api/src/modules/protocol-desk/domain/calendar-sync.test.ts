@@ -17,7 +17,7 @@ const input = {
   },
   engagement: {
     type: "keynote" as const,
-    eventName: "Sahel Futures Forum",
+    eventName: "Lite Futures Forum",
     startsAt: "2026-09-01T10:00:00.000Z",
     city: "Accra",
     country: "GH",
@@ -69,7 +69,7 @@ describe("calendar synchronization domain", () => {
       calendarId: "principal-calendar",
       idempotencyKey: `protocol-desk:${request.requestId}`,
       externalReference: request.reference,
-      summary: "Sahel Futures Forum",
+      summary: "Lite Futures Forum",
       startsAt: "2026-09-01T10:00:00.000Z",
       endsAt: "2026-09-01T12:00:00.000Z",
       location: "Conference Centre, Accra",

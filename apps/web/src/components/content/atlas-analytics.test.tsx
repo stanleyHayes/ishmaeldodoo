@@ -22,7 +22,7 @@ describe("AtlasFilterAnalytics", () => {
         name: "atlas_filter_applied",
         route: "/fr/record/atlas/table",
         locale: "fr-FR",
-        mode: "sahel",
+        mode: "lite",
       }),
     );
     expect(

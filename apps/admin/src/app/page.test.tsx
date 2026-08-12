@@ -86,8 +86,8 @@ function completeLoginForm() {
   fireEvent.change(screen.getByLabelText("Password"), {
     target: { value: "a-long-development-passphrase" },
   });
-  fireEvent.change(screen.getByLabelText("Authenticator code"), {
-    target: { value: "123456" },
+  fireEvent.paste(screen.getByLabelText("Digit 1 of 6"), {
+    clipboardData: { getData: () => "123456" },
   });
   fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
 }

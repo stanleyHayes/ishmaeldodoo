@@ -51,7 +51,7 @@ describe("living dossier proxy", () => {
     expect(response.headers.get("x-dossier-reference")).toBe("ref-1");
     expect(await response.text()).toBe("%PDF-test");
   });
-  it("accepts a native Sahel form post and forwards the typed JSON contract", async () => {
+  it("accepts a native Lite form post and forwards the typed JSON contract", async () => {
     const fetchMock = vi.fn().mockResolvedValue(
       new Response("%PDF-test", {
         status: 201,

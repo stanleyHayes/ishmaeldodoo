@@ -34,7 +34,7 @@ export default async function LegacyPage({
 }>) {
   const params = await searchParams;
   const lite =
-    (params.mode === "sahel" || params.lite === "1") && params.media !== "1";
+    (params.mode === "lite" || params.lite === "1") && params.media !== "1";
   const [content, legacy] = await Promise.all([
     getPublicContent({
       documentType: "page",

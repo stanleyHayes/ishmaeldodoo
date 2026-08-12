@@ -305,7 +305,7 @@ describe("CMS content schemas", () => {
   });
 
   it("requires the complete sourced bilingual four-act contract for The Record", () => {
-    const acts = ["forest", "system", "sahel", "return"] as const;
+    const acts = ["forest", "system", "lite", "return"] as const;
     const record = {
       ...fixtures.page,
       slug: "/record",

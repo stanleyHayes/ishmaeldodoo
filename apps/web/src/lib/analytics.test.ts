@@ -8,7 +8,7 @@ describe("analytics privacy contract", () => {
         name: "pageview",
         route: "/record/atlas",
         locale: "fr-FR",
-        mode: "sahel",
+        mode: "lite",
       }).success,
     ).toBe(true);
     expect(

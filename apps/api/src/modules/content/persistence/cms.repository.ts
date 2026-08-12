@@ -49,6 +49,7 @@ export type PublishedArchivePayload = Readonly<{
 }>;
 export type PublishedSpeakingThemePayload = PublishedArchivePayload;
 export type PublishedSignalPayload = PublishedArchivePayload;
+export type PublishedScholarPayload = PublishedArchivePayload;
 export type PublishedSourceAuditRow = Readonly<{
   documentType: ContentKind;
   documentId: string;
@@ -1156,6 +1157,51 @@ export class CmsRepository {
           },
         },
         { $limit: 50 },
+        {
+          $project: {
+            _id: 0,
+            documentId: 1,
+            publishedAt: 1,
+            payload: "$versionDocument.payload",
+          },
+        },
+      ])
+      .toArray();
+  }
+
+  async listPublicScholars(
+    locale: "en-GB" | "fr-FR",
+  ): Promise<readonly PublishedScholarPayload[]> {
+    return this.database()
+      .collection<Publication>("publications")
+      .aggregate<PublishedScholarPayload>([
+        { $match: { documentType: "scholar", locale } },
+        {
+          $lookup: {
+            from: "content_versions",
+            let: { documentId: "$documentId", version: "$version" },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ["$documentType", "scholar"] },
+                      { $eq: ["$documentId", "$$documentId"] },
+                      { $eq: ["$version", "$$version"] },
+                      { $eq: ["$state", "published"] },
+                      { $eq: ["$payload.consentStatus", "granted"] },
+                    ],
+                  },
+                },
+              },
+              { $project: { _id: 0, payload: 1 } },
+            ],
+            as: "versionDocument",
+          },
+        },
+        { $unwind: "$versionDocument" },
+        { $sort: { "versionDocument.payload.cohortYear": -1, documentId: 1 } },
+        { $limit: 100 },
         {
           $project: {
             _id: 0,

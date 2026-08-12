@@ -15,6 +15,7 @@ import { PublicSpeakingController } from "./http/public-speaking.controller";
 import { AdminMutationOriginGuard } from "../../common/admin-mutation-origin.guard";
 import { PublicSignalsController } from "./http/public-signals.controller";
 import { MediaModule } from "../media/media.module";
+import { PublicLegacyController } from "./http/public-legacy.controller";
 
 @Module({
   imports: [AuthModule, MediaModule],
@@ -26,6 +27,7 @@ import { MediaModule } from "../media/media.module";
     PublicArchiveController,
     PublicSpeakingController,
     PublicSignalsController,
+    PublicLegacyController,
     RevalidationClaimController,
   ],
   providers: [

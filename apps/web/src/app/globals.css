@@ -2677,6 +2677,21 @@ button {
   padding: 0;
 }
 
+.legacy-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: var(--space-4);
+  padding: 0;
+  list-style: none;
+}
+
+.legacy-card {
+  padding: var(--space-5);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--surface-raised);
+}
+
 .signal-card {
   border: 1px solid var(--line);
   padding: clamp(1.25rem, 3vw, 2rem);

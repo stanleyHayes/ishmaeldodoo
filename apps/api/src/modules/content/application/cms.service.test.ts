@@ -62,6 +62,7 @@ function fixture(
     listPublicSources: vi.fn().mockResolvedValue({ items: [] }),
     latestPublicSignal: vi.fn().mockResolvedValue(null),
     listPublicSignals: vi.fn().mockResolvedValue([]),
+    listPublicScholars: vi.fn().mockResolvedValue([]),
     findMissingPublishedSourceRefs: vi.fn().mockResolvedValue([]),
     findPublishedSourceDependents: vi.fn().mockResolvedValue([]),
     listPublishedForSourceAudit: vi.fn().mockResolvedValue([]),
@@ -173,6 +174,46 @@ describe("CmsService", () => {
         sourceUpdatedAt: new Date("2026-08-10T00:00:00Z"),
       },
     });
+  });
+
+  it("projects consent-filtered scholars without exposing consent records", async () => {
+    const { service, repository } = fixture();
+    repository.listPublicScholars.mockResolvedValue([
+      {
+        documentId: "scholar-1",
+        publishedAt: new Date("2026-08-10T00:00:00Z"),
+        payload: {
+          name: "Ama",
+          country: "GH",
+          institution: "University",
+          field: {
+            "en-GB": "Economics",
+            "fr-FR": "Économie",
+            status: { "en-GB": "current", "fr-FR": "current" },
+          },
+          cohortYear: 2024,
+          status: "Active",
+          story: {
+            "en-GB": "Story",
+            "fr-FR": "Parcours",
+            status: { "en-GB": "current", "fr-FR": "current" },
+          },
+          consentStatus: "granted",
+          consentDate: new Date("2026-01-01"),
+          consentVersion: "v1",
+        },
+      },
+    ]);
+    const result = await service.listPublicScholars("fr-FR");
+    expect(result).toMatchObject({
+      scholars: [
+        { documentId: "scholar-1", field: "Économie", story: "Parcours" },
+      ],
+      translation: { stale: false },
+    });
+    expect(result.scholars[0]).not.toHaveProperty("consentStatus");
+    expect(result.scholars[0]).not.toHaveProperty("consentDate");
+    expect(result.scholars[0]).not.toHaveProperty("consentVersion");
   });
 
   it("audits every published claim against same-locale Source Register entries", async () => {

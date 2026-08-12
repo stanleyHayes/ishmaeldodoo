@@ -3717,6 +3717,38 @@
         ]
       }
     },
+    "/v1/public/legacy": {
+      "get": {
+        "operationId": "PublicLegacyController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Published consent-granted scholar profiles."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error response. The status code is repeated in the bounded JSON envelope.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Correlation identifier safe to quote to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "public-content"
+        ]
+      }
+    },
     "/v1/public/living-dossier": {
       "post": {
         "operationId": "LivingDossierController_generate",

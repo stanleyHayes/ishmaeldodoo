@@ -64,6 +64,7 @@ export interface ApiOperations {
   readonly "PublicArchiveController_list": { readonly method: "GET"; readonly path: "/v1/public/archive"; readonly successStatus: 200 };
   readonly "PublicAtlasController_list": { readonly method: "GET"; readonly path: "/v1/public/atlas"; readonly successStatus: 200 };
   readonly "PublicContentController_getPublished": { readonly method: "GET"; readonly path: "/v1/public/content/{documentType}/{documentId}"; readonly successStatus: 200 };
+  readonly "PublicLegacyController_list": { readonly method: "GET"; readonly path: "/v1/public/legacy"; readonly successStatus: 200 };
   readonly "PublicMediaController_asset": { readonly method: "GET"; readonly path: "/v1/public/media/{assetId}"; readonly successStatus: 200 };
   readonly "PublicSignalsController_latest": { readonly method: "GET"; readonly path: "/v1/public/signals/latest"; readonly successStatus: 200 };
   readonly "PublicSignalsController_list": { readonly method: "GET"; readonly path: "/v1/public/signals"; readonly successStatus: 200 };

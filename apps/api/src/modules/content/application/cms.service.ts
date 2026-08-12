@@ -470,6 +470,42 @@ export class CmsService {
     };
   }
 
+  async listPublicScholars(
+    locale: Locale,
+  ): Promise<
+    Readonly<{ scholars: readonly unknown[]; translation: TranslationSummary }>
+  > {
+    const rows = await this.repository.listPublicScholars(locale);
+    const summaries = rows.map((row) =>
+      summarizeTranslation(row.payload, locale),
+    );
+    const sourceUpdatedAt = summaries
+      .map((item) => item.sourceUpdatedAt)
+      .filter((date): date is Date => Boolean(date))
+      .sort((left, right) => right.getTime() - left.getTime())[0];
+    return {
+      scholars: rows.map((row) => {
+        const payload = projectPublicLocale(row.payload, locale);
+        const projected =
+          payload && typeof payload === "object" && !Array.isArray(payload)
+            ? { ...(payload as Record<string, unknown>) }
+            : {};
+        delete projected.consentStatus;
+        delete projected.consentDate;
+        delete projected.consentVersion;
+        return {
+          documentId: row.documentId,
+          publishedAt: row.publishedAt,
+          ...projected,
+        };
+      }),
+      translation: {
+        stale: summaries.some((item) => item.stale),
+        ...(sourceUpdatedAt ? { sourceUpdatedAt } : {}),
+      },
+    };
+  }
+
   async transition(
     documentType: ContentKind,
     documentId: string,

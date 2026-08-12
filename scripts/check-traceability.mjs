@@ -219,6 +219,8 @@ function validatePlanStatus(taskId, allowedStatuses) {
 for (const taskId of ["AMANOR-056", "AMANOR-070", "AMANOR-072"])
   validatePlanStatus(taskId, ["IN REVIEW", "DONE"]);
 validatePlanStatus("AMANOR-073", ["IN PROGRESS", "IN REVIEW", "DONE"]);
+for (const taskId of ["AMANOR-060", "AMANOR-075"])
+  validatePlanStatus(taskId, ["IN PROGRESS", "IN REVIEW", "DONE"]);
 
 const operationCount = Object.values(openApi.paths ?? {}).reduce(
   (count, item) =>

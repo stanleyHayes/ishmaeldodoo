@@ -28,6 +28,7 @@ const trustAnchorPublicJwk = trustAnchor.publicKey.export({ format: "jwk" });
 const recipientPrivateJwk = recipient.privateKey.export({ format: "jwk" });
 const recipientPublicJwk = recipient.publicKey.export({ format: "jwk" });
 const roomEnvironment = {
+  NEXT_PUBLIC_AMANOR_DEPLOYMENT_ENV: "local",
   E2E_ROOM_TRUST_ANCHOR_PRIVATE_JWK: JSON.stringify(trustAnchorPrivateJwk),
   E2E_ROOM_RECIPIENT_PRIVATE_JWK: JSON.stringify(recipientPrivateJwk),
   E2E_ROOM_RECIPIENT_PUBLIC_KEY: rawPublicKey(recipientPublicJwk),

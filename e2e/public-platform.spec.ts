@@ -115,6 +115,33 @@ test("keeps French punctuation non-breaking across public routes", async ({
   expect(failures, "breakable French punctuation").toEqual([]);
 });
 
+test("renders the published bilingual Signal Board with governed ledger semantics", async ({
+  page,
+}) => {
+  await page.goto("https://localhost:3210/signals");
+  await useStandardMode(page);
+  await expect(
+    page.getByRole("heading", { level: 2, name: "Signal Board" }),
+  ).toBeVisible();
+  await expect(page.getByText("1 in the Foresight Ledger")).toBeVisible();
+  const signal = page.locator("#published-signal-e2e");
+  await expect(signal.getByText("Calling it")).toBeVisible();
+  await expect(signal.getByText("What would change the view")).toBeVisible();
+  await expect(signal.getByText(/Review due:/)).toBeVisible();
+  await expect(
+    signal.getByRole("link", { name: "source-e2e" }),
+  ).toHaveAttribute("href", "/record/sources#source-e2e");
+
+  await page.goto("https://localhost:3210/fr/signals");
+  await expect(
+    page.getByRole("heading", { level: 2, name: "Tableau des signaux" }),
+  ).toBeVisible();
+  await expect(page.getByText("1 dans le registre prospectif")).toBeVisible();
+  await expect(page.locator("#published-signal-e2e")).toContainText(
+    "Des preuves contraires substantielles",
+  );
+});
+
 test("keeps the public design system usable in day and night at every required width", async ({
   page,
 }) => {

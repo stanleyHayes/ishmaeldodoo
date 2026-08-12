@@ -58,6 +58,7 @@ export default async function globalSetup(): Promise<void> {
               "speaking",
               "speaking-request",
               "archive",
+              "signals",
               "contact",
               "record",
               "takedown-chromium",
@@ -72,7 +73,10 @@ export default async function globalSetup(): Promise<void> {
         {
           documentType: "signal",
           documentId: {
-            $in: browserNames.map((name) => `policy-signal-${name}`),
+            $in: [
+              ...browserNames.map((name) => `policy-signal-${name}`),
+              "published-signal-e2e",
+            ],
           },
         },
         { documentType: "identity", documentId: "canonical" },
@@ -87,6 +91,7 @@ export default async function globalSetup(): Promise<void> {
               "speaking",
               "speaking-request",
               "archive",
+              "signals",
               "contact",
               "record",
               "takedown-chromium",
@@ -101,7 +106,10 @@ export default async function globalSetup(): Promise<void> {
         {
           documentType: "signal",
           documentId: {
-            $in: browserNames.map((name) => `policy-signal-${name}`),
+            $in: [
+              ...browserNames.map((name) => `policy-signal-${name}`),
+              "published-signal-e2e",
+            ],
           },
         },
         { documentType: "identity", documentId: "canonical" },
@@ -116,6 +124,7 @@ export default async function globalSetup(): Promise<void> {
           "speaking",
           "speaking-request",
           "archive",
+          "signals",
           "contact",
           "record",
           "takedown-chromium",
@@ -126,6 +135,7 @@ export default async function globalSetup(): Promise<void> {
           "public-value",
           "regional-investment",
           ...browserNames.map((name) => `policy-signal-${name}`),
+          "published-signal-e2e",
           "canonical",
           "record-forest",
           "record-system",
@@ -466,6 +476,21 @@ export default async function globalSetup(): Promise<void> {
       seoDescription: localized(
         "Search the published Archive.",
         "Rechercher dans les archives publiées.",
+      ),
+      noIndex: false,
+    }),
+    publicationRecord("page", "signals", {
+      slug: "/signals",
+      title: localized("Signal Board", "Tableau des signaux"),
+      summary: localized(
+        "Published, sourced judgements with explicit confidence and review criteria.",
+        "Des analyses publiées et sourcées, avec un niveau de confiance et des critères de révision explicites.",
+      ),
+      sections: [],
+      seoTitle: localized("Signal Board", "Tableau des signaux"),
+      seoDescription: localized(
+        "Review published Signals and their evidence.",
+        "Consultez les signaux publiés et leurs preuves.",
       ),
       noIndex: false,
     }),
@@ -828,6 +853,20 @@ export default async function globalSetup(): Promise<void> {
         approvedBy: `principal-${browserName}`,
       },
     })),
+    publicationRecord("signal", "published-signal-e2e", {
+      slug: "published-signal-e2e",
+      body: localized(words(150, "signal"), words(150, "prevision")),
+      publishedAt: new Date("2026-08-10T00:00:00.000Z"),
+      tags: ["finance", "public value"],
+      confidence: "callingIt",
+      changeMyMind: localized(
+        "Material contrary evidence from the published source register.",
+        "Des preuves contraires substantielles issues du registre publié des sources.",
+      ),
+      sourceRefs: ["source-e2e"],
+      reviewDue: new Date("2026-11-10T00:00:00.000Z"),
+      approvedBy: "e2e-reviewer",
+    }),
   ]);
   const seededVersions = await database
     .collection("content_versions")
@@ -867,6 +906,7 @@ export default async function globalSetup(): Promise<void> {
     ["page", "speaking-request"],
     ["page", "speaking"],
     ["page", "archive"],
+    ["page", "signals"],
     ["page", "contact"],
     ["page", "record"],
     ["identity", "canonical"],
@@ -878,6 +918,7 @@ export default async function globalSetup(): Promise<void> {
     ["atlasNode", "record-system"],
     ["atlasNode", "record-sahel"],
     ["atlasNode", "record-return"],
+    ["signal", "published-signal-e2e"],
     ...Array.from(
       { length: 5 },
       (_, offset) => ["atlasNode", `homepage-proof-${offset + 5}`] as const,

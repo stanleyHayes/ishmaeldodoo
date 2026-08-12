@@ -44,6 +44,7 @@ export default defineConfig({
       timeout: 120_000,
       ignoreHTTPSErrors: true,
       env: {
+        AMANOR_DEPLOYMENT_ENV: "local",
         PUBLIC_API_BASE_URL: "https://localhost:4210/v1",
         PUBLIC_WEB_BASE_URL: "https://localhost:3210",
         PUBLIC_SERVICE_KEY_ID: publicServiceKeyId,
@@ -62,7 +63,10 @@ export default defineConfig({
       reuseExistingServer: false,
       timeout: 120_000,
       ignoreHTTPSErrors: true,
-      env: { NEXT_PUBLIC_API_BASE_URL: "https://localhost:4210/v1" },
+      env: {
+        NEXT_PUBLIC_AMANOR_DEPLOYMENT_ENV: "local",
+        NEXT_PUBLIC_API_BASE_URL: "https://localhost:4210/v1",
+      },
     },
     {
       command: "npm run start --workspace @amanor/api",

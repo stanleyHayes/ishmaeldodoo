@@ -19,6 +19,11 @@ The root `check:security-ci` command verifies that the hosted workflow cannot si
 
 Security owns code-scanning triage. A high or critical finding blocks release until fixed and rescanned. A false-positive dismissal requires a dated rationale and Security approval in the provider, not a workflow suppression committed by an engineer. Lower-severity accepted risk requires an owner, expiry date and remediation ticket.
 
+Use the controlled
+[`codeql-triage-record.md`](templates/codeql-triage-record.md) to bind each
+hosted alert to its exact data flow, safeguards, proposed disposition and dated
+Security decision. An engineering rationale alone leaves the alert open.
+
 Generated SARIF, SBOM and scanner logs may contain repository paths and package metadata but must never contain runtime environment files, request bodies, recipient details or credentials. Retain hosted reports with the release candidate record.
 
 ## Evidence still requiring deployed staging

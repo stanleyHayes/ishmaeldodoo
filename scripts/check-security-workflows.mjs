@@ -12,6 +12,10 @@ const supplyChainAcceptance = await readFile(
   "docs/security/templates/image-supply-chain-acceptance-record.md",
   "utf8",
 );
+const codeqlTriage = await readFile(
+  "docs/security/templates/codeql-triage-record.md",
+  "utf8",
+);
 const pinnedActions = new Map([
   ["actions/checkout", ["3d3c42e5aac5ba805825da76410c181273ba90b1", "v7"]],
   ["actions/setup-node", ["820762786026740c76f36085b0efc47a31fe5020", "v7"]],
@@ -28,6 +32,43 @@ const pinnedActions = new Map([
   ["anchore/scan-action", ["e1165082ffb1fe366ebaf02d8526e7c4989ea9d2", "v7"]],
   ["github/codeql-action", ["5595ccaf912efad79be6eef63a5619ff05969be3", "v4"]],
 ]);
+
+const pendingCodeqlTriageSentinels = [
+  "- Status: `Awaiting Security approval`",
+  "- Open-alert snapshot: `8`",
+  "- Security approver and date: `Not approved`",
+  "| 15-16  | High",
+  "| 21     | Medium",
+  "| 22     | Medium",
+  "| 23-24  | Medium",
+  "| 25     | Medium",
+  "| 26     | Medium",
+  "No approval may be inferred from a successful CodeQL run or this engineering",
+];
+
+function validatePendingCodeqlTriage(candidate) {
+  for (const sentinel of pendingCodeqlTriageSentinels)
+    assert.ok(
+      candidate.includes(sentinel),
+      `CodeQL triage lost pending evidence: ${sentinel}`,
+    );
+  assert.equal(
+    (candidate.match(/\| Not approved\s+\|/gu) ?? []).length,
+    6,
+    "Every CodeQL alert group requires an explicit pending Security decision",
+  );
+}
+
+validatePendingCodeqlTriage(codeqlTriage);
+for (const sentinel of pendingCodeqlTriageSentinels)
+  assert.throws(
+    () =>
+      validatePendingCodeqlTriage(
+        codeqlTriage.replace(sentinel, "[prematurely changed]"),
+      ),
+    undefined,
+    `CodeQL triage accepted premature mutation: ${sentinel}`,
+  );
 
 for (const source of [codeql, quality]) {
   const actionUses = [

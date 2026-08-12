@@ -81,11 +81,13 @@ Set only `NEXT_PUBLIC_AMANOR_DEPLOYMENT_ENV` and `NEXT_PUBLIC_API_BASE_URL`. The
 The manually dispatched `Deploy separated applications` workflow accepts only
 a full reviewed commit SHA. It requires successful hosted Quality and CodeQL
 runs for that SHA plus an HTTPS migration/backup evidence reference. Render's
-hook receives the SHA as its documented `ref` parameter; Vercel deployments use
-the Git-source API with both `ref` and `sha`. API, Admin and Web are triggered
-separately in that order, and the job succeeds only after the existing
-three-origin remote smoke passes. Provider acceptance is not staging acceptance;
-retain the returned deployment IDs and reconcile them in the release record.
+authenticated deploy API receives the SHA as `commitId`; Vercel deployments use
+the Git-source API with both `ref` and `sha`. The workflow waits for the API to
+be `live` at that SHA before starting Admin, and waits for Admin to be `READY`
+before starting Web. It succeeds only after Web is `READY` at the same SHA and
+the existing three-origin remote smoke passes. Provider acceptance is not
+staging acceptance; retain all three deployment IDs and reconcile them in the
+release record.
 
 1. Resolve D01 and provision the API, public Web and Admin domains.
 2. Create separate MongoDB application, migration and retention users.

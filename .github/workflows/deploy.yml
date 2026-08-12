@@ -40,7 +40,8 @@ jobs:
     environment: ${{ inputs.environment }}
     env:
       GH_TOKEN: ${{ github.token }}
-      RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+      RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+      RENDER_API_SERVICE_ID: ${{ vars.RENDER_API_SERVICE_ID }}
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM_ID: ${{ vars.VERCEL_TEAM_ID }}
       VERCEL_GITHUB_REPO_ID: ${{ vars.VERCEL_GITHUB_REPO_ID }}
@@ -72,7 +73,7 @@ jobs:
           GH_REPOSITORY: ${{ github.repository }}
         run: node scripts/verify-hosted-gates.mjs
 
-      - name: Deploy exact revision to Render and Vercel
+      - name: Deploy exact revision API then Admin then Web
         env:
           REQUESTED_REVISION: ${{ inputs.revision }}
         run: node scripts/deploy-provider-revision.mjs

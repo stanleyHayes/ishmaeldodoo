@@ -28,9 +28,9 @@ assert.equal(
   "migration evidence must not contain credentials",
 );
 
-const hook = new URL(required("RENDER_DEPLOY_HOOK"));
-assert.equal(hook.protocol, "https:", "RENDER_DEPLOY_HOOK must use HTTPS");
 for (const name of [
+  "RENDER_API_KEY",
+  "RENDER_API_SERVICE_ID",
   "VERCEL_TOKEN",
   "VERCEL_GITHUB_REPO_ID",
   "VERCEL_ADMIN_PROJECT",

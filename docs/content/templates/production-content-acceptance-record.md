@@ -17,6 +17,7 @@
 - Scholars, Office Hours, Selah, riders and nine email templates approved: `Not approved`
 - Page FAQs, metadata, Open Graph and social assets approved: `Not approved`
 - Public canonical URLs, hreflang, sitemap, feeds, llms.txt and robots reviewed: `Not run`
+- [Production discoverability record](../../operations/templates/production-discoverability-record.md): `Not run`
 - Person/ProfilePage/Event/Article/VideoObject/FAQ/Organization schemas validated: `Not run`
 - Governed media inventory and Cloudinary reconciliation reference: `Not recorded`
 - No-sampling claim/source audit and rights/consent reference: `Not recorded`

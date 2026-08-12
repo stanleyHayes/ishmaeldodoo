@@ -11,6 +11,7 @@
 
 - Content/French/identity/source freeze reference: Not approved
 - [Production content acceptance record](../../content/templates/production-content-acceptance-record.md): Not approved
+- [Production discoverability record](production-discoverability-record.md): Not run
 - UAT and beta approvals: Not approved
 - Security/accessibility/privacy/legal approvals: Not approved
 - Backup/PITR and rollback targets verified: Not run

@@ -1,5 +1,32 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
+
+const authoredImageUrlPattern =
+  /(?:profile[ _-]?image|portrait|avatar|image|photo|thumbnail|cover|logo)(?:[ _-]?(?:url|uri))\b/iu;
+
+async function productionSources(root) {
+  const entries = await readdir(root, { withFileTypes: true });
+  const sources = [];
+  for (const entry of entries) {
+    const path = `${root}/${entry.name}`;
+    if (entry.isDirectory()) sources.push(...(await productionSources(path)));
+    else if (
+      /\.(?:ts|tsx)$/u.test(entry.name) &&
+      !/\.(?:test|spec)\.(?:ts|tsx)$/u.test(entry.name)
+    )
+      sources.push([path, await readFile(path, "utf8")]);
+  }
+  return sources;
+}
+
+function assertNoAuthoredImageUrls(sources) {
+  for (const [path, source] of sources)
+    assert.doesNotMatch(
+      source,
+      authoredImageUrlPattern,
+      `${path} may not expose profile or content image URL authoring`,
+    );
+}
 
 const [
   contentSchemas,
@@ -147,6 +174,15 @@ const validSources = [
 ];
 validate(...validSources);
 
+const authoringSources = (
+  await Promise.all(
+    ["apps/admin/src", "apps/api/src", "packages/contracts/src"].map(
+      productionSources,
+    ),
+  )
+).flat();
+assertNoAuthoredImageUrls(authoringSources);
+
 for (const [name, values] of [
   [
     "URL-backed identity portrait",
@@ -205,6 +241,15 @@ for (const [name, values] of [
   );
 }
 
+assert.throws(
+  () =>
+    assertNoAuthoredImageUrls([
+      ["fixture/profile.ts", "const profileImageUrl = z.string().url();"],
+    ]),
+  undefined,
+  "repository-wide profile image URL fixture must fail media governance",
+);
+
 process.stdout.write(
-  "All CMS image fields require local-file upload, governed Cloudinary selection and atomic publication-time registry validation; six unsafe fixtures rejected.\n",
+  "All production Admin/API/contract image authoring requires local-file upload, governed Cloudinary selection and atomic publication-time registry validation; seven unsafe fixtures rejected.\n",
 );

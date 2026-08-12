@@ -22,15 +22,33 @@ function canonical(value) {
 
 const serialize = (value) => `${JSON.stringify(canonical(value), null, 2)}\n`;
 
+function localDocsUrl(value) {
+  const url = new URL(value);
+  const loopbackHosts = new Set(["127.0.0.1", "[::1]", "localhost"]);
+  if (
+    url.protocol !== "http:" ||
+    !loopbackHosts.has(url.hostname) ||
+    url.username ||
+    url.password ||
+    url.pathname !== "/v1/docs-json" ||
+    url.search ||
+    url.hash
+  )
+    throw new Error(
+      "OpenAPI source must be the local loopback API /v1/docs-json endpoint",
+    );
+  return url;
+}
+
 if (mode === "generate") {
-  const response = await fetch(source);
+  const response = await fetch(localDocsUrl(source), { redirect: "error" });
   if (!response.ok)
     throw new Error(`OpenAPI endpoint returned HTTP ${response.status}`);
   await mkdir(new URL(".", artifactUrl), { recursive: true });
   await writeFile(artifactUrl, serialize(await response.json()), "utf8");
 } else if (mode === "check") {
   const expected = await readFile(artifactUrl, "utf8");
-  const response = await fetch(source);
+  const response = await fetch(localDocsUrl(source), { redirect: "error" });
   if (!response.ok)
     throw new Error(`OpenAPI endpoint returned HTTP ${response.status}`);
   if (expected !== serialize(await response.json()))

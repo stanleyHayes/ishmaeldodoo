@@ -15,7 +15,7 @@
     "openapi:augment": "npm run build --workspace @amanor/api && node scripts/augment-openapi.mjs",
     "openapi:generate:replica": "UPDATE_OPENAPI_ARTIFACT=true node scripts/run-api-replica-tests.mjs",
     "contracts:generate": "node scripts/generate-api-types.mjs generate",
-    "check:contracts": "node scripts/openapi-artifact.mjs validate && node scripts/generate-api-types.mjs check",
+    "check:contracts": "node scripts/check-openapi-source-boundary.mjs && node scripts/openapi-artifact.mjs validate && node scripts/generate-api-types.mjs check",
     "check:dependency-policy": "node scripts/check-dependency-policy.mjs",
     "check:outbound-destinations": "node scripts/check-outbound-destinations.mjs",
     "check:traceability": "node scripts/check-traceability.mjs",

@@ -35,14 +35,13 @@ const pinnedActions = new Map([
 
 const pendingCodeqlTriageSentinels = [
   "- Status: `Awaiting Security approval`",
-  "- Open-alert snapshot: `8`",
+  "- Open-alert snapshot before OpenAPI boundary remediation: `8`",
   "- Security approver and date: `Not approved`",
   "| 15-16  | High",
   "| 21     | Medium",
   "| 22     | Medium",
   "| 23-24  | Medium",
   "| 25     | Medium",
-  "| 26     | Medium",
   "No approval may be inferred from a successful CodeQL run or this engineering",
 ];
 
@@ -54,7 +53,7 @@ function validatePendingCodeqlTriage(candidate) {
     );
   assert.equal(
     (candidate.match(/\| Not approved\s+\|/gu) ?? []).length,
-    6,
+    5,
     "Every CodeQL alert group requires an explicit pending Security decision",
   );
 }

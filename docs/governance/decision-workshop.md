@@ -12,13 +12,20 @@ For each record, an authorized stakeholder must:
 
 1. choose exactly one value already listed in `options`;
 2. set `status` to `approved` or `deferred`;
-3. put the accountable person's name and role in `decider`;
-4. record an ISO `decidedAt` date no earlier than the register update date;
-5. explain the exact choice, names, domains, cadence, wording, scope or provider account in `decisionDetail` without recording credentials or personal contact details;
-6. link a signed minute, approval record, contract, registrar record or policy in `evidence`;
-7. obtain every authority named by the record, using a co-signed evidence record where more than one authority is listed.
+3. explain the exact choice, names, domains, cadence, wording, scope or provider account in `decisionDetail` without recording credentials or personal contact details;
+4. replace `approvals: null` with one approval object for every value in `authority`, using the exact authority name and no duplicates;
+5. put that authority's accountable person's name and role in each approval's `decider`;
+6. record an ISO `decidedAt` date no earlier than the register update date for each approval;
+7. link that authority's signed minute, approval record, contract, registrar record or policy in each approval's `evidence`, using an HTTPS URL or a committed path below `docs/governance/evidence/` rather than an unauditable label.
 
-`pending` records must retain null decision fields. `deferred` is a formal scope decision, not an informal delay: its detail and evidence must state whether affected work is removed from launch, moved post-launch or blocks release. Changing a status in this repository without the evidence does not resolve the blocker; `npm run check:decisions` rejects it.
+`pending` records must retain null decision fields. A resolved record passes only
+when its approval authorities exactly match the controlled `authority` list;
+one generic signatory cannot stand in for Legal, Privacy, Security, Product,
+Engineering or Operations. `deferred` is a formal scope decision, not an
+informal delay: its detail and per-authority evidence must state whether
+affected work is removed from launch, moved post-launch or blocks release.
+Changing a status in this repository without complete attributable evidence
+does not resolve the blocker; `npm run check:decisions` rejects it.
 
 ## Workshop order
 

@@ -1,7 +1,7 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "registerStatus": "awaiting-stakeholders",
-  "updatedAt": "2026-08-11",
+  "updatedAt": "2026-08-12",
   "decisions": [
     {
       "id": "D01",
@@ -15,9 +15,7 @@
       ],
       "selected": null,
       "decisionDetail": null,
-      "decider": null,
-      "decidedAt": null,
-      "evidence": null,
+      "approvals": null,
       "affectedTasks": ["AMANOR-014", "AMANOR-029", "AMANOR-121", "AMANOR-147"]
     },
     {
@@ -32,9 +30,7 @@
       ],
       "selected": null,
       "decisionDetail": null,
-      "decider": null,
-      "decidedAt": null,
-      "evidence": null,
+      "approvals": null,
       "affectedTasks": ["AMANOR-015", "AMANOR-056", "AMANOR-072"]
     },
     {
@@ -49,9 +45,7 @@
       ],
       "selected": null,
       "decisionDetail": null,
-      "decider": null,
-      "decidedAt": null,
-      "evidence": null,
+      "approvals": null,
       "affectedTasks": ["AMANOR-016", "AMANOR-058", "AMANOR-071", "AMANOR-140"]
     },
     {
@@ -62,9 +56,7 @@
       "options": ["ship-at-launch", "ship-post-launch", "do-not-ship"],
       "selected": null,
       "decisionDetail": null,
-      "decider": null,
-      "decidedAt": null,
-      "evidence": null,
+      "approvals": null,
       "affectedTasks": ["AMANOR-017", "AMANOR-062", "AMANOR-076", "AMANOR-107"]
     },
     {
@@ -75,9 +67,7 @@
       "options": ["prominent-approved-copy", "limited-approved-copy", "omit"],
       "selected": null,
       "decisionDetail": null,
-      "decider": null,
-      "decidedAt": null,
-      "evidence": null,
+      "approvals": null,
       "affectedTasks": ["AMANOR-018", "AMANOR-051", "AMANOR-052"]
     },
     {
@@ -92,9 +82,7 @@
       ],
       "selected": null,
       "decisionDetail": null,
-      "decider": null,
-      "decidedAt": null,
-      "evidence": null,
+      "approvals": null,
       "affectedTasks": ["AMANOR-019", "AMANOR-061", "AMANOR-074", "AMANOR-009"]
     },
     {
@@ -109,9 +97,7 @@
       ],
       "selected": null,
       "decisionDetail": null,
-      "decider": null,
-      "decidedAt": null,
-      "evidence": null,
+      "approvals": null,
       "affectedTasks": ["AMANOR-020", "AMANOR-073", "AMANOR-086", "AMANOR-091"]
     },
     {
@@ -126,9 +112,7 @@
       ],
       "selected": null,
       "decisionDetail": null,
-      "decider": null,
-      "decidedAt": null,
-      "evidence": null,
+      "approvals": null,
       "affectedTasks": ["AMANOR-021", "AMANOR-042", "AMANOR-085"]
     },
     {
@@ -144,9 +128,7 @@
       ],
       "selected": null,
       "decisionDetail": null,
-      "decider": null,
-      "decidedAt": null,
-      "evidence": null,
+      "approvals": null,
       "affectedTasks": ["AMANOR-022", "AMANOR-073", "AMANOR-084", "AMANOR-085"]
     },
     {
@@ -161,9 +143,7 @@
       ],
       "selected": null,
       "decisionDetail": null,
-      "decider": null,
-      "decidedAt": null,
-      "evidence": null,
+      "approvals": null,
       "affectedTasks": [
         "AMANOR-023",
         "AMANOR-052",
@@ -184,9 +164,7 @@
       ],
       "selected": null,
       "decisionDetail": null,
-      "decider": null,
-      "decidedAt": null,
-      "evidence": null,
+      "approvals": null,
       "affectedTasks": ["AMANOR-026", "AMANOR-139", "AMANOR-179"]
     },
     {
@@ -201,9 +179,7 @@
       ],
       "selected": null,
       "decisionDetail": null,
-      "decider": null,
-      "decidedAt": null,
-      "evidence": null,
+      "approvals": null,
       "affectedTasks": ["AMANOR-024", "AMANOR-029", "AMANOR-147"]
     },
     {
@@ -214,9 +190,7 @@
       "options": ["resend", "approved-alternative", "defer-email-workflows"],
       "selected": null,
       "decisionDetail": null,
-      "decider": null,
-      "decidedAt": null,
-      "evidence": null,
+      "approvals": null,
       "affectedTasks": ["AMANOR-024", "AMANOR-088", "AMANOR-121", "AMANOR-144"]
     },
     {
@@ -232,9 +206,7 @@
       ],
       "selected": null,
       "decisionDetail": null,
-      "decider": null,
-      "decidedAt": null,
-      "evidence": null,
+      "approvals": null,
       "affectedTasks": ["AMANOR-024", "AMANOR-087", "AMANOR-091", "AMANOR-140"]
     },
     {
@@ -249,9 +221,7 @@
       ],
       "selected": null,
       "decisionDetail": null,
-      "decider": null,
-      "decidedAt": null,
-      "evidence": null,
+      "approvals": null,
       "affectedTasks": ["AMANOR-024", "AMANOR-035", "AMANOR-130", "AMANOR-131"]
     },
     {
@@ -266,9 +236,7 @@
       ],
       "selected": null,
       "decisionDetail": null,
-      "decider": null,
-      "decidedAt": null,
-      "evidence": null,
+      "approvals": null,
       "affectedTasks": ["AMANOR-024", "AMANOR-033", "AMANOR-090", "AMANOR-176"]
     },
     {
@@ -283,9 +251,7 @@
       ],
       "selected": null,
       "decisionDetail": null,
-      "decider": null,
-      "decidedAt": null,
-      "evidence": null,
+      "approvals": null,
       "affectedTasks": ["AMANOR-008", "AMANOR-024", "AMANOR-053", "AMANOR-068"]
     },
     {
@@ -300,9 +266,7 @@
       ],
       "selected": null,
       "decisionDetail": null,
-      "decider": null,
-      "decidedAt": null,
-      "evidence": null,
+      "approvals": null,
       "affectedTasks": ["AMANOR-024", "AMANOR-054", "AMANOR-059", "AMANOR-140"]
     }
   ]

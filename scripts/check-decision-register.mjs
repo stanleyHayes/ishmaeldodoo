@@ -18,9 +18,22 @@ const expectedIds = [
     (_, index) => `S${String(index + 1).padStart(2, "0")}`,
   ),
 ];
+const isEvidenceReference = (value) => {
+  if (typeof value !== "string") return false;
+  if (
+    value.startsWith("docs/governance/evidence/") &&
+    documentationFiles.includes(value)
+  )
+    return true;
+  try {
+    return new URL(value).protocol === "https:";
+  } catch {
+    return false;
+  }
+};
 function validateDecisionRegister(candidate) {
   if (
-    candidate.schemaVersion !== 1 ||
+    candidate.schemaVersion !== 2 ||
     !["awaiting-stakeholders", "partially-decided", "decided"].includes(
       candidate.registerStatus,
     ) ||
@@ -64,9 +77,7 @@ function validateDecisionRegister(candidate) {
     const outcomeFields = [
       decision.selected,
       decision.decisionDetail,
-      decision.decider,
-      decision.decidedAt,
-      decision.evidence,
+      decision.approvals,
     ];
     if (
       decision.status === "pending" &&
@@ -80,18 +91,52 @@ function validateDecisionRegister(candidate) {
         throw new Error(
           `${decision.id} selected value is not an allowed option`,
         );
-      for (const [field, value] of Object.entries({
-        decisionDetail: decision.decisionDetail,
-        decider: decision.decider,
-        decidedAt: decision.decidedAt,
-        evidence: decision.evidence,
-      }))
-        if (typeof value !== "string" || value.trim().length < 3)
-          throw new Error(`${decision.id} is missing ${field}`);
-      if (!/^20\d{2}-\d{2}-\d{2}$/u.test(decision.decidedAt))
-        throw new Error(`${decision.id} decidedAt must be an ISO date`);
-      if (decision.decidedAt < candidate.updatedAt)
-        throw new Error(`${decision.id} predates the controlled register`);
+      if (
+        typeof decision.decisionDetail !== "string" ||
+        decision.decisionDetail.trim().length < 3
+      )
+        throw new Error(`${decision.id} is missing decisionDetail`);
+      if (!Array.isArray(decision.approvals))
+        throw new Error(`${decision.id} is missing authority approvals`);
+      if (
+        decision.approvals.some(
+          (approval) => !approval || typeof approval !== "object",
+        )
+      )
+        throw new Error(`${decision.id} contains an invalid approval`);
+      const approvalAuthorities = decision.approvals.map(
+        (approval) => approval.authority,
+      );
+      if (
+        new Set(approvalAuthorities).size !== approvalAuthorities.length ||
+        JSON.stringify([...approvalAuthorities].sort()) !==
+          JSON.stringify([...decision.authority].sort())
+      )
+        throw new Error(
+          `${decision.id} approvals must exactly cover every required authority`,
+        );
+      for (const approval of decision.approvals) {
+        for (const [field, value] of Object.entries({
+          decider: approval.decider,
+          decidedAt: approval.decidedAt,
+        }))
+          if (typeof value !== "string" || value.trim().length < 3)
+            throw new Error(
+              `${decision.id} ${approval.authority} approval is missing ${field}`,
+            );
+        if (!/^20\d{2}-\d{2}-\d{2}$/u.test(approval.decidedAt))
+          throw new Error(
+            `${decision.id} ${approval.authority} decidedAt must be an ISO date`,
+          );
+        if (approval.decidedAt < candidate.updatedAt)
+          throw new Error(
+            `${decision.id} ${approval.authority} approval predates the controlled register`,
+          );
+        if (!isEvidenceReference(approval.evidence))
+          throw new Error(
+            `${decision.id} ${approval.authority} approval evidence must be a durable HTTPS URL or committed governance-evidence path`,
+          );
+      }
     }
   }
 
@@ -140,11 +185,87 @@ assertRejected("selection outside bounded options", (fixture) => {
     status: "approved",
     selected: "uncontrolled-choice",
     decisionDetail: "Controlled test decision",
-    decider: "Test Principal",
-    decidedAt: register.updatedAt,
-    evidence: "signed-test-record",
+    approvals: [
+      {
+        authority: "principal",
+        decider: "Test Principal",
+        decidedAt: register.updatedAt,
+        evidence: "signed-test-record",
+      },
+    ],
   };
 });
+assertRejected("missing required co-signature", (fixture) => {
+  fixture.registerStatus = "partially-decided";
+  fixture.decisions[11] = {
+    ...fixture.decisions[11],
+    status: "approved",
+    selected: fixture.decisions[11].options[0],
+    decisionDetail: "Controlled hosting decision",
+    approvals: [
+      {
+        authority: "product",
+        decider: "Test Product Lead",
+        decidedAt: register.updatedAt,
+        evidence: "signed-product-record",
+      },
+    ],
+  };
+});
+assertRejected("duplicate authority approval", (fixture) => {
+  fixture.registerStatus = "partially-decided";
+  fixture.decisions[11] = {
+    ...fixture.decisions[11],
+    status: "approved",
+    selected: fixture.decisions[11].options[0],
+    decisionDetail: "Controlled hosting decision",
+    approvals: [
+      ...fixture.decisions[11].authority,
+      fixture.decisions[11].authority[0],
+    ].map((authority) => ({
+      authority,
+      decider: `Test ${authority}`,
+      decidedAt: register.updatedAt,
+      evidence: `signed-${authority}-record`,
+    })),
+  };
+});
+assertRejected("unauditable evidence label", (fixture) => {
+  fixture.registerStatus = "partially-decided";
+  fixture.decisions[0] = {
+    ...fixture.decisions[0],
+    status: "approved",
+    selected: fixture.decisions[0].options[0],
+    decisionDetail: "Controlled domain decision",
+    approvals: [
+      {
+        authority: "principal",
+        decider: "Test Principal",
+        decidedAt: register.updatedAt,
+        evidence: "signed-test-record",
+      },
+    ],
+  };
+});
+
+const validMultiAuthorityFixture = clone(register);
+validMultiAuthorityFixture.registerStatus = "partially-decided";
+validMultiAuthorityFixture.decisions[11] = {
+  ...validMultiAuthorityFixture.decisions[11],
+  status: "approved",
+  selected: validMultiAuthorityFixture.decisions[11].options[0],
+  decisionDetail: "Controlled hosting decision",
+  approvals: validMultiAuthorityFixture.decisions[11].authority.map(
+    (authority) => ({
+      authority,
+      decider: `Test ${authority}`,
+      decidedAt: register.updatedAt,
+      evidence: `https://evidence.invalid/${authority}-record`,
+    }),
+  ),
+};
+if (validateDecisionRegister(validMultiAuthorityFixture) !== 17)
+  throw new Error("Complete multi-authority approval fixture was rejected");
 
 const unresolved = validateDecisionRegister(register);
 
@@ -200,5 +321,5 @@ if (forbiddenMappings.some((pattern) => pattern.test(decisionReferences)))
   );
 
 process.stdout.write(
-  `Decision register contains ${register.decisions.length} controlled records; ${unresolved} await authorized stakeholder evidence; four fail-closed fixtures and documentation mapping passed.\n`,
+  `Decision register contains ${register.decisions.length} controlled records; ${unresolved} await authorized stakeholder evidence; seven fail-closed fixtures, one complete multi-authority fixture and documentation mapping passed.\n`,
 );

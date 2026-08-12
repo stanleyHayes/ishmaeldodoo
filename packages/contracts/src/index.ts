@@ -1084,18 +1084,20 @@ export const publicSignalsSchema = z.object({
 });
 export type PublicSignals = z.infer<typeof publicSignalsSchema>;
 
-export const publicScholarSchema = z.object({
-  documentId: z.string().regex(/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$/u),
-  name: z.string().trim().min(1),
-  country: z.string().trim().min(2),
-  institution: z.string().trim().min(1),
-  field: z.string().trim().min(1),
-  cohortYear: z.number().int().min(2000).max(2200),
-  status: z.string().trim().min(1),
-  photo: z.string().uuid().optional(),
-  story: z.string().trim().min(1),
-  publishedAt: z.coerce.date(),
-});
+export const publicScholarSchema = z
+  .object({
+    documentId: z.string().regex(/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$/u),
+    name: z.string().trim().min(1),
+    country: z.string().trim().min(2),
+    institution: z.string().trim().min(1),
+    field: z.string().trim().min(1),
+    cohortYear: z.number().int().min(2000).max(2200),
+    status: z.string().trim().min(1),
+    photo: z.string().uuid().optional(),
+    story: z.string().trim().min(1),
+    publishedAt: z.coerce.date(),
+  })
+  .strict();
 export const publicLegacySchema = z.object({
   scholars: z.array(publicScholarSchema).max(100),
   translation: z.object({

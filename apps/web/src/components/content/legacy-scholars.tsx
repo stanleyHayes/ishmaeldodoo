@@ -1,10 +1,18 @@
-import type { PublicLegacy } from "@amanor/contracts";
+import type { PublicLegacy, PublicMedia } from "@amanor/contracts";
+import Image from "next/image";
 import type { SupportedLocale } from "../../lib/i18n/locale";
 
 export function LegacyScholars({
   legacy,
   locale,
-}: Readonly<{ legacy: PublicLegacy; locale: SupportedLocale }>) {
+  media = {},
+  lite = false,
+}: Readonly<{
+  legacy: PublicLegacy;
+  locale: SupportedLocale;
+  media?: Readonly<Record<string, PublicMedia | undefined>>;
+  lite?: boolean;
+}>) {
   const french = locale === "fr-FR";
   return (
     <section className="legacy-register" aria-labelledby="legacy-heading">
@@ -42,22 +50,39 @@ export function LegacyScholars({
         </p>
       ) : (
         <ol className="legacy-list">
-          {legacy.scholars.map((scholar) => (
-            <li key={scholar.documentId} className="legacy-card">
-              <p className="page-kicker">
-                {scholar.country} · {scholar.cohortYear}
-              </p>
-              <h3>{scholar.name}</h3>
-              <p>
-                <strong>{scholar.field}</strong> · {scholar.institution}
-              </p>
-              <p>{scholar.story}</p>
-              <p className="signal-review">
-                {french ? "Statut du programme" : "Programme status"}:{" "}
-                {scholar.status}
-              </p>
-            </li>
-          ))}
+          {legacy.scholars.map((scholar) => {
+            const portrait = scholar.photo ? media[scholar.photo] : undefined;
+            return (
+              <li key={scholar.documentId} className="legacy-card">
+                {!lite && portrait?.resourceType === "image" ? (
+                  <figure className="legacy-portrait">
+                    <Image
+                      src={portrait.secureUrl}
+                      alt={portrait.altText}
+                      width={portrait.width ?? 800}
+                      height={portrait.height ?? 800}
+                      sizes="(max-width: 40rem) 100vw, 18rem"
+                    />
+                    <figcaption>
+                      {portrait.credit} · {portrait.licence}
+                    </figcaption>
+                  </figure>
+                ) : null}
+                <p className="page-kicker">
+                  {scholar.country} · {scholar.cohortYear}
+                </p>
+                <h3>{scholar.name}</h3>
+                <p>
+                  <strong>{scholar.field}</strong> · {scholar.institution}
+                </p>
+                <p>{scholar.story}</p>
+                <p className="signal-review">
+                  {french ? "Statut du programme" : "Programme status"}:{" "}
+                  {scholar.status}
+                </p>
+              </li>
+            );
+          })}
         </ol>
       )}
     </section>

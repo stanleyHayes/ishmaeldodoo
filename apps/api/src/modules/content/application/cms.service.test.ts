@@ -201,6 +201,7 @@ describe("CmsService", () => {
           consentStatus: "granted",
           consentDate: new Date("2026-01-01"),
           consentVersion: "v1",
+          profileImageUrl: "https://untrusted.example/profile.jpg",
         },
       },
     ]);
@@ -214,6 +215,7 @@ describe("CmsService", () => {
     expect(result.scholars[0]).not.toHaveProperty("consentStatus");
     expect(result.scholars[0]).not.toHaveProperty("consentDate");
     expect(result.scholars[0]).not.toHaveProperty("consentVersion");
+    expect(result.scholars[0]).not.toHaveProperty("profileImageUrl");
   });
 
   it("audits every published claim against same-locale Source Register entries", async () => {

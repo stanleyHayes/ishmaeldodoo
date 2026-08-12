@@ -488,15 +488,21 @@ export class CmsService {
         const payload = projectPublicLocale(row.payload, locale);
         const projected =
           payload && typeof payload === "object" && !Array.isArray(payload)
-            ? { ...(payload as Record<string, unknown>) }
+            ? (payload as Record<string, unknown>)
             : {};
-        delete projected.consentStatus;
-        delete projected.consentDate;
-        delete projected.consentVersion;
         return {
           documentId: row.documentId,
           publishedAt: row.publishedAt,
-          ...projected,
+          name: projected.name,
+          country: projected.country,
+          institution: projected.institution,
+          field: projected.field,
+          cohortYear: projected.cohortYear,
+          status: projected.status,
+          ...(typeof projected.photo === "string"
+            ? { photo: projected.photo }
+            : {}),
+          story: projected.story,
         };
       }),
       translation: {

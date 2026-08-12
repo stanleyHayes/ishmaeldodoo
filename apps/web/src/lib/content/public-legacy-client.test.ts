@@ -45,7 +45,21 @@ describe("public legacy client", () => {
       vi.fn().mockResolvedValue(
         new Response(
           JSON.stringify({
-            scholars: [{ consentStatus: "granted" }],
+            scholars: [
+              {
+                documentId: "scholar-1",
+                name: "Ama",
+                country: "GH",
+                institution: "University",
+                field: "Economics",
+                cohortYear: 2024,
+                status: "Active",
+                story: "A consent-cleared story.",
+                publishedAt: "2026-08-12T00:00:00.000Z",
+                consentStatus: "granted",
+                profileImageUrl: "https://untrusted.example/profile.jpg",
+              },
+            ],
             translation: { stale: false },
           }),
           { status: 200 },

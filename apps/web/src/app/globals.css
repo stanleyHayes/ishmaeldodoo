@@ -2680,16 +2680,33 @@ button {
 .legacy-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
-  gap: var(--space-4);
+  gap: 1.25rem;
   padding: 0;
   list-style: none;
 }
 
 .legacy-card {
-  padding: var(--space-5);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  background: var(--surface-raised);
+  padding: 1.5rem;
+  border: 1px solid var(--rule);
+  border-radius: 0.75rem;
+  background: var(--surface);
+}
+
+.legacy-portrait {
+  margin: 0 0 1rem;
+}
+
+.legacy-portrait img {
+  aspect-ratio: 1;
+  width: 100%;
+  object-fit: cover;
+  border-radius: 0.5rem;
+}
+
+.legacy-portrait figcaption {
+  margin-top: 0.5rem;
+  color: var(--muted);
+  font-size: 0.78rem;
 }
 
 .signal-card {

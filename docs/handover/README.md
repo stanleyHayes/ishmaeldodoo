@@ -52,6 +52,7 @@ This index is the controlled entry point for operating the independently deploye
 - Controlled [production content and identity acceptance record](../content/templates/production-content-acceptance-record.md) for immutable bilingual versions, canonical identity/title history, media/source/print/discoverability checks, freeze integrity and approvals.
 - Controlled [production discoverability record](../operations/templates/production-discoverability-record.md) for external crawl/index, Search Console, sitemap/feed, canonical/hreflang, schema, social preview, cache and approval evidence.
 - Controlled [edge WAF and abuse rehearsal record](../security/templates/edge-abuse-rehearsal-record.md) for active Cloudflare rules, trusted-proxy spoof resistance, bot/accessibility review, distributed/slow/outage drills, rollback and approvals.
+- Controlled [deployed observability acceptance record](../operations/templates/deployed-observability-acceptance-record.md) for exact Web/Admin/API correlation, provider telemetry, uptime, collector-loss continuity, alert delivery/recovery, privacy review and named approvals.
 - Monthly, quarterly and six-month [measurement cadence](../operations/measurement-cadence.md) evidence.
 - Versioned [release notes](release-notes.md) and completed [training evidence](training-evidence.md).
 

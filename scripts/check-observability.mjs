@@ -9,6 +9,10 @@ const dashboard = JSON.parse(
   await readFile("infra/observability/grafana-dashboard.json", "utf8"),
 );
 const runbook = await readFile("docs/operations/observability.md", "utf8");
+const deployedAcceptance = await readFile(
+  "docs/operations/templates/deployed-observability-acceptance-record.md",
+  "utf8",
+);
 const protocolCorrespondenceRunbook = await readFile(
   "docs/operations/protocol-correspondence.md",
   "utf8",
@@ -55,6 +59,67 @@ const correlatedWebRoutes = [
   "room/enquiries",
   "room/key-manifest",
 ];
+
+const pendingDeployedAcceptanceSentinels = [
+  "- Status: `Not run`",
+  "- Environment, release and immutable source revision: `Not recorded`",
+  "- Web, Admin and API deployment revisions: `Not recorded`",
+  "- Public, Admin and API origins: `Not recorded`",
+  "- Monitoring, logging and tracing providers plus regions: `Not selected`",
+  "- Provider account/resource identifiers and evidence location: `Not recorded`",
+  "- Collector, dashboard, alert-rule and uptime-target revisions: `Not recorded`",
+  "- Exercise window, timezone, operators and independent observer: `Not scheduled`",
+  "- Production-like differences and accepted limitations: `Not assessed`",
+  "- Web, Admin and API uptime/TLS probe results: `Not run`",
+  "- Readiness, authenticated metrics scrape and wrong-token concealment: `Not run`",
+  "- Web proxy to API request-ID and W3C parent/child trace evidence: `Not run`",
+  "- Admin direct-call to API request-ID and W3C parent/child trace evidence: `Not run`",
+  "- API log, metric and exported-span reconciliation: `Not run`",
+  "- Normalized route, bounded labels and redacted log/span review: `Not run`",
+  "- Query, body, header, identity, IP and credential non-disclosure review: `Not run`",
+  "- OTLP collector authentication and network-boundary evidence: `Not recorded`",
+  "- Trace sampling configuration, measured rate and approval: `Not approved`",
+  "- Log, metric and trace retention/access policy and approval: `Not approved`",
+  "- Collector queue/backpressure/drop visibility result: `Not run`",
+  "- Collector-loss response-continuity and health-alert result: `Not run`",
+  "- API 5xx sustained alert delivery, acknowledgement and recovery: `Not run`",
+  "- API latency sustained alert delivery, acknowledgement and recovery: `Not run`",
+  "- Missing-metrics alert delivery, acknowledgement and recovery: `Not run`",
+  "- Single-deployable outage alert delivery, acknowledgement and recovery: `Not run`",
+  "- TLS-expiry provider-test alert delivery and acknowledgement: `Not run`",
+  "- Calendar synchronization failure alert and recovery: `Not run`",
+  "- Principal decision delivery failure alert and recovery: `Not run`",
+  "- Protocol, Room and personal-data retention alert routing review: `Not run`",
+  "- Primary and secondary on-call routes, escalation times and evidence: `Not recorded`",
+  "- Dashboard baseline, SLOs and release/incident annotations: `Not approved`",
+  "- Fault-injection removal and temporary-access revocation: `Not run`",
+  "- Defects, severity, owners, target dates and retest evidence: `None recorded`",
+  "- Operations approval and date: `Not approved`",
+  "- Security approval and date: `Not approved`",
+  "- Privacy approval and date: `Not approved`",
+  "- Product acceptance and date: `Not approved`",
+];
+
+function validatePendingDeployedAcceptance(candidate) {
+  for (const sentinel of pendingDeployedAcceptanceSentinels)
+    if (!candidate.includes(sentinel))
+      throw new Error(
+        `Deployed observability record no longer proves its pending state: ${sentinel}`,
+      );
+}
+
+validatePendingDeployedAcceptance(deployedAcceptance);
+for (const sentinel of pendingDeployedAcceptanceSentinels) {
+  const mutated = deployedAcceptance.replace(sentinel, "[prematurely changed]");
+  try {
+    validatePendingDeployedAcceptance(mutated);
+  } catch {
+    continue;
+  }
+  throw new Error(
+    `Deployed observability record accepted mutation of required sentinel: ${sentinel}`,
+  );
+}
 
 const requiredAlerts = [
   "AmanorApiHighErrorRate",
@@ -198,7 +263,8 @@ for (const service of ["amanor-web", "amanor-admin", "amanor-api"]) {
 }
 if (
   !runbook.includes("## Alert drill and response") ||
-  !runbook.includes("AmanorApiHighErrorRate")
+  !runbook.includes("AmanorApiHighErrorRate") ||
+  !runbook.includes("templates/deployed-observability-acceptance-record.md")
 ) {
   throw new Error(
     "Observability runbook is missing the executable alert drill",

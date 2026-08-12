@@ -56,3 +56,9 @@ Production response starts by checking readiness and recent release/configuratio
 The observability provider is deliberately undecided. NestJS optionally exports server spans over provider-neutral OTLP/HTTP when `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` is configured. Root sampling defaults to `0.1` and is bounded to `0..1` by `OTEL_TRACE_SAMPLE_RATIO`; an accepted upstream sampling decision is preserved. Export uses a 512-span queue, 64-span batches and a three-second timeout, runs after request completion and never blocks the product response. Span attributes contain only service/version, normalized path, HTTP method and status—never request IDs, query strings, IP addresses, identities, headers or bodies. Collector authentication must use a private network or workload identity rather than credentials embedded in the endpoint.
 
 Before launch, select and deploy the collector/provider independently per environment, connect the scrape endpoint to dashboards and alerts, validate sampling and retention, prove redaction in staging and run an alert/trace drill. Confirm a Web/Admin-propagated trace ID reaches the API child span and that collector loss does not change an application response.
+
+Record the exact deployed revisions, provider resources, correlation evidence,
+alert delivery and recovery timestamps, cleanup and named approvals in the
+[deployed observability acceptance record](templates/deployed-observability-acceptance-record.md).
+Automated checks and a successful provider deployment do not complete that
+record; unresolved pending fields keep AMANOR-176 and the release gate open.

@@ -189,7 +189,7 @@ jobs:
           output-file: amanor-api.sarif
 
       - name: Upload API findings to code scanning
-        uses: github/codeql-action/upload-sarif@5595ccaf912efad79be6eef63a5619ff05969be3 # v4
+        uses: github/codeql-action/upload-sarif@ff2f1c621b7f889edc0d3c761ac2e6a3f8cdb0dd # v4
         with:
           sarif_file: amanor-api.sarif
           category: amanor-api-container
@@ -239,7 +239,7 @@ jobs:
           output-file: amanor-web.sarif
 
       - name: Upload public-web findings to code scanning
-        uses: github/codeql-action/upload-sarif@5595ccaf912efad79be6eef63a5619ff05969be3 # v4
+        uses: github/codeql-action/upload-sarif@ff2f1c621b7f889edc0d3c761ac2e6a3f8cdb0dd # v4
         with:
           sarif_file: amanor-web.sarif
           category: amanor-web-container
@@ -289,7 +289,7 @@ jobs:
           output-file: amanor-admin.sarif
 
       - name: Upload Admin/CMS findings to code scanning
-        uses: github/codeql-action/upload-sarif@5595ccaf912efad79be6eef63a5619ff05969be3 # v4
+        uses: github/codeql-action/upload-sarif@ff2f1c621b7f889edc0d3c761ac2e6a3f8cdb0dd # v4
         with:
           sarif_file: amanor-admin.sarif
           category: amanor-admin-container

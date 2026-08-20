@@ -86,4 +86,13 @@ async function bootstrap(): Promise<void> {
   process.once("SIGINT", shutdown);
 }
 
-void bootstrap();
+bootstrap().catch((error: unknown) => {
+  // A startup failure (bad config, port bind, or an onApplicationBootstrap hook
+  // such as migrations/index creation throwing) must be logged and turn into a
+  // deterministic non-zero exit, so the orchestrator restarts instead of leaving
+  // a half-initialised process that a shallow port check could read as healthy.
+  const detail =
+    error instanceof Error ? (error.stack ?? error.message) : String(error);
+  process.stderr.write(`API failed to start: ${detail}\n`);
+  process.exit(1);
+});

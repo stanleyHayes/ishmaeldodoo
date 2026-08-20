@@ -4,7 +4,7 @@ import type { Connection } from "mongoose";
 
 describe("HealthController", () => {
   it("exposes non-sensitive liveness and readiness payloads", () => {
-    const controller = new HealthController();
+    const controller = new HealthController({ readyState: 1 } as Connection);
     expect(controller.live()).toEqual(
       expect.objectContaining({ status: "ok", service: "amanor-api" }),
     );
@@ -14,6 +14,11 @@ describe("HealthController", () => {
 
   it("fails readiness without exposing dependency details when MongoDB is disconnected", () => {
     const controller = new HealthController({ readyState: 0 } as Connection);
+    expect(() => controller.ready()).toThrow(/dependencies are not ready/i);
+  });
+
+  it("fails readiness closed when the database connection is absent", () => {
+    const controller = new HealthController();
     expect(() => controller.ready()).toThrow(/dependencies are not ready/i);
   });
 });

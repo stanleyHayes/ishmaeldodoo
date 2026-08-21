@@ -58,7 +58,10 @@ async function bootstrap(): Promise<void> {
       "traceparent",
     ],
     exposedHeaders: ["X-Request-ID", "traceparent"],
-    maxAge: 600,
+    // Cache preflights in production, but never in development: a cached
+    // preflight with a stale allowed-origin survives config changes and blocks
+    // local work until it expires, which a hard refresh cannot clear.
+    maxAge: process.env.NODE_ENV === "production" ? 600 : 0,
   });
   app.use(helmet());
   app.use(requestContextMiddleware);

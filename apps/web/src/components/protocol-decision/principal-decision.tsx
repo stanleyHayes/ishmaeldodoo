@@ -8,6 +8,7 @@ import {
 } from "@amanor/contracts";
 import { useEffect, useState } from "react";
 import styles from "./principal-decision.module.css";
+import { BrandedSelect } from "../ui/branded-select";
 
 type Locale = "en-GB" | "fr-FR";
 type Action = (typeof principalDecisionActions)[number];
@@ -162,23 +163,16 @@ export function PrincipalDecision({ locale }: Readonly<{ locale: Locale }>) {
               />
             </label>
             {capability.action === "decline" ? (
-              <label>
-                <span>{text.declineCategory}</span>
-                <select
-                  value={declineCategory}
-                  onChange={(event) =>
-                    setDeclineCategory(
-                      event.target.value as typeof declineCategory,
-                    )
-                  }
-                >
-                  {Object.entries(text.categories).map(([value, label]) => (
-                    <option key={value} value={value}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              <BrandedSelect
+                label={text.declineCategory}
+                value={declineCategory}
+                onChange={(value) =>
+                  setDeclineCategory(value as typeof declineCategory)
+                }
+                options={Object.entries(text.categories).map(
+                  ([value, label]) => ({ value, label }),
+                )}
+              />
             ) : null}
             {status === "failed" ? (
               <p className={styles.error} role="alert">

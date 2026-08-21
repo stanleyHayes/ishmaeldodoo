@@ -20,31 +20,53 @@ import {
   webAuthnRegistrationResponseSchema,
 } from "@amanor/contracts";
 
-export const loginInputSchema = z
-  .object({
-    email: z.email().max(254),
-    password: z.string().min(14).max(128),
-    mfaCode: z
-      .string()
-      .regex(/^\d{6}$/u)
-      .optional(),
-    recoveryCode: z
-      .string()
-      .regex(/^[A-Z2-9]{4}(?:-[A-Z2-9]{4}){3}$/u)
-      .optional(),
-  })
-  .refine((input) => Boolean(input.mfaCode) !== Boolean(input.recoveryCode))
-  .strict();
+export const loginInputSchema = z.discriminatedUnion("stage", [
+  z
+    .object({
+      stage: z.literal("credentials"),
+      email: z.email().max(254),
+      password: z.string().min(14).max(128),
+      challenge: z.never().optional(),
+      mfaCode: z.never().optional(),
+      recoveryCode: z.never().optional(),
+    })
+    .strict(),
+  z
+    .object({
+      stage: z.literal("verification"),
+      email: z.never().optional(),
+      password: z.never().optional(),
+      challenge: z.string().min(32).max(1024),
+      mfaCode: z
+        .string()
+        .regex(/^\d{6}$/u)
+        .optional(),
+      recoveryCode: z
+        .string()
+        .regex(/^[A-Z2-9]{4}(?:-[A-Z2-9]{4}){3}$/u)
+        .optional(),
+    })
+    .refine((input) => Boolean(input.mfaCode) !== Boolean(input.recoveryCode))
+    .strict(),
+]);
 
 export class LoginDto {
+  @IsString()
+  @IsIn(["credentials", "verification"])
+  stage!: string;
+
+  @IsOptional()
   @IsEmail()
   @MaxLength(254)
-  email!: string;
+  email?: string;
 
+  @IsOptional()
   @IsString()
   @MinLength(14)
   @MaxLength(128)
-  password!: string;
+  password?: string;
+
+  @IsOptional() @IsString() @MinLength(32) @MaxLength(1024) challenge?: string;
 
   @IsOptional() @IsString() @Length(6, 6) mfaCode?: string;
   @IsOptional() @IsString() @Length(19, 19) recoveryCode?: string;

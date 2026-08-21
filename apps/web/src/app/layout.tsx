@@ -19,6 +19,7 @@ import {
   type AnalyticsConsent,
 } from "../lib/analytics-catalog";
 import { liteCookieName } from "../lib/lite/mode";
+import { identityPayload } from "../lib/content/identity-payload";
 
 export const metadata: Metadata = {
   metadataBase: new URL(webEnvironment.PUBLIC_WEB_BASE_URL),
@@ -61,6 +62,10 @@ export default async function RootLayout({
       ? storedAnalytics
       : null
   ) satisfies AnalyticsConsent;
+  const canonicalIdentity =
+    identity?.status === "available"
+      ? identityPayload(identity.content.payload)
+      : null;
   return (
     <html
       lang={locale}
@@ -69,6 +74,13 @@ export default async function RootLayout({
       data-scroll-behavior="smooth"
     >
       <body>
+        {lite ? null : (
+          // Design enhancements are excluded from Lite mode to protect its
+          // byte budget, so this stylesheet is loaded conditionally and cannot
+          // be a static CSS import. React 19 hoists it into <head>.
+          // eslint-disable-next-line @next/next/no-css-tags
+          <link rel="stylesheet" href="/amanor-enhance.css" precedence="high" />
+        )}
         {!privateDecision ? (
           <>
             {identity ? (
@@ -107,7 +119,14 @@ export default async function RootLayout({
             initialConsent={analyticsConsent}
           />
         )}
-        {!privateDecision ? <SiteFooter locale={locale} /> : null}
+        {!privateDecision ? (
+          <SiteFooter
+            locale={locale}
+            {...(canonicalIdentity?.displayName
+              ? { displayName: canonicalIdentity.displayName }
+              : {})}
+          />
+        ) : null}
       </body>
     </html>
   );

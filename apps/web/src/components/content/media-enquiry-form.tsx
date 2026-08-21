@@ -1,6 +1,7 @@
 "use client";
 import { useState, type FormEvent } from "react";
 import type { SupportedLocale } from "../../lib/i18n/locale";
+import { BrandedDateTime } from "../ui/branded-date-time";
 export function MediaEnquiryForm({
   locale,
 }: Readonly<{ locale: SupportedLocale }>) {
@@ -58,10 +59,11 @@ export function MediaEnquiryForm({
         {fr ? "Adresse e-mail" : "Email address"}
         <input name="email" type="email" required />
       </label>
-      <label>
-        {fr ? "Échéance (facultatif)" : "Deadline (optional)"}
-        <input name="deadline" type="datetime-local" />
-      </label>
+      <BrandedDateTime
+        name="deadline"
+        label={fr ? "Échéance (facultatif)" : "Deadline (optional)"}
+        locale={locale}
+      />
       <label>
         {fr ? "Objet" : "Subject"}
         <input name="subject" minLength={4} maxLength={160} required />

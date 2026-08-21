@@ -2,21 +2,29 @@
   min-height: 100svh;
   display: grid;
   place-items: center;
-  padding: 1.5rem;
-  background: #f2efe6;
+  padding: clamp(1rem, 4vw, 3rem);
+  background:
+    linear-gradient(
+      90deg,
+      transparent 49.9%,
+      rgb(23 27 24 / 10%) 50%,
+      transparent 50.1%
+    ),
+    #ece8dc;
   color: #171b18;
 }
 
 .panel {
-  width: min(100%, 38rem);
-  padding: clamp(1.5rem, 5vw, 3.5rem);
-  border-top: 0.35rem solid #984c2d;
-  background: #fffdf7;
-  box-shadow: 0 1.5rem 4rem rgb(39 32 22 / 12%);
+  width: min(100%, 62rem);
+  padding: clamp(1.5rem, 6vw, 5rem);
+  border: 1px solid #171b18;
+  border-top: 0.55rem solid #984c2d;
+  background: #f8f5ec;
+  box-shadow: 1.25rem 1.25rem 0 #173f36;
 }
 
 .eyebrow {
-  margin: 0 0 1rem;
+  margin: 0 0 clamp(3rem, 7vw, 6rem);
   color: #6c3c28;
   font-size: 0.75rem;
   font-weight: 700;
@@ -25,22 +33,29 @@
 }
 
 .panel h1 {
-  max-width: 12ch;
-  margin: 0 0 1.25rem;
+  max-width: 11ch;
+  margin: 0 0 1.5rem;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(2.2rem, 8vw, 4rem);
+  font-size: clamp(3rem, 9vw, 7rem);
   font-weight: 400;
   line-height: 0.98;
 }
 
 .form {
   display: grid;
-  gap: 1.25rem;
+  grid-template-columns: minmax(10rem, 0.34fr) minmax(0, 1fr);
+  gap: 0;
+  margin-top: clamp(3rem, 7vw, 6rem);
+  border-top: 1px solid #171b18;
 }
 
 .form label {
   display: grid;
-  gap: 0.5rem;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  gap: 1rem;
+  padding-block: 1rem;
+  border-bottom: 1px solid #8b897f;
   font-weight: 650;
 }
 
@@ -48,10 +63,11 @@
 .form select {
   width: 100%;
   min-height: 3rem;
-  padding: 0.8rem;
-  border: 1px solid #8b897f;
+  padding: 0.9rem 0;
+  border: 0;
+  border-bottom: 1px solid #171b18;
   border-radius: 0;
-  background: white;
+  background: transparent;
   color: inherit;
   font: inherit;
 }
@@ -62,17 +78,21 @@
 }
 
 .action {
-  padding: 1rem;
-  border-inline-start: 0.25rem solid #984c2d;
-  background: #f3e8d8;
+  grid-column: 2;
+  margin: 0;
+  padding: 1rem 0;
+  border: 0;
+  background: transparent;
   font-size: 1.15rem;
   font-weight: 750;
 }
 
 .form button {
+  grid-column: 2;
   min-height: 3.25rem;
   border: 0;
-  background: #1d3b2b;
+  margin-top: 1rem;
+  background: #173f36;
   color: white;
   font: inherit;
   font-weight: 750;
@@ -85,14 +105,16 @@
 }
 
 .error {
+  grid-column: 2;
   color: #8d241f;
   font-weight: 650;
 }
 
 .result {
-  padding: 1rem;
-  border-inline-start: 0.25rem solid #2c6545;
-  background: #e4efe5;
+  grid-column: 2;
+  padding: 1.25rem;
+  border-inline-start: 0.35rem solid #2c6545;
+  background: #dfe8df;
 }
 
 .privacy {
@@ -111,6 +133,18 @@
   .panel {
     min-height: 100svh;
     box-shadow: none;
+  }
+
+  .form,
+  .form label {
+    grid-template-columns: 1fr;
+  }
+
+  .action,
+  .form button,
+  .error,
+  .result {
+    grid-column: 1;
   }
 }
 

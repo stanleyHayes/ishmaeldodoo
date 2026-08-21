@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { localizePath, type SupportedLocale } from "../../lib/i18n/locale";
+import { BrandedSelect } from "../ui/branded-select";
 
 const categoryLabels = {
   "en-GB": {
@@ -134,16 +135,15 @@ export function ContactForm({ locale }: Readonly<{ locale: SupportedLocale }>) {
           {french ? "Organisation (facultatif)" : "Organisation (optional)"}
           <input name="organisation" minLength={2} maxLength={160} />
         </label>
-        <label>
-          {french ? "Type de demande" : "Enquiry type"}
-          <select name="category" defaultValue="general">
-            {contactCategories.map((category) => (
-              <option key={category} value={category}>
-                {categoryLabels[locale][category]}
-              </option>
-            ))}
-          </select>
-        </label>
+        <BrandedSelect
+          name="category"
+          label={french ? "Type de demande" : "Enquiry type"}
+          defaultValue="general"
+          options={contactCategories.map((category) => ({
+            value: category,
+            label: categoryLabels[locale][category],
+          }))}
+        />
         <label className="contact-form-wide">
           {french ? "Objet" : "Subject"}
           <input name="subject" minLength={4} maxLength={160} required />

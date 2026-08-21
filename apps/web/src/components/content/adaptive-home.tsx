@@ -111,27 +111,36 @@ export function AdaptiveHome({
           </h2>
         </div>
         <div className="home-act-grid">
-          {acts.map((item) => (
+          {acts.map((item, index) => (
             <article key={item.homepageAct.act}>
-              <p>{item.homepageAct.dateRange}</p>
-              <h3>{item.homepageAct.label}</h3>
-              <p>{item.homepageAct.place}</p>
-              <strong>{item.homepageAct.figure}</strong>
-              <p>{item.homepageAct.sentence}</p>
-              <div className="home-evidence-links">
-                <Link
-                  href={`${localizePath("/record/atlas", locale)}?node=${encodeURIComponent(item.slug)}`}
-                >
-                  {french ? "Voir dans l’Atlas" : "View in the Atlas"}
-                </Link>
-                {item.sourceRefs.map((ref) => (
+              <div className="home-act-grid__index" aria-hidden="true">
+                {String(index + 1).padStart(2, "0")}
+              </div>
+              <div className="home-act-grid__period">
+                <p>{item.homepageAct.dateRange}</p>
+                <p>{item.homepageAct.place}</p>
+              </div>
+              <div className="home-act-grid__story">
+                <h3>{item.homepageAct.label}</h3>
+                <p>{item.homepageAct.sentence}</p>
+              </div>
+              <div className="home-act-grid__evidence">
+                <strong>{item.homepageAct.figure}</strong>
+                <div className="home-evidence-links">
                   <Link
-                    key={ref}
-                    href={`${localizePath("/record/sources", locale)}#${ref}`}
+                    href={`${localizePath("/record/atlas", locale)}?node=${encodeURIComponent(item.slug)}`}
                   >
-                    {ref}
+                    {french ? "Voir dans l’Atlas" : "View in the Atlas"}
                   </Link>
-                ))}
+                  {item.sourceRefs.map((ref) => (
+                    <Link
+                      key={ref}
+                      href={`${localizePath("/record/sources", locale)}#${ref}`}
+                    >
+                      {ref}
+                    </Link>
+                  ))}
+                </div>
               </div>
             </article>
           ))}
@@ -149,7 +158,10 @@ export function AdaptiveHome({
         aria-labelledby="atlas-preview-heading"
       >
         <p className="section-number">04</p>
-        <div>
+        <div className="home-atlas-preview__copy">
+          <p className="page-kicker">
+            {french ? "Géographie d’un parcours" : "A geography of service"}
+          </p>
           <h2 id="atlas-preview-heading">
             {french ? "L’Atlas en aperçu" : "The Atlas at a glance"}
           </h2>
@@ -163,6 +175,19 @@ export function AdaptiveHome({
           >
             {french ? "Explorer l’Atlas" : "Explore the Atlas"}
           </Link>
+        </div>
+        <div className="home-atlas-preview__figure" aria-hidden="true">
+          <strong>{String(atlas.length).padStart(2, "0")}</strong>
+          <span>{french ? "entrées publiées" : "published entries"}</span>
+          <svg viewBox="0 0 480 280" role="presentation">
+            <path d="M12 218C72 174 96 222 146 173S232 75 286 116s78 96 182 18" />
+            <path d="M32 246c54-24 91-6 124-50s57-93 116-72 66 82 170 66" />
+            <path d="M72 78c44 38 67-18 108 9s52 62 96 38 83-70 152-46" />
+            <circle cx="146" cy="173" r="7" />
+            <circle cx="286" cy="116" r="7" />
+            <circle cx="428" cy="79" r="7" />
+            <line x1="18" y1="258" x2="462" y2="258" />
+          </svg>
         </div>
       </section>
     ) : null,
@@ -237,13 +262,19 @@ export function AdaptiveHome({
       <section className="home-invitation" aria-labelledby="invitation-heading">
         <p className="section-number">07</p>
         <div>
+          <p className="page-kicker">
+            {french ? "Une prochaine étape" : "One considered next step"}
+          </p>
           <h2 id="invitation-heading">
             {french
               ? "Poursuivre la conversation"
               : "Continue the conversation"}
           </h2>
           <Link href={localizePath(audienceCta(audience), locale)}>
-            {french ? "Choisir la prochaine étape" : "Choose the next step"}
+            <span>
+              {french ? "Choisir la prochaine étape" : "Choose the next step"}
+            </span>
+            <span aria-hidden="true">↗</span>
           </Link>
         </div>
       </section>

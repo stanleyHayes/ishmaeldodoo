@@ -10,6 +10,7 @@ import { ApiClientError } from "../lib/api/client";
 import AdminPage from "./page";
 
 const apiMocks = vi.hoisted(() => ({
+  beginLogin: vi.fn(),
   login: vi.fn(),
   logout: vi.fn(),
   listSessions: vi.fn(),
@@ -46,7 +47,8 @@ vi.mock("../lib/api/client", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../lib/api/client")>();
   return {
     ...actual,
-    login: apiMocks.login,
+    beginLogin: apiMocks.beginLogin,
+    completeLogin: apiMocks.login,
     logout: apiMocks.logout,
     listSessions: apiMocks.listSessions,
     revokeSession: apiMocks.revokeSession,
@@ -86,14 +88,24 @@ function completeLoginForm() {
   fireEvent.change(screen.getByLabelText("Password"), {
     target: { value: "a-long-development-passphrase" },
   });
-  fireEvent.paste(screen.getByLabelText("Digit 1 of 6"), {
-    clipboardData: { getData: () => "123456" },
+  fireEvent.click(screen.getByRole("button", { name: "Continue securely" }));
+  void screen.findByLabelText("Digit 1 of 6").then((input) => {
+    fireEvent.paste(input, {
+      clipboardData: { getData: () => "123456" },
+    });
+    fireEvent.click(
+      screen.getByRole("button", { name: "Continue to console" }),
+    );
   });
-  fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
 }
 
 describe("admin application", () => {
   beforeEach(() => {
+    apiMocks.beginLogin.mockResolvedValue({
+      state: "mfa_required",
+      challenge: "a".repeat(64),
+      expiresIn: 300,
+    });
     apiMocks.listAdministrators.mockResolvedValue([]);
     apiMocks.listAuthenticationAudit.mockResolvedValue({ items: [] });
     apiMocks.getAuthenticationAuditIntegrity.mockResolvedValue({
@@ -146,6 +158,7 @@ describe("admin application", () => {
   });
 
   afterEach(() => {
+    apiMocks.beginLogin.mockReset();
     cleanup();
     apiMocks.login.mockReset();
     apiMocks.logout.mockReset();
@@ -190,6 +203,27 @@ describe("admin application", () => {
     expect(
       screen.queryByRole("navigation", { name: "Administration sections" }),
     ).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Digit 1 of 6")).not.toBeInTheDocument();
+  });
+
+  it("reveals MFA only after the credentials step succeeds", async () => {
+    render(<AdminPage />);
+    fireEvent.change(screen.getByLabelText("Email address"), {
+      target: { value: "editor@example.test" },
+    });
+    fireEvent.change(screen.getByLabelText("Password"), {
+      target: { value: "a-long-development-passphrase" },
+    });
+    expect(screen.queryByLabelText("Digit 1 of 6")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Continue securely" }));
+
+    expect(await screen.findByLabelText("Digit 1 of 6")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Password")).not.toBeInTheDocument();
+    expect(apiMocks.beginLogin).toHaveBeenCalledWith(
+      "editor@example.test",
+      "a-long-development-passphrase",
+    );
   });
 
   it("uses the API session roles to limit operator navigation", async () => {
@@ -287,7 +321,7 @@ describe("admin application", () => {
     fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
     await waitFor(() =>
       expect(
-        screen.getByRole("button", { name: "Sign in" }),
+        screen.getByRole("button", { name: "Continue securely" }),
       ).toBeInTheDocument(),
     );
     expect(apiMocks.logout).toHaveBeenCalledOnce();

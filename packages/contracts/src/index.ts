@@ -276,10 +276,22 @@ export type WebAuthnOptionsEnvelope = z.infer<
 const recoveryCodeSchema = z
   .string()
   .regex(/^[A-Z2-9]{4}(?:-[A-Z2-9]{4}){3}$/u);
-export const loginRequestSchema = z
+const credentialLoginRequestSchema = z
   .object({
+    stage: z.literal("credentials"),
     email: z.email().max(254),
     password: z.string().min(14).max(128),
+    challenge: z.never().optional(),
+    mfaCode: z.never().optional(),
+    recoveryCode: z.never().optional(),
+  })
+  .strict();
+const verificationLoginRequestSchema = z
+  .object({
+    stage: z.literal("verification"),
+    email: z.never().optional(),
+    password: z.never().optional(),
+    challenge: z.string().min(32).max(1024),
     mfaCode: z
       .string()
       .regex(/^\d{6}$/u)
@@ -289,6 +301,16 @@ export const loginRequestSchema = z
   .refine((input) => Boolean(input.mfaCode) !== Boolean(input.recoveryCode), {
     message: "Provide exactly one verification method",
   });
+export const loginRequestSchema = z.discriminatedUnion("stage", [
+  credentialLoginRequestSchema,
+  verificationLoginRequestSchema,
+]);
+
+export const loginChallengeResponseSchema = z.object({
+  state: z.literal("mfa_required"),
+  challenge: z.string().min(32).max(1024),
+  expiresIn: z.literal(300),
+});
 
 export const authSessionResponseSchema = z.object({
   accessToken: z.string().min(1),
@@ -301,6 +323,9 @@ export const authSessionResponseSchema = z.object({
 });
 
 export type LoginRequest = z.infer<typeof loginRequestSchema>;
+export type LoginChallengeResponse = z.infer<
+  typeof loginChallengeResponseSchema
+>;
 export type AuthSessionResponse = z.infer<typeof authSessionResponseSchema>;
 
 export const adminSessionSchema = z.object({

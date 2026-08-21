@@ -2,6 +2,7 @@
 
 import type { ContentKind, MediaAssetListQuery } from "@amanor/contracts";
 import { GovernedMediaPicker } from "../media/governed-media-picker";
+import { AdminEmptyState } from "../ui/admin-state";
 
 type Option = Readonly<{ value: string; label: string }>;
 type Field = Readonly<{
@@ -1144,23 +1145,24 @@ export function SchemaPayloadEditor({
   const fields = schemas[kind];
   if (!payload || Object.keys(payload).length === 0)
     return (
-      <div className="structured-empty">
-        <p>
-          Initialise the validated {kind} fields to begin. This does not create
-          a version until you select Create draft.
-        </p>
-        {!readOnly ? (
-          <button
-            className="secondary-button"
-            type="button"
-            onClick={() =>
-              onChange(`${JSON.stringify(initialise(fields), null, 2)}\n`)
-            }
-          >
-            Initialise {kind} fields
-          </button>
-        ) : null}
-      </div>
+      <AdminEmptyState
+        kind="content"
+        title={`${kind} fields are not initialised`}
+        description="Create the validated field structure to begin. No version is saved until you select Create draft."
+        action={
+          !readOnly ? (
+            <button
+              className="secondary-button"
+              type="button"
+              onClick={() =>
+                onChange(`${JSON.stringify(initialise(fields), null, 2)}\n`)
+              }
+            >
+              Initialise {kind} fields
+            </button>
+          ) : undefined
+        }
+      />
     );
   const commit = (next: Payload) =>
     onChange(`${JSON.stringify(next, null, 2)}\n`);

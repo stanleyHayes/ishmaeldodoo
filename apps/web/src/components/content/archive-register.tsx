@@ -1,5 +1,6 @@
 import type { PublicArchive, PublicArchiveItem } from "@amanor/contracts";
 import Link from "next/link";
+import { BrandedSelect } from "../ui/branded-select";
 import { structuredDataJson } from "../../lib/discoverability/structured-data";
 import type { SupportedLocale } from "../../lib/i18n/locale";
 import { QuotableTranscript } from "./quotable-transcript";
@@ -123,17 +124,15 @@ export function ArchiveRegister({
             }
           />
         </label>
-        <label>
-          <span>{french ? "Type" : "Type"}</span>
-          <select name="type" defaultValue={selectedType ?? ""}>
-            <option value="">{french ? "Tous" : "All"}</option>
-            {archiveTypes.map((value) => (
-              <option value={value} key={value}>
-                {value}
-              </option>
-            ))}
-          </select>
-        </label>
+        <BrandedSelect
+          name="type"
+          label="Type"
+          defaultValue={selectedType ?? ""}
+          options={[
+            { value: "", label: french ? "Tous" : "All" },
+            ...archiveTypes.map((value) => ({ value, label: value })),
+          ]}
+        />
         <button type="submit">{french ? "Appliquer" : "Apply"}</button>
         {query || selectedType ? (
           <Link href={route}>{french ? "Effacer" : "Clear"}</Link>

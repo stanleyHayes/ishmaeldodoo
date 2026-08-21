@@ -1,4 +1,9 @@
-import { createHmac, randomBytes, randomUUID } from "node:crypto";
+import {
+  createHmac,
+  randomBytes,
+  randomUUID,
+  timingSafeEqual,
+} from "node:crypto";
 import {
   BadRequestException,
   ConflictException,
@@ -46,6 +51,13 @@ const dummyPasswordHash =
 const sessionLifetimeMilliseconds = 30 * 24 * 60 * 60 * 1_000;
 const invitationLifetimeMilliseconds = 24 * 60 * 60 * 1_000;
 const recoveryCodeCount = 8;
+const loginChallengeLifetimeMilliseconds = 5 * 60 * 1_000;
+
+export type LoginChallenge = Readonly<{
+  state: "mfa_required";
+  challenge: string;
+  expiresIn: 300;
+}>;
 
 export type AuthenticatedSession = Readonly<{
   accessToken: string;
@@ -70,18 +82,31 @@ export class AuthService {
       string | Readonly<{ mfaCode?: string; recoveryCode?: string }>,
     now = new Date(),
   ): Promise<AuthenticatedSession> {
+    const outcome = await this.beginLogin(email, password, now);
+    // MFA is opt-in: when no MFA is enrolled, beginLogin already issued a
+    // password-only session, so there is no challenge left to complete.
+    if (!("state" in outcome)) return outcome;
+    return this.completeLogin(
+      outcome.challenge,
+      typeof verificationInput === "string"
+        ? { mfaCode: verificationInput }
+        : verificationInput,
+      now,
+    );
+  }
+
+  async beginLogin(
+    email: string,
+    password: string,
+    now = new Date(),
+  ): Promise<LoginChallenge | AuthenticatedSession> {
     const canonicalEmail = email.trim().toLowerCase();
     const user = await this.repository.findUserByEmail(canonicalEmail);
     const passwordValid = await verifyPassword(
       password,
       user?.passwordHash ?? dummyPasswordHash,
     );
-    if (
-      !user ||
-      !passwordValid ||
-      user.disabledAt ||
-      !user.mfa?.encryptedSecret
-    ) {
+    if (!user || !passwordValid || user.disabledAt) {
       await this.recordEvent(
         "login_failed",
         user?.userId,
@@ -95,10 +120,50 @@ export class AuthService {
       );
     }
 
-    const verification =
-      typeof verificationInput === "string"
-        ? { mfaCode: verificationInput }
-        : verificationInput;
+    if (!user.mfa?.encryptedSecret || !user.mfa.enrolledAt) {
+      // MFA is opt-in. An administrator without an enrolled TOTP secret
+      // authenticates with the password factor alone. The session carries
+      // only ["pwd"] so that MFA-gated operations (step-up, Room access)
+      // stay correctly denied for this weaker session.
+      return this.issueSession(user, ["pwd"], now);
+    }
+
+    await this.recordEvent(
+      "mfa_challenged",
+      user.userId,
+      undefined,
+      "password_verified",
+      "success",
+      now,
+    );
+    return {
+      state: "mfa_required",
+      challenge: this.createLoginChallenge(
+        user.userId,
+        new Date(now.getTime() + loginChallengeLifetimeMilliseconds),
+      ),
+      expiresIn: 300,
+    };
+  }
+
+  async completeLogin(
+    challenge: string,
+    verification: Readonly<{ mfaCode?: string; recoveryCode?: string }>,
+    now = new Date(),
+  ): Promise<AuthenticatedSession> {
+    const challengePayload = this.verifyLoginChallenge(challenge, now);
+    const user = await this.repository.findUserMfaById(challengePayload.userId);
+    if (
+      !user ||
+      user.disabledAt ||
+      !user.mfa?.encryptedSecret ||
+      !user.mfa.enrolledAt
+    ) {
+      throw new UnauthorizedException(
+        "Invalid credentials or verification code",
+      );
+    }
+
     let authenticationMethods: readonly AuthenticationMethod[] = [
       "pwd",
       "totp",
@@ -147,6 +212,14 @@ export class AuthService {
       await this.failedVerification(user.userId, now);
     }
 
+    return this.issueSession(user, authenticationMethods, now);
+  }
+
+  private async issueSession(
+    user: AuthUser,
+    authenticationMethods: readonly AuthenticationMethod[],
+    now: Date,
+  ): Promise<AuthenticatedSession> {
     const identity = newSessionIdentity();
     const pepper = sessionPeppers(this.configuration)[0];
     const refresh = createRefreshToken(pepper, identity.sessionId);
@@ -184,6 +257,61 @@ export class AuthService {
       expiresIn: 300,
       user: { id: user.userId, roles: user.roles },
     };
+  }
+
+  private createLoginChallenge(userId: string, expiresAt: Date): string {
+    const payload = Buffer.from(
+      JSON.stringify({
+        userId,
+        expiresAt: expiresAt.toISOString(),
+        nonce: randomBytes(16).toString("base64url"),
+      }),
+      "utf8",
+    ).toString("base64url");
+    const signature = createHmac(
+      "sha256",
+      sessionPeppers(this.configuration)[0],
+    )
+      .update(payload)
+      .digest("base64url");
+    return `${payload}.${signature}`;
+  }
+
+  private verifyLoginChallenge(
+    challenge: string,
+    now: Date,
+  ): Readonly<{ userId: string }> {
+    const [payload, signature, extra] = challenge.split(".");
+    if (!payload || !signature || extra || challenge.length > 1024)
+      throw new UnauthorizedException("Verification challenge is invalid");
+    const validSignature = sessionPeppers(this.configuration).some((pepper) => {
+      const expected = createHmac("sha256", pepper)
+        .update(payload)
+        .digest("base64url");
+      const left = Buffer.from(signature);
+      const right = Buffer.from(expected);
+      return left.length === right.length && timingSafeEqual(left, right);
+    });
+    if (!validSignature)
+      throw new UnauthorizedException("Verification challenge is invalid");
+    try {
+      const parsed = JSON.parse(
+        Buffer.from(payload, "base64url").toString("utf8"),
+      ) as Record<string, unknown>;
+      if (
+        typeof parsed.userId !== "string" ||
+        parsed.userId.length < 1 ||
+        parsed.userId.length > 128 ||
+        typeof parsed.expiresAt !== "string" ||
+        typeof parsed.nonce !== "string" ||
+        parsed.nonce.length < 16 ||
+        new Date(parsed.expiresAt).getTime() <= now.getTime()
+      )
+        throw new Error("invalid challenge");
+      return { userId: parsed.userId };
+    } catch {
+      throw new UnauthorizedException("Verification challenge is invalid");
+    }
   }
 
   async refresh(

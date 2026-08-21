@@ -7,6 +7,9 @@ import type {
   MediaMetadataUpdate,
   MediaSignRequest,
 } from "@amanor/contracts";
+import { AdminSelect } from "../ui/admin-select";
+import { AdminEmptyState, AdminSkeleton, LoadingDots } from "../ui/admin-state";
+import { AdminTemporalField } from "../ui/admin-temporal-field";
 import { useEffect, useState } from "react";
 import {
   ApiClientError,
@@ -236,15 +239,18 @@ export function MediaWorkspace() {
 
   return (
     <div className="media-workspace">
-      <section className="work-queue" aria-labelledby="media-upload-title">
-        <div>
-          <p className="section-context">Signed direct upload</p>
-          <h2 id="media-upload-title">Add governed media</h2>
-        </div>
-        <p>
-          Files go directly to Cloudinary with a short-lived NestJS signature.
-          The API independently verifies the result before registration.
-        </p>
+      <section className="media-intake" aria-labelledby="media-upload-title">
+        <header className="media-intake__header">
+          <div>
+            <p className="section-context">Asset intake / 01</p>
+            <h2 id="media-upload-title">Register a governed asset</h2>
+          </div>
+          <p>
+            Files travel directly to the media vault on a short-lived signature.
+            The API verifies provenance, usage and retention before
+            registration.
+          </p>
+        </header>
         <MediaMetadataForm onSubmit={submitUpload} busy={busy} upload />
       </section>
 
@@ -259,10 +265,21 @@ export function MediaWorkspace() {
         </p>
       ) : null}
 
-      <section className="work-queue" aria-labelledby="media-library-title">
-        <div>
-          <p className="section-context">Active assets</p>
-          <h2 id="media-library-title">Media library</h2>
+      <section
+        className="media-catalogue"
+        aria-labelledby="media-library-title"
+      >
+        <div className="media-catalogue__header">
+          <div>
+            <p className="section-context">Governed library / 02</p>
+            <h2 id="media-library-title">Media library</h2>
+          </div>
+          <span
+            className="media-catalogue__count"
+            aria-label={`${assets.length} loaded assets`}
+          >
+            {String(assets.length).padStart(2, "0")}
+          </span>
         </div>
         <div className="media-inventory-actions">
           <button
@@ -281,10 +298,14 @@ export function MediaWorkspace() {
           ) : null}
         </div>
         {loading && assets.length === 0 ? (
-          <p role="status">Loading media…</p>
+          <AdminSkeleton variant="media" label="Loading governed media" />
         ) : null}
         {!loading && assets.length === 0 ? (
-          <p>No active governed assets.</p>
+          <AdminEmptyState
+            kind="media"
+            title="The governed library is ready"
+            description="No active assets are registered yet. Add the first approved file above and its provenance, usage rights and retention rules will appear here."
+          />
         ) : null}
         <div className="media-library-grid">
           {assets.map((asset) => (
@@ -343,7 +364,7 @@ export function MediaWorkspace() {
             disabled={loading}
             onClick={() => void load(nextCursor, true)}
           >
-            {loading ? "Loading" : "Load more"}
+            {loading ? <LoadingDots label="Loading more" /> : "Load more"}
           </button>
         ) : null}
       </section>
@@ -397,22 +418,24 @@ function MediaMetadataForm({
             File
             <input name="file" type="file" required disabled={busy} />
           </label>
-          <label>
-            Library folder
-            <select name="folder" defaultValue="press">
-              {folders.map((folder) => (
-                <option key={folder}>{folder}</option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Resource type
-            <select name="resourceType" defaultValue="image">
-              <option value="image">Image</option>
-              <option value="video">Video</option>
-              <option value="raw">Document/raw</option>
-            </select>
-          </label>
+          <AdminSelect
+            label="Library folder"
+            name="folder"
+            defaultValue="press"
+          >
+            {folders.map((folder) => (
+              <option key={folder}>{folder}</option>
+            ))}
+          </AdminSelect>
+          <AdminSelect
+            label="Resource type"
+            name="resourceType"
+            defaultValue="image"
+          >
+            <option value="image">Image</option>
+            <option value="video">Video</option>
+            <option value="raw">Document/raw</option>
+          </AdminSelect>
         </>
       ) : null}
       <label>
@@ -439,36 +462,30 @@ function MediaMetadataForm({
         Licence / usage terms
         <input name="licence" required defaultValue={asset?.licence} />
       </label>
-      <label>
-        Transformation policy
-        <select
-          name="transformationPolicy"
-          defaultValue={asset?.transformationPolicy ?? "editorial"}
-        >
-          {policies.map((policy) => (
-            <option key={policy}>{policy}</option>
-          ))}
-        </select>
-      </label>
-      <label>
-        Retention policy
-        <select
-          name="retentionPolicy"
-          defaultValue={asset?.retentionPolicy ?? "standard"}
-        >
-          <option value="standard">Standard review</option>
-          <option value="permanent">Permanent master</option>
-          <option value="expires">Retain until date</option>
-        </select>
-      </label>
-      <label>
-        Retain until
-        <input
-          name="retainUntil"
-          type="date"
-          defaultValue={asset?.retainUntil?.toISOString().slice(0, 10)}
-        />
-      </label>
+      <AdminSelect
+        label="Transformation policy"
+        name="transformationPolicy"
+        defaultValue={asset?.transformationPolicy ?? "editorial"}
+      >
+        {policies.map((policy) => (
+          <option key={policy}>{policy}</option>
+        ))}
+      </AdminSelect>
+      <AdminSelect
+        label="Retention policy"
+        name="retentionPolicy"
+        defaultValue={asset?.retentionPolicy ?? "standard"}
+      >
+        <option value="standard">Standard review</option>
+        <option value="permanent">Permanent master</option>
+        <option value="expires">Retain until date</option>
+      </AdminSelect>
+      <AdminTemporalField
+        label="Retain until"
+        name="retainUntil"
+        mode="date"
+        defaultValue={asset?.retainUntil?.toISOString().slice(0, 10) ?? ""}
+      />
       <label>
         <input
           name="legalHold"
@@ -517,7 +534,15 @@ function MediaMetadataForm({
         </fieldset>
       ) : null}
       <button className="primary-button" type="submit" disabled={busy}>
-        {busy ? "Saving" : upload ? "Upload and register" : "Save metadata"}
+        {busy ? (
+          <LoadingDots
+            label={upload ? "Registering asset" : "Saving metadata"}
+          />
+        ) : upload ? (
+          "Upload and register"
+        ) : (
+          "Save metadata"
+        )}
       </button>
     </form>
   );

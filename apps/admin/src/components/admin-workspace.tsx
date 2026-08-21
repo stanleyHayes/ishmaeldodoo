@@ -1,17 +1,21 @@
 "use client";
 
-import type { AuthSessionResponse, LoginRequest } from "@amanor/contracts";
+import type { AuthSessionResponse } from "@amanor/contracts";
 import Link from "next/link";
 import { useState } from "react";
-import { ApiClientError, login, logout } from "../lib/api/client";
-import { SessionManager } from "./security/session-manager";
-import { AdministratorManager } from "./security/administrator-manager";
-import { AuthenticationAudit } from "./security/authentication-audit";
-import { StepUpPanel } from "./security/step-up-panel";
+import {
+  ApiClientError,
+  beginLogin,
+  completeLogin,
+  logout,
+} from "../lib/api/client";
+import { SecurityWorkspace } from "./security/security-workspace";
 import { ContentWorkspace } from "./content/content-workspace";
 import { ProtocolDeskWorkspace } from "./protocol/protocol-desk-workspace";
+import { AmanorMark } from "./amanor-mark";
 import { MediaWorkspace } from "./media/media-workspace";
 import { SegmentedCodeInput } from "./security/segmented-code-input";
+import { AuthFrame } from "./security/auth-frame";
 
 const MFA_CODE_LENGTH = 6;
 const RECOVERY_CODE_LENGTH = 19;
@@ -104,24 +108,58 @@ function LoginForm({
   const [error, setError] = useState<string | null>(null);
   const [useRecovery, setUseRecovery] = useState(false);
   const [code, setCode] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [challenge, setChallenge] = useState<string | null>(null);
+  const [verifiedEmail, setVerifiedEmail] = useState("");
   const codeComplete =
     code.length === (useRecovery ? RECOVERY_CODE_LENGTH : MFA_CODE_LENGTH);
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleCredentials(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSubmitting(true);
     setError(null);
     const form = event.currentTarget;
     const formData = new FormData(form);
-    const input: LoginRequest = {
-      email: String(formData.get("email") ?? ""),
-      password: String(formData.get("password") ?? ""),
-      ...(useRecovery
-        ? { recoveryCode: String(formData.get("recoveryCode") ?? "") }
-        : { mfaCode: String(formData.get("mfaCode") ?? "") }),
-    };
+    const email = String(formData.get("email") ?? "");
     try {
-      const session = await login(input);
+      const next = await beginLogin(
+        email,
+        String(formData.get("password") ?? ""),
+      );
+      form.reset();
+      if ("state" in next) {
+        setVerifiedEmail(email);
+        setChallenge(next.challenge);
+      } else {
+        // The account has no MFA enrolled — the credentials stage returned a
+        // completed session, so sign in directly without a second step.
+        onAuthenticated(next.user);
+      }
+    } catch (caught) {
+      setError(
+        caught instanceof ApiClientError && caught.status === 401
+          ? "Sign-in failed. Check your email and password, then try again."
+          : messageFor(caught),
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function handleVerification(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!challenge) return;
+    setSubmitting(true);
+    setError(null);
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    try {
+      const session = await completeLogin(
+        challenge,
+        useRecovery
+          ? { recoveryCode: String(formData.get("recoveryCode") ?? "") }
+          : { mfaCode: String(formData.get("mfaCode") ?? "") },
+      );
       form.reset();
       onAuthenticated(session.user);
     } catch (caught) {
@@ -132,44 +170,26 @@ function LoginForm({
   }
 
   return (
-    <main className="login-page">
-      <section className="login-panel" aria-labelledby="login-title">
-        <div className="login-introduction">
-          <p className="product-mark">Project AMANOR</p>
-          <h1 id="login-title">Administration</h1>
-          <p>
-            Protected editorial and operations access. Use your issued account
-            and authenticator code.
-          </p>
-        </div>
+    <AuthFrame
+      eyebrow="Editorial · Protocol · Security"
+      title="Administration"
+      description="Protected editorial and operations access for the people entrusted with the public record."
+    >
+      <div className="auth-form-heading">
+        <p>{challenge ? "Second step" : "Welcome back"}</p>
+        <h2>{challenge ? "Enter your secure code" : "Verify your identity"}</h2>
+        <span>
+          {challenge
+            ? `Password verified for ${verifiedEmail}. Complete multi-factor verification to continue.`
+            : "Start with your issued email address and password."}
+        </span>
+      </div>
+      {challenge ? (
         <form
           className="login-form"
-          onSubmit={handleSubmit}
+          onSubmit={handleVerification}
           aria-busy={submitting}
         >
-          <div className="field">
-            <label htmlFor="email">Email address</label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="username"
-              required
-              disabled={submitting}
-            />
-          </div>
-          <div className="field">
-            <label htmlFor="password">Password</label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              minLength={14}
-              required
-              disabled={submitting}
-            />
-          </div>
           {useRecovery ? (
             <div className="field field--code">
               <span className="field-label" id="recoveryCode-label">
@@ -205,21 +225,39 @@ function LoginForm({
                 onValueChange={setCode}
               />
               <p className="field-help" id="mfaCode-help">
-                Enter the current six-digit code.
+                Enter the current six-digit code from your authenticator app.
               </p>
             </div>
           )}
-          <button
-            className="text-button"
-            type="button"
-            onClick={() => {
-              setUseRecovery((current) => !current);
-              setCode("");
-            }}
-            disabled={submitting}
-          >
-            {useRecovery ? "Use authenticator instead" : "Use a recovery code"}
-          </button>
+          <div className="auth-form-actions">
+            <button
+              className="text-button"
+              type="button"
+              onClick={() => {
+                setUseRecovery((current) => !current);
+                setCode("");
+              }}
+              disabled={submitting}
+            >
+              {useRecovery
+                ? "Use authenticator instead"
+                : "Use a recovery code"}
+            </button>
+            <button
+              className="text-button text-button--muted"
+              type="button"
+              onClick={() => {
+                setChallenge(null);
+                setVerifiedEmail("");
+                setUseRecovery(false);
+                setCode("");
+                setError(null);
+              }}
+              disabled={submitting}
+            >
+              Use another account
+            </button>
+          </div>
           {error ? (
             <p className="form-error" role="alert">
               {error}
@@ -230,14 +268,167 @@ function LoginForm({
             type="submit"
             disabled={submitting || !codeComplete}
           >
-            {submitting ? "Checking credentials" : "Sign in"}
+            {submitting ? "Verifying code" : "Continue to console"}
           </button>
         </form>
-      </section>
-      <p className="access-notice">
-        Access is logged. Unauthorised use may be investigated.
-      </p>
-    </main>
+      ) : (
+        <form
+          className="login-form"
+          onSubmit={handleCredentials}
+          aria-busy={submitting}
+        >
+          <div className="field">
+            <label htmlFor="email">Email address</label>
+            <div className="input-wrap">
+              <svg
+                className="input-icon"
+                viewBox="0 0 24 24"
+                width="18"
+                height="18"
+                fill="none"
+                aria-hidden="true"
+              >
+                <rect
+                  x="3"
+                  y="5"
+                  width="18"
+                  height="14"
+                  rx="2"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                />
+                <path
+                  d="m3.5 7 8.5 6 8.5-6"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="you@amanor.org"
+                autoComplete="username"
+                required
+                disabled={submitting}
+              />
+            </div>
+          </div>
+          <div className="field">
+            <label htmlFor="password">Password</label>
+            <div className="input-wrap input-wrap--action">
+              <svg
+                className="input-icon"
+                viewBox="0 0 24 24"
+                width="18"
+                height="18"
+                fill="none"
+                aria-hidden="true"
+              >
+                <rect
+                  x="4.5"
+                  y="10.5"
+                  width="15"
+                  height="10"
+                  rx="2"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                />
+                <path
+                  d="M8 10.5V8a4 4 0 0 1 8 0v2.5"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                />
+              </svg>
+              <input
+                id="password"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Your password"
+                autoComplete="current-password"
+                minLength={14}
+                required
+                disabled={submitting}
+              />
+              <button
+                type="button"
+                className="input-icon-button"
+                onClick={() => setShowPassword((value) => !value)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                disabled={submitting}
+              >
+                {showPassword ? (
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="18"
+                    height="18"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="m3 3 18 18"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M10.6 10.6a3 3 0 0 0 4.05 4.2"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M9.9 5.2A9.6 9.6 0 0 1 12 5c6.5 0 10 7 10 7a17.8 17.8 0 0 1-2.8 3.5M6.5 6.6A17.6 17.6 0 0 0 2 12s3.5 7 10 7a9.5 9.5 0 0 0 3.2-.5"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="18"
+                    height="18"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                      strokeLinejoin="round"
+                    />
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="3"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                    />
+                  </svg>
+                )}
+              </button>
+            </div>
+          </div>
+          {error ? (
+            <p className="form-error" role="alert">
+              {error}
+            </p>
+          ) : null}
+          <button
+            className="primary-button"
+            type="submit"
+            disabled={submitting}
+          >
+            {submitting ? "Checking credentials" : "Continue securely"}
+          </button>
+        </form>
+      )}
+    </AuthFrame>
   );
 }
 
@@ -252,6 +443,7 @@ function OperatorShell({
     allowedNavigation[0]?.id ?? "overview",
   );
   const [signingOut, setSigningOut] = useState(false);
+  const [navOpen, setNavOpen] = useState(false);
   const active =
     allowedNavigation.find((item) => item.id === activeId) ??
     allowedNavigation[0];
@@ -268,11 +460,38 @@ function OperatorShell({
   }
 
   return (
-    <main className="admin-shell">
-      <aside className="admin-sidebar">
-        <div>
-          <p className="product-mark">Project AMANOR</p>
+    <main className="admin-shell" data-nav-open={navOpen ? "true" : undefined}>
+      <div className="admin-mobile-bar">
+        <div className="admin-brand admin-brand--compact">
+          <AmanorMark className="admin-brand__mark" />
           <p className="console-name">Administration</p>
+        </div>
+        <button
+          type="button"
+          className="admin-nav-toggle"
+          aria-label={navOpen ? "Close navigation" : "Open navigation"}
+          aria-expanded={navOpen}
+          aria-controls="admin-sidebar"
+          onClick={() => setNavOpen((open) => !open)}
+        >
+          <span className="admin-nav-toggle__bars" aria-hidden="true" />
+        </button>
+      </div>
+      {navOpen ? (
+        <button
+          type="button"
+          className="admin-sidebar__scrim"
+          aria-label="Close navigation"
+          onClick={() => setNavOpen(false)}
+        />
+      ) : null}
+      <aside className="admin-sidebar" id="admin-sidebar">
+        <div className="admin-brand">
+          <AmanorMark className="admin-brand__mark" />
+          <div>
+            <p className="product-mark">Project AMANOR</p>
+            <p className="console-name">Administration</p>
+          </div>
         </div>
         <nav className="admin-navigation" aria-label="Administration sections">
           {allowedNavigation.map((item) => (
@@ -280,7 +499,10 @@ function OperatorShell({
               key={item.id}
               type="button"
               aria-current={item.id === active?.id ? "page" : undefined}
-              onClick={() => setActiveId(item.id)}
+              onClick={() => {
+                setActiveId(item.id);
+                setNavOpen(false);
+              }}
             >
               <span>{item.label}</span>
               <small>{item.description}</small>
@@ -288,25 +510,28 @@ function OperatorShell({
           ))}
         </nav>
         <div className="operator-card">
+          <p className="operator-eyebrow">Operator</p>
           <p className="operator-id">{user.id}</p>
           <div className="role-list" aria-label="Assigned roles">
             {user.roles.map((role) => (
               <span key={role}>{roleLabels[role]}</span>
             ))}
           </div>
-          {user.roles.includes("principal") ? (
-            <Link className="text-button" href="/room">
-              Open The Room
-            </Link>
-          ) : null}
-          <button
-            className="text-button"
-            type="button"
-            onClick={handleSignOut}
-            disabled={signingOut}
-          >
-            {signingOut ? "Signing out" : "Sign out"}
-          </button>
+          <div className="operator-actions">
+            {user.roles.includes("principal") ? (
+              <Link className="text-button" href="/room">
+                Open The Room
+              </Link>
+            ) : null}
+            <button
+              className="text-button"
+              type="button"
+              onClick={handleSignOut}
+              disabled={signingOut}
+            >
+              {signingOut ? "Signing out" : "Sign out"}
+            </button>
+          </div>
         </div>
       </aside>
 
@@ -321,12 +546,7 @@ function OperatorShell({
         </header>
 
         {active?.id === "security" ? (
-          <>
-            <SessionManager />
-            <StepUpPanel />
-            <AdministratorManager currentUserId={user.id} />
-            <AuthenticationAudit />
-          </>
+          <SecurityWorkspace currentUserId={user.id} />
         ) : active?.id === "content" ? (
           <ContentWorkspace roles={user.roles} />
         ) : active?.id === "media" ? (

@@ -1,6 +1,7 @@
 "use client";
 
 import { GovernedMediaPicker } from "../media/governed-media-picker";
+import { AdminEmptyState } from "../ui/admin-state";
 
 type TranslationStatus = "current" | "stale" | "missing";
 
@@ -326,21 +327,22 @@ export function PagePayloadEditor({
   const page = parsePage(rawValue);
   if (!page) {
     return (
-      <div className="structured-empty">
-        <p>
-          The current payload is not a page form yet. Initialising creates the
-          required bilingual fields without saving a version.
-        </p>
-        {!readOnly ? (
-          <button
-            className="secondary-button"
-            type="button"
-            onClick={() => onChange(serialized(initialPage()))}
-          >
-            Initialise page fields
-          </button>
-        ) : null}
-      </div>
+      <AdminEmptyState
+        kind="content"
+        title="Page fields are not initialised"
+        description="Create the required bilingual field structure without saving a version."
+        action={
+          !readOnly ? (
+            <button
+              className="secondary-button"
+              type="button"
+              onClick={() => onChange(serialized(initialPage()))}
+            >
+              Initialise page fields
+            </button>
+          ) : undefined
+        }
+      />
     );
   }
 

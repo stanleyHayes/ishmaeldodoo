@@ -26,7 +26,7 @@ describe("public site shell", () => {
     render(
       <>
         <SiteHeader theme="night" themePreference="night" />
-        <SiteFooter />
+        <SiteFooter displayName="Dr Ishmael Nii Amanor Dodoo" />
       </>,
     );
 
@@ -39,11 +39,39 @@ describe("public site shell", () => {
       "/api/theme?theme=auto&return=%2F",
     );
     expect(
-      screen.getByText(/not an official government website/i),
+      screen.getByText(/not an official publication/i),
     ).toBeInTheDocument();
     expect(
       screen.getByText("This site keeps Accra hours."),
     ).toBeInTheDocument();
+  });
+
+  it("renders canonical identity in the full public-office disclosure", () => {
+    render(<SiteFooter displayName="Dr Ishmael Nii Amanor Dodoo" />);
+
+    expect(
+      screen.getByText(/personal website of Dr Ishmael Nii Amanor Dodoo/i),
+    ).toHaveTextContent(/Office of the President, or the Government of Ghana/i);
+    expect(screen.getByRole("link", { name: "Sources" })).toHaveAttribute(
+      "href",
+      "/record/sources",
+    );
+    expect(
+      screen.getByRole("link", { name: /continue the conversation/i }),
+    ).toHaveAttribute("href", "/contact");
+    expect(screen.getByText("END OF RECORD")).toBeInTheDocument();
+  });
+
+  it("marks nested primary routes as the current section", () => {
+    render(<SiteHeader pathname="/record/atlas/table" />);
+
+    expect(screen.getByRole("link", { name: "The Record" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    expect(screen.getByRole("link", { name: "Press" })).not.toHaveAttribute(
+      "aria-current",
+    );
   });
 
   it("renders reciprocal French navigation and utility labels", () => {

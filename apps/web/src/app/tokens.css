@@ -11,15 +11,24 @@
   --surface: #f2efea;
   --night-ink: #e8e6e1;
   --night-paper: #0e1114;
+  --footer-paper: #062f41;
+  --footer-ink: #f3f0e9;
+  --footer-muted: #b9cbd2;
+  --footer-rule: #496572;
   --signal: #2e7d5b;
   --caution: #8c3a2e;
   --focus: var(--accent);
   --font-display: "Outfit Variable", "Segoe UI", Arial, sans-serif;
   --font-body: "Outfit Variable", Arial, sans-serif;
   --font-data: "IBM Plex Mono", monospace;
+  /* Aliases used by later redesign CSS; kept on the Outfit/mono stacks so
+     nothing silently falls back to a serif and Lite-mode swaps still apply. */
+  --font-editorial: var(--font-display);
+  --font-mono: var(--font-data);
   --content-max: 80rem;
   --page-gutter: clamp(1.25rem, 5.625vw, 4.5rem);
   --nav-height: 4.5rem;
+  --radius: 0.25rem;
   --motion-fast: 160ms;
   --motion-panel: 240ms;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);

@@ -21,17 +21,25 @@ const mfaKey = randomBytes(32).toString("base64");
 const mfaSecret = "JBSWY3DPEHPK3PXP";
 
 async function fixture(
-  overrides: Partial<AuthUser> = {},
+  overrides: Partial<Omit<AuthUser, "mfa">> & {
+    mfa?: AuthUser["mfa"] | undefined;
+  } = {},
   configurationOverrides: Record<string, string> = {},
 ) {
+  const { mfa: mfaOverride, ...rest } = overrides;
+  // Passing `{ mfa: undefined }` models a password-only (opt-in MFA) account.
+  const mfa =
+    "mfa" in overrides
+      ? mfaOverride
+      : { ...encryptMfaSecret(mfaSecret, mfaKey), enrolledAt: now };
   const user: AuthUser = {
     userId: "user-1",
     emailCanonical: "editor@example.test",
     passwordHash: await hashPassword("a-long-development-passphrase"),
     roles: ["editor"],
     roleVersion: 1,
-    mfa: { ...encryptMfaSecret(mfaSecret, mfaKey), enrolledAt: now },
-    ...overrides,
+    ...rest,
+    ...(mfa ? { mfa } : {}),
   };
   const repository = {
     findUserByEmail: vi.fn().mockResolvedValue(user),
@@ -80,6 +88,116 @@ async function fixture(
 }
 
 describe("AuthService", () => {
+  it("creates no session until a verified credential challenge is completed with MFA", async () => {
+    const { service, repository } = await fixture();
+    const challenge = await service.beginLogin(
+      "Editor@Example.Test",
+      "a-long-development-passphrase",
+      now,
+    );
+
+    expect(challenge).toEqual({
+      state: "mfa_required",
+      challenge: expect.any(String),
+      expiresIn: 300,
+    });
+    expect(repository.createSession).not.toHaveBeenCalled();
+    if (!("state" in challenge)) throw new Error("expected an MFA challenge");
+
+    await service.completeLogin(
+      challenge.challenge,
+      { mfaCode: generateTotpForTesting(mfaSecret, now) },
+      now,
+    );
+    expect(repository.createSession).toHaveBeenCalledOnce();
+  });
+
+  it("issues a password-only session when the account has no MFA enrolled", async () => {
+    const { service, repository, keys } = await fixture({ mfa: undefined });
+    const result = await service.beginLogin(
+      "Editor@Example.Test",
+      "a-long-development-passphrase",
+      now,
+    );
+
+    // Opt-in MFA: a password-only account authenticates on the credential
+    // factor alone and receives a session directly (no MFA challenge).
+    expect("state" in result).toBe(false);
+    expect(result).toEqual(
+      expect.objectContaining({
+        accessToken: "signed-access-token",
+        refreshToken: expect.any(String),
+        csrfToken: expect.any(String),
+        expiresIn: 300,
+        user: { id: "user-1", roles: ["editor"] },
+      }),
+    );
+    // The session and its access token MUST carry only ["pwd"] so that
+    // MFA-gated operations (step-up, Room access) remain denied.
+    expect(repository.createSession).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: "user-1",
+        authenticationMethods: ["pwd"],
+      }),
+    );
+    expect(keys.sign).toHaveBeenCalledWith(
+      expect.objectContaining({ authenticationMethods: ["pwd"] }),
+    );
+    expect(repository.consumeMfaStep).not.toHaveBeenCalled();
+    expect(repository.appendEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ type: "login_succeeded", outcome: "success" }),
+    );
+  });
+
+  it("logs in a password-only account end to end via login()", async () => {
+    const { service, repository } = await fixture({ mfa: undefined });
+    const result = await service.login(
+      "editor@example.test",
+      "a-long-development-passphrase",
+      { mfaCode: generateTotpForTesting(mfaSecret, now) },
+      now,
+    );
+
+    // login() must return the session issued by beginLogin without demanding
+    // any verification code from an account that never enrolled MFA.
+    expect(result).toEqual(
+      expect.objectContaining({
+        accessToken: "signed-access-token",
+        expiresIn: 300,
+      }),
+    );
+    expect(repository.createSession).toHaveBeenCalledWith(
+      expect.objectContaining({ authenticationMethods: ["pwd"] }),
+    );
+    expect(repository.consumeMfaStep).not.toHaveBeenCalled();
+  });
+
+  it("rejects tampered and expired login challenges before MFA verification", async () => {
+    const { service, repository } = await fixture();
+    const challenge = await service.beginLogin(
+      "editor@example.test",
+      "a-long-development-passphrase",
+      now,
+    );
+    if (!("state" in challenge)) throw new Error("expected an MFA challenge");
+    await expect(
+      service.completeLogin(
+        `${challenge.challenge}tampered`,
+        { mfaCode: generateTotpForTesting(mfaSecret, now) },
+        now,
+      ),
+    ).rejects.toThrow("Verification challenge is invalid");
+    await expect(
+      service.completeLogin(
+        challenge.challenge,
+        { mfaCode: generateTotpForTesting(mfaSecret, now) },
+        new Date(now.getTime() + 301_000),
+      ),
+    ).rejects.toThrow("Verification challenge is invalid");
+    expect(repository.consumeMfaStep).not.toHaveBeenCalled();
+    expect(repository.createSession).not.toHaveBeenCalled();
+  });
+
   it("requires password plus non-replayed MFA before creating a session", async () => {
     const { service, repository } = await fixture();
     const result = await service.login(

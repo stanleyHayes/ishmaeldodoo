@@ -29,6 +29,9 @@ import {
 } from "../../lib/api/client";
 import { PagePayloadEditor } from "./page-payload-editor";
 import { SchemaPayloadEditor } from "./schema-payload-editor";
+import { AdminSelect } from "../ui/admin-select";
+import { AdminTemporalField } from "../ui/admin-temporal-field";
+import { AdminEmptyState, AdminSkeleton, LoadingDots } from "../ui/admin-state";
 
 type AdminRole = AuthSessionResponse["user"]["roles"][number];
 
@@ -410,18 +413,23 @@ export function ContentWorkspace({
   return (
     <div className="content-workspace">
       <section
-        className="document-locator"
+        className="document-locator content-command"
         aria-labelledby="document-locator-title"
       >
         <div>
-          <p className="section-context">Document address</p>
-          <h2 id="document-locator-title">Open a CMS record</h2>
+          <p className="section-context">Content command / 01</p>
+          <h2 id="document-locator-title">
+            Find the record. Shape the release.
+          </h2>
+          <p className="content-command__intro">
+            Locate one governed document or browse its collection. Every change
+            remains versioned, reviewable and bilingual.
+          </p>
         </div>
         <div className="document-locator__fields">
           <div className="field">
-            <label htmlFor="documentType">Content type</label>
-            <select
-              id="documentType"
+            <AdminSelect
+              label="Content type"
               value={documentType}
               onChange={(event) => {
                 setDocumentType(event.target.value as ContentKind);
@@ -438,7 +446,7 @@ export function ContentWorkspace({
                   {labels[kind]}
                 </option>
               ))}
-            </select>
+            </AdminSelect>
           </div>
           <div className="field">
             <label htmlFor="documentId">Document ID</label>
@@ -455,7 +463,11 @@ export function ContentWorkspace({
             onClick={() => void openDocument()}
             disabled={busy !== null}
           >
-            {busy === "open" ? "Loading" : "Open document"}
+            {busy === "open" ? (
+              <LoadingDots label="Opening document" />
+            ) : (
+              "Open document"
+            )}
           </button>
           <button
             className="text-button"
@@ -463,7 +475,11 @@ export function ContentWorkspace({
             onClick={() => void browseDocuments()}
             disabled={busy !== null}
           >
-            {busy === "browse" ? "Loading records" : "Browse records"}
+            {busy === "browse" ? (
+              <LoadingDots label="Loading records" />
+            ) : (
+              "Browse records"
+            )}
           </button>
           {canAuditSources ? (
             <button
@@ -472,9 +488,11 @@ export function ContentWorkspace({
               onClick={() => void downloadSourceAudit()}
               disabled={busy !== null}
             >
-              {busy === "source-audit"
-                ? "Auditing sources"
-                : "Download source audit"}
+              {busy === "source-audit" ? (
+                <LoadingDots label="Auditing sources" />
+              ) : (
+                "Download source audit"
+              )}
             </button>
           ) : null}
         </div>
@@ -487,6 +505,10 @@ export function ContentWorkspace({
           </p>
         ) : null}
       </section>
+
+      {busy === "browse" && documents.length === 0 ? (
+        <AdminSkeleton variant="content" label="Loading content records" />
+      ) : null}
 
       {documents.length > 0 ? (
         <section
@@ -502,7 +524,11 @@ export function ContentWorkspace({
                 disabled={busy !== null}
                 onClick={() => void browseDocuments(documentsCursor)}
               >
-                {busy === "browse" ? "Loading" : "Load more"}
+                {busy === "browse" ? (
+                  <LoadingDots label="Loading more records" />
+                ) : (
+                  "Load more"
+                )}
               </button>
             ) : null}
           </div>
@@ -566,7 +592,11 @@ export function ContentWorkspace({
                 onClick={() => void createDraft()}
                 disabled={busy !== null}
               >
-                {busy === "draft" ? "Creating" : "Create draft"}
+                {busy === "draft" ? (
+                  <LoadingDots label="Creating draft" />
+                ) : (
+                  "Create draft"
+                )}
               </button>
             ) : null}
           </div>
@@ -638,11 +668,19 @@ export function ContentWorkspace({
               onClick={() => void prepareAuditExport()}
               disabled={busy !== null}
             >
-              {busy === "audit-export" ? "Preparing" : "Export audit"}
+              {busy === "audit-export" ? (
+                <LoadingDots label="Preparing audit" />
+              ) : (
+                "Export audit"
+              )}
             </button>
           </div>
           {versions.length === 0 ? (
-            <p className="empty-copy">Open a document to load its history.</p>
+            <AdminEmptyState
+              kind="history"
+              title="No version selected"
+              description="Open a record to reveal its immutable history, review state and publication path."
+            />
           ) : (
             <div className="version-list">
               {versions.map((version) => (
@@ -696,12 +734,10 @@ export function ContentWorkspace({
             ) : null}
             {availableActions.includes("schedule") && canReview ? (
               <div className="field">
-                <label htmlFor="scheduledFor">Publication time</label>
-                <input
-                  id="scheduledFor"
-                  type="datetime-local"
+                <AdminTemporalField
+                  label="Publication time"
                   value={scheduledFor}
-                  onChange={(event) => setScheduledFor(event.target.value)}
+                  onValueChange={setScheduledFor}
                 />
               </div>
             ) : null}
@@ -722,7 +758,11 @@ export function ContentWorkspace({
                     }
                     onClick={() => void transition(action)}
                   >
-                    {busy === action ? "Applying" : actionLabels[action]}
+                    {busy === action ? (
+                      <LoadingDots label={`Applying ${actionLabels[action]}`} />
+                    ) : (
+                      actionLabels[action]
+                    )}
                   </button>
                 );
               })}
@@ -732,9 +772,8 @@ export function ContentWorkspace({
             canReview ? (
               <div className="publish-controls">
                 <div className="field">
-                  <label htmlFor="publishLocale">Publish locale</label>
-                  <select
-                    id="publishLocale"
+                  <AdminSelect
+                    label="Publish locale"
                     value={publishLocale}
                     onChange={(event) =>
                       setPublishLocale(event.target.value as "en-GB" | "fr-FR")
@@ -742,7 +781,7 @@ export function ContentWorkspace({
                   >
                     <option value="en-GB">English</option>
                     <option value="fr-FR">French</option>
-                  </select>
+                  </AdminSelect>
                 </div>
                 <button
                   className="primary-button"
@@ -750,7 +789,11 @@ export function ContentWorkspace({
                   onClick={() => void publish()}
                   disabled={busy !== null}
                 >
-                  {busy === "publish" ? "Publishing" : "Publish"}
+                  {busy === "publish" ? (
+                    <LoadingDots label="Publishing" />
+                  ) : (
+                    "Publish"
+                  )}
                 </button>
               </div>
             ) : null}
@@ -759,9 +802,8 @@ export function ContentWorkspace({
             canReview ? (
               <div className="publish-controls">
                 <div className="field">
-                  <label htmlFor="rollbackLocale">Restore locale</label>
-                  <select
-                    id="rollbackLocale"
+                  <AdminSelect
+                    label="Restore locale"
                     value={publishLocale}
                     onChange={(event) =>
                       setPublishLocale(event.target.value as "en-GB" | "fr-FR")
@@ -769,7 +811,7 @@ export function ContentWorkspace({
                   >
                     <option value="en-GB">English</option>
                     <option value="fr-FR">French</option>
-                  </select>
+                  </AdminSelect>
                 </div>
                 <button
                   className="danger-button"
@@ -777,16 +819,19 @@ export function ContentWorkspace({
                   onClick={() => void rollback()}
                   disabled={busy !== null}
                 >
-                  {busy === "rollback" ? "Restoring" : "Restore this version"}
+                  {busy === "rollback" ? (
+                    <LoadingDots label="Restoring version" />
+                  ) : (
+                    "Restore this version"
+                  )}
                 </button>
               </div>
             ) : null}
             {selected.state === "published" && canReview ? (
               <div className="publish-controls">
                 <div className="field">
-                  <label htmlFor="unpublishLocale">Takedown locale</label>
-                  <select
-                    id="unpublishLocale"
+                  <AdminSelect
+                    label="Takedown locale"
                     value={publishLocale}
                     onChange={(event) => {
                       setConfirmUnpublish(false);
@@ -795,7 +840,7 @@ export function ContentWorkspace({
                   >
                     <option value="en-GB">English</option>
                     <option value="fr-FR">French</option>
-                  </select>
+                  </AdminSelect>
                 </div>
                 {confirmUnpublish ? (
                   <button
@@ -804,9 +849,11 @@ export function ContentWorkspace({
                     onClick={() => void unpublish()}
                     disabled={busy !== null}
                   >
-                    {busy === "unpublish"
-                      ? "Removing"
-                      : `Confirm ${publishLocale} takedown`}
+                    {busy === "unpublish" ? (
+                      <LoadingDots label="Removing publication" />
+                    ) : (
+                      `Confirm ${publishLocale} takedown`
+                    )}
                   </button>
                 ) : (
                   <button
@@ -838,7 +885,11 @@ export function ContentWorkspace({
             </p>
           ) : null}
           {audit.length === 0 ? (
-            <p className="empty-copy">No audit events were returned.</p>
+            <AdminEmptyState
+              kind="audit"
+              title="No audit events yet"
+              description="Events will appear here when this record enters the governed editorial workflow."
+            />
           ) : (
             <ol>
               {audit.map((event) => (

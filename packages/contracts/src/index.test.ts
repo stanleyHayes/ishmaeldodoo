@@ -3,6 +3,7 @@ import {
   adminSessionSchema,
   authenticationMethods,
   httpsUrlSchema,
+  loginRequestSchema,
   resolveDateRangedRecord,
 } from "./index";
 
@@ -58,6 +59,33 @@ describe("authentication-method contracts", () => {
       adminSessionSchema.safeParse({
         ...session,
         authenticationMethods: ["pwd", "pwd"],
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe("staged administrator login contract", () => {
+  it("accepts credentials and MFA as separate stages and rejects a combined payload", () => {
+    expect(
+      loginRequestSchema.safeParse({
+        stage: "credentials",
+        email: "editor@example.test",
+        password: "a-long-development-passphrase",
+      }).success,
+    ).toBe(true);
+    expect(
+      loginRequestSchema.safeParse({
+        stage: "verification",
+        challenge: "a".repeat(64),
+        mfaCode: "123456",
+      }).success,
+    ).toBe(true);
+    expect(
+      loginRequestSchema.safeParse({
+        stage: "credentials",
+        email: "editor@example.test",
+        password: "a-long-development-passphrase",
+        mfaCode: "123456",
       }).success,
     ).toBe(false);
   });

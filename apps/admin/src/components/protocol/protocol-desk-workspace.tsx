@@ -10,6 +10,7 @@ import type {
   ProtocolDeskTransitionInput,
   ProtocolNoteInput,
 } from "@amanor/contracts";
+import { AdminSelect } from "../ui/admin-select";
 import { useEffect, useState } from "react";
 import {
   addProtocolDeskNote,
@@ -253,26 +254,20 @@ export function ProtocolDeskWorkspace({
             placeholder="Reference, organisation or event"
           />
         </label>
-        <label>
-          State
-          <select name="state">
-            {states.map((state) => (
-              <option key={state || "all"} value={state}>
-                {state ? state.replaceAll("_", " ") : "All states"}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Flag
-          <select name="flag">
-            {flags.map((flag) => (
-              <option key={flag || "all"} value={flag}>
-                {flag ? flag.replaceAll("_", " ") : "All flags"}
-              </option>
-            ))}
-          </select>
-        </label>
+        <AdminSelect label="State" name="state">
+          {states.map((state) => (
+            <option key={state || "all"} value={state}>
+              {state ? state.replaceAll("_", " ") : "All states"}
+            </option>
+          ))}
+        </AdminSelect>
+        <AdminSelect label="Flag" name="flag">
+          {flags.map((flag) => (
+            <option key={flag || "all"} value={flag}>
+              {flag ? flag.replaceAll("_", " ") : "All flags"}
+            </option>
+          ))}
+        </AdminSelect>
         <button
           className="primary-button"
           type="submit"
@@ -790,20 +785,16 @@ function RequestDetail({
               }
             />
           </label>
-          <label>
-            Lectern required
-            <select
-              name="lecternRequired"
-              defaultValue={
-                request.protocolNoteConfiguration?.lecternRequired
-                  ? "yes"
-                  : "no"
-              }
-            >
-              <option value="no">No</option>
-              <option value="yes">Yes</option>
-            </select>
-          </label>
+          <AdminSelect
+            label="Lectern required"
+            name="lecternRequired"
+            defaultValue={
+              request.protocolNoteConfiguration?.lecternRequired ? "yes" : "no"
+            }
+          >
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+          </AdminSelect>
           <button className="secondary-button" type="submit">
             {noteStatus === "working"
               ? "Generating…"
@@ -843,33 +834,31 @@ function RequestDetail({
           (state) => principal || !["accepted", "declined"].includes(state),
         ) ? (
           <form onSubmit={transition}>
-            <label>
-              Next state
-              <select name="state" required>
-                {detail.nextStates
-                  .filter(
-                    (state) =>
-                      principal || !["accepted", "declined"].includes(state),
-                  )
-                  .map((state) => (
-                    <option key={state} value={state}>
-                      {transitionLabels[state]}
-                    </option>
-                  ))}
-              </select>
-            </label>
+            <AdminSelect label="Next state" name="state" required>
+              {detail.nextStates
+                .filter(
+                  (state) =>
+                    principal || !["accepted", "declined"].includes(state),
+                )
+                .map((state) => (
+                  <option key={state} value={state}>
+                    {transitionLabels[state]}
+                  </option>
+                ))}
+            </AdminSelect>
             <label>
               Reason
               <textarea name="reason" required maxLength={1000} />
             </label>
-            <label>
-              Decline category (required when declining)
-              <select name="declineCategory" defaultValue="capacity">
-                <option value="capacity">Diary / capacity</option>
-                <option value="fit">Fit</option>
-                <option value="conflict">Public-office conflict</option>
-              </select>
-            </label>
+            <AdminSelect
+              label="Decline category (required when declining)"
+              name="declineCategory"
+              defaultValue="capacity"
+            >
+              <option value="capacity">Diary / capacity</option>
+              <option value="fit">Fit</option>
+              <option value="conflict">Public-office conflict</option>
+            </AdminSelect>
             <button className="primary-button">Apply transition</button>
           </form>
         ) : (

@@ -2,6 +2,7 @@
 
 import { adminRoles, type AdministratorSummary } from "@amanor/contracts";
 import { useCallback, useEffect, useState } from "react";
+import { AdminSelect } from "../ui/admin-select";
 import {
   changeAdministratorRoles,
   inviteAdministrator,
@@ -163,9 +164,8 @@ export function AdministratorManager({
           />
         </div>
         <div className="field">
-          <label htmlFor="invitation-role">Initial role</label>
-          <select
-            id="invitation-role"
+          <AdminSelect
+            label="Initial role"
             name="role"
             defaultValue="editor"
             disabled={working === "invitation"}
@@ -177,7 +177,7 @@ export function AdministratorManager({
                   {labels[role]}
                 </option>
               ))}
-          </select>
+          </AdminSelect>
         </div>
         <button type="submit" disabled={working === "invitation"}>
           {working === "invitation"

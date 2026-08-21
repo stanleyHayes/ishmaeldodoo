@@ -7,6 +7,7 @@ import Link from "next/link";
 import { acceptInvitation, getInvitationSetup } from "../../lib/api/client";
 import { AdminWorkspace } from "../admin-workspace";
 import { SegmentedCodeInput } from "./segmented-code-input";
+import { AuthFrame } from "./auth-frame";
 
 export function InvitationGateway() {
   const token = useSearchParams()?.get("invitation");
@@ -52,93 +53,118 @@ export function InvitationAcceptance({ token }: Readonly<{ token: string }>) {
   }
 
   return (
-    <main className="login-page">
-      <section className="login-panel" aria-labelledby="invitation-title">
-        <div className="login-introduction">
-          <p className="product-mark">Project AMANOR</p>
-          <h1 id="invitation-title">Secure account setup</h1>
-          <p>
-            Set a unique password and enroll an authenticator before this
-            one-time invitation expires.
-          </p>
+    <AuthFrame
+      eyebrow="One-time account activation"
+      title="Secure account setup"
+      description="Create the credentials that will protect your access to AMANOR's governed editorial and operations workspace."
+    >
+      <div className="auth-form-heading">
+        <p>Account invitation</p>
+        <h2>
+          {state === "complete"
+            ? "Store your recovery codes"
+            : "Activate access"}
+        </h2>
+        <span>
+          {state === "complete"
+            ? "This is the only time these codes will be displayed."
+            : "Complete every step before the invitation expires."}
+        </span>
+      </div>
+      {state === "loading" ? (
+        <div className="auth-state" role="status">
+          <span className="auth-state__indicator" aria-hidden="true" />
+          <div>
+            <strong>Validating invitation</strong>
+            <p>Checking the one-time link and preparing secure setup…</p>
+          </div>
         </div>
-        {state === "loading" ? (
-          <p role="status">Validating invitation…</p>
-        ) : null}
-        {state === "error" ? (
-          <p className="form-error" role="alert">
-            This invitation is invalid, expired, or could not be completed.
-          </p>
-        ) : null}
-        {state === "complete" ? (
-          <div role="status">
-            <p>
-              Account setup is complete. Save these single-use recovery codes
-              now; they will not be shown again.
-            </p>
-            <ul aria-label="Recovery codes">
-              {recoveryCodes.map((code) => (
-                <li key={code}>
-                  <code>{code}</code>
-                </li>
-              ))}
-            </ul>
-            <Link className="primary-button" href="/">
-              I have stored the codes securely
+      ) : null}
+      {state === "error" ? (
+        <div className="auth-state auth-state--error" role="alert">
+          <span aria-hidden="true">×</span>
+          <div>
+            <strong>Invitation unavailable</strong>
+            <p>This link is invalid, expired, or could not be completed.</p>
+            <Link className="text-button" href="/">
+              Return to sign in
             </Link>
           </div>
-        ) : null}
-        {state === "ready" && setup ? (
-          <form className="login-form" onSubmit={submit} aria-busy={submitting}>
-            <p>
-              <strong>{setup.email}</strong>
+        </div>
+      ) : null}
+      {state === "complete" ? (
+        <div className="recovery-handoff" role="status">
+          <p>
+            Account setup is complete. Save these single-use recovery codes now;
+            they will not be shown again.
+          </p>
+          <ul aria-label="Recovery codes">
+            {recoveryCodes.map((code) => (
+              <li key={code}>
+                <code>{code}</code>
+              </li>
+            ))}
+          </ul>
+          <Link className="primary-button" href="/">
+            I have stored the codes securely
+          </Link>
+        </div>
+      ) : null}
+      {state === "ready" && setup ? (
+        <form
+          className="login-form invitation-form"
+          onSubmit={submit}
+          aria-busy={submitting}
+        >
+          <p className="invitation-identity">
+            <span>Account</span>
+            <strong>{setup.email}</strong>
+          </p>
+          <div className="field">
+            <label htmlFor="enrollment-uri">Authenticator setup URI</label>
+            <textarea
+              id="enrollment-uri"
+              readOnly
+              rows={4}
+              value={setup.enrollmentUri}
+            />
+            <p className="field-help">
+              Import this URI into your authenticator. Never share it.
             </p>
-            <div className="field">
-              <label htmlFor="enrollment-uri">Authenticator setup URI</label>
-              <textarea
-                id="enrollment-uri"
-                readOnly
-                rows={4}
-                value={setup.enrollmentUri}
-              />
-              <p className="field-help">
-                Import this URI into your authenticator. Never share it.
-              </p>
-            </div>
-            <div className="field">
-              <label htmlFor="new-password">New password</label>
-              <input
-                id="new-password"
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                minLength={14}
-                maxLength={128}
-                required
-              />
-            </div>
-            <div className="field field--code">
-              <span className="field-label" id="setup-code-label">
-                Current authenticator code
-              </span>
-              <SegmentedCodeInput
-                name="mfaCode"
-                labelId="setup-code-label"
-                groups={[6]}
-                disabled={submitting}
-                onValueChange={setCode}
-              />
-            </div>
-            <button
-              className="primary-button"
-              type="submit"
-              disabled={submitting || code.length !== 6}
-            >
-              {submitting ? "Completing setup" : "Complete secure setup"}
-            </button>
-          </form>
-        ) : null}
-      </section>
-    </main>
+          </div>
+          <div className="field">
+            <label htmlFor="new-password">New password</label>
+            <input
+              id="new-password"
+              name="password"
+              type="password"
+              autoComplete="new-password"
+              minLength={14}
+              maxLength={128}
+              required
+            />
+          </div>
+          <div className="field field--code">
+            <span className="field-label" id="setup-code-label">
+              Current authenticator code
+            </span>
+            <SegmentedCodeInput
+              name="mfaCode"
+              labelId="setup-code-label"
+              groups={[6]}
+              disabled={submitting}
+              onValueChange={setCode}
+            />
+          </div>
+          <button
+            className="primary-button"
+            type="submit"
+            disabled={submitting || code.length !== 6}
+          >
+            {submitting ? "Completing setup" : "Complete secure setup"}
+          </button>
+        </form>
+      ) : null}
+    </AuthFrame>
   );
 }

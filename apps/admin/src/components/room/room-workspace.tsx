@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { AdminSelect } from "../ui/admin-select";
 import {
   roomExtensionReasons,
   type RoomCiphertext,
@@ -9,6 +10,7 @@ import {
   type RoomPlaintext,
 } from "@amanor/contracts";
 import { getAuthState } from "../../lib/api/auth-store";
+import { ApiClientError } from "../../lib/api/client";
 import {
   extendRoomRetention,
   fetchRoomCiphertext,
@@ -64,6 +66,9 @@ function Metadata({ item }: Readonly<{ item: RoomInboxItem }>) {
 
 export function RoomWorkspace() {
   const [items, setItems] = useState<readonly RoomInboxItem[] | null>(null);
+  const [inboxState, setInboxState] = useState<
+    "loading" | "ready" | "sealed" | "verification" | "error"
+  >("loading");
   const [error, setError] = useState<string | null>(null);
   const [unlocked, setUnlocked] = useState(roomKeyState().unlocked);
   const [open, setOpen] = useState<Readonly<{
@@ -89,10 +94,22 @@ export function RoomWorkspace() {
     try {
       const page = await listRoomInbox();
       setItems(page.items);
+      setInboxState("ready");
       setError(null);
-    } catch {
+    } catch (failure) {
       setItems([]);
-      setError("The Room inbox is not available.");
+      if (failure instanceof ApiClientError && failure.status === 404) {
+        setInboxState("sealed");
+        setError(null);
+      } else if (failure instanceof ApiClientError && failure.status === 403) {
+        setInboxState("verification");
+        setError(null);
+      } else {
+        setInboxState("error");
+        setError(
+          "The encrypted inbox could not be reached. No message content was exposed.",
+        );
+      }
     }
   }, []);
 
@@ -207,9 +224,67 @@ export function RoomWorkspace() {
       </section>
 
       <section aria-labelledby="room-inbox-title">
-        <h2 id="room-inbox-title">Inbox</h2>
-        {items === null && <p role="status">Loading…</p>}
-        {items?.length === 0 && <p>No submissions are held.</p>}
+        <div className="room-admin__section-heading">
+          <div>
+            <p className="section-context">Ciphertext only</p>
+            <h2 id="room-inbox-title">Restricted inbox</h2>
+          </div>
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={() => void refresh()}
+          >
+            Check channel
+          </button>
+        </div>
+        {inboxState === "loading" && (
+          <div
+            className="room-admin__skeleton"
+            aria-label="Loading encrypted inbox"
+            aria-busy="true"
+          >
+            <span />
+            <span />
+          </div>
+        )}
+        {inboxState === "sealed" && (
+          <div className="room-admin__channel-state">
+            <strong>The confidential channel is sealed.</strong>
+            <p>
+              Intake and operator routes are disabled until key custody and the
+              restricted Room infrastructure are configured. No submissions can
+              enter while the channel is sealed.
+            </p>
+          </div>
+        )}
+        {inboxState === "verification" && (
+          <div className="room-admin__channel-state">
+            <strong>Hardware-key verification is required.</strong>
+            <p>
+              Return to Security, verify an enrolled hardware key, then check
+              this channel again within five minutes.
+            </p>
+            <Link href="/">Return to Security</Link>
+          </div>
+        )}
+        {inboxState === "error" && (
+          <div
+            className="room-admin__channel-state room-admin__channel-state--error"
+            role="alert"
+          >
+            <strong>Encrypted inbox connection interrupted.</strong>
+            <p>
+              Check the API connection and try again. The local recipient key
+              remains locked to this browser.
+            </p>
+          </div>
+        )}
+        {inboxState === "ready" && items?.length === 0 && (
+          <div className="room-admin__channel-state">
+            <strong>No encrypted submissions are held.</strong>
+            <p>The channel is available and the retention queue is clear.</p>
+          </div>
+        )}
         <ul className="room-admin__list">
           {items?.map((item) => (
             <li key={item.reference} className="room-item">
@@ -246,11 +321,8 @@ export function RoomWorkspace() {
                 >
                   Quarantine
                 </button>
-                <label htmlFor={`extend-${item.reference}`}>
-                  Extend retention
-                </label>
-                <select
-                  id={`extend-${item.reference}`}
+                <AdminSelect
+                  label="Extend retention"
                   defaultValue=""
                   disabled={busy}
                   onChange={(event) => {
@@ -271,7 +343,7 @@ export function RoomWorkspace() {
                       {reason.replaceAll("_", " ")}
                     </option>
                   ))}
-                </select>
+                </AdminSelect>
               </div>
             </li>
           ))}

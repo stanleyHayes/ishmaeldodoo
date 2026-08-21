@@ -13,8 +13,8 @@ export default function AdminLayout({
   children,
 }: Readonly<{ children: ReactNode }>) {
   return (
-    <html lang="en-GB">
-      <body>{children}</body>
+    <html lang="en-GB" suppressHydrationWarning>
+      <body suppressHydrationWarning>{children}</body>
     </html>
   );
 }

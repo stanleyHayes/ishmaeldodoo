@@ -2,11 +2,45 @@
   "components": {
     "schemas": {
       "AdministratorInvitationDto": {
-        "properties": {},
+        "properties": {
+          "email": {
+            "format": "email",
+            "maxLength": 254,
+            "type": "string"
+          },
+          "roles": {
+            "items": {
+              "enum": [
+                "principal",
+                "desk_officer",
+                "editor",
+                "translator",
+                "reviewer",
+                "press_officer",
+                "trust_admin",
+                "security_admin"
+              ],
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "email",
+          "roles"
+        ],
         "type": "object"
       },
       "AdministratorStatusDto": {
-        "properties": {},
+        "properties": {
+          "disabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "disabled"
+        ],
         "type": "object"
       },
       "ContactEnquiryDto": {
@@ -24,6 +58,7 @@
           "email": {
             "format": "email",
             "maxLength": 254,
+            "minLength": 3,
             "type": "string"
           },
           "locale": {
@@ -72,7 +107,15 @@
         "type": "object"
       },
       "CreateDraftDto": {
-        "properties": {},
+        "properties": {
+          "payload": {
+            "additionalProperties": true,
+            "type": "object"
+          }
+        },
+        "required": [
+          "payload"
+        ],
         "type": "object"
       },
       "ErrorEnvelope": {
@@ -114,6 +157,7 @@
           "email": {
             "format": "email",
             "maxLength": 254,
+            "minLength": 3,
             "type": "string"
           },
           "locale": {
@@ -162,6 +206,7 @@
           "email": {
             "format": "email",
             "maxLength": 254,
+            "minLength": 3,
             "type": "string"
           },
           "format": {
@@ -199,15 +244,66 @@
         "type": "object"
       },
       "HardwareKeyAuthenticationDto": {
-        "properties": {},
+        "properties": {
+          "ceremonyId": {
+            "type": "string"
+          },
+          "response": {
+            "additionalProperties": true,
+            "type": "object"
+          }
+        },
+        "required": [
+          "ceremonyId",
+          "response"
+        ],
         "type": "object"
       },
       "HardwareKeyRegistrationDto": {
-        "properties": {},
+        "properties": {
+          "ceremonyId": {
+            "type": "string"
+          },
+          "label": {
+            "maxLength": 80,
+            "minLength": 1,
+            "type": "string"
+          },
+          "response": {
+            "additionalProperties": true,
+            "type": "object"
+          }
+        },
+        "required": [
+          "ceremonyId",
+          "response",
+          "label"
+        ],
         "type": "object"
       },
       "InvitationAcceptanceDto": {
-        "properties": {},
+        "properties": {
+          "mfaCode": {
+            "maxLength": 6,
+            "minLength": 6,
+            "type": "string"
+          },
+          "password": {
+            "maxLength": 128,
+            "minLength": 14,
+            "type": "string"
+          },
+          "token": {
+            "maxLength": 43,
+            "minLength": 43,
+            "type": "string"
+          }
+        },
+        "required": [
+          "token",
+          "password",
+          "mfaCode"
+        ],
         "type": "object"
       },
       "InvitationAcceptanceResponseDto": {
@@ -229,11 +325,56 @@
         "type": "object"
       },
       "InvitationSetupDto": {
-        "properties": {},
+        "properties": {
+          "token": {
+            "maxLength": 43,
+            "minLength": 43,
+            "type": "string"
+          }
+        },
+        "required": [
+          "token"
+        ],
         "type": "object"
       },
       "LoginDto": {
-        "properties": {},
+        "properties": {
+          "challenge": {
+            "maxLength": 1024,
+            "minLength": 32,
+            "type": "string"
+          },
+          "email": {
+            "format": "email",
+            "maxLength": 254,
+            "type": "string"
+          },
+          "mfaCode": {
+            "maxLength": 6,
+            "minLength": 6,
+            "type": "string"
+          },
+          "password": {
+            "maxLength": 128,
+            "minLength": 14,
+            "type": "string"
+          },
+          "recoveryCode": {
+            "maxLength": 19,
+            "minLength": 19,
+            "type": "string"
+          },
+          "stage": {
+            "enum": [
+              "credentials",
+              "verification"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "stage"
+        ],
         "type": "object"
       },
       "MediaEnquiryDto": {
@@ -245,6 +386,7 @@
           "email": {
             "format": "email",
             "maxLength": 254,
+            "minLength": 3,
             "type": "string"
           },
           "locale": {
@@ -286,11 +428,43 @@
         "type": "object"
       },
       "PublishContentDto": {
-        "properties": {},
+        "properties": {
+          "locale": {
+            "enum": [
+              "en-GB",
+              "fr-FR"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "locale"
+        ],
         "type": "object"
       },
       "RolesUpdateDto": {
-        "properties": {},
+        "properties": {
+          "roles": {
+            "items": {
+              "enum": [
+                "principal",
+                "desk_officer",
+                "editor",
+                "translator",
+                "reviewer",
+                "press_officer",
+                "trust_admin",
+                "security_admin"
+              ],
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "roles"
+        ],
         "type": "object"
       },
       "RoomCiphertext": {
@@ -756,7 +930,16 @@
         "type": "object"
       },
       "StepUpDto": {
-        "properties": {},
+        "properties": {
+          "mfaCode": {
+            "maxLength": 6,
+            "minLength": 6,
+            "type": "string"
+          }
+        },
+        "required": [
+          "mfaCode"
+        ],
         "type": "object"
       },
       "StepUpResponseDto": {
@@ -779,7 +962,27 @@
         "type": "object"
       },
       "TransitionContentDto": {
-        "properties": {},
+        "properties": {
+          "action": {
+            "enum": [
+              "submit",
+              "request_changes",
+              "approve",
+              "schedule",
+              "supersede"
+            ],
+            "type": "string"
+          },
+          "policySensitive": {
+            "type": "boolean"
+          },
+          "scheduledFor": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "action"
+        ],
         "type": "object"
       }
     },
@@ -979,6 +1182,13 @@
         ],
         "responses": {
           "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            },
             "description": ""
           },
           "default": {
@@ -1035,6 +1245,13 @@
         },
         "responses": {
           "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            },
             "description": ""
           },
           "default": {
@@ -1081,6 +1298,13 @@
         ],
         "responses": {
           "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            },
             "description": ""
           },
           "default": {
@@ -1137,6 +1361,13 @@
         },
         "responses": {
           "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            },
             "description": ""
           },
           "default": {
@@ -1322,7 +1553,7 @@
         },
         "responses": {
           "200": {
-            "description": "Password and MFA verified; session created."
+            "description": "Credentials verified and MFA challenge issued, or MFA verified and session created."
           },
           "401": {
             "description": "Credentials or MFA verification failed."
@@ -1800,7 +2031,7 @@
           {
             "in": "query",
             "name": "limit",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -1808,7 +2039,7 @@
           {
             "in": "query",
             "name": "cursor",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -1870,7 +2101,7 @@
           {
             "in": "query",
             "name": "limit",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -1932,7 +2163,7 @@
           {
             "in": "query",
             "name": "limit",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -2858,6 +3089,13 @@
         ],
         "responses": {
           "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            },
             "description": ""
           },
           "default": {
@@ -3597,7 +3835,14 @@
     "/v1/public/atlas": {
       "get": {
         "operationId": "PublicAtlasController_list",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "locale",
+            "required": false,
+            "schema": {}
+          }
+        ],
         "responses": {
           "200": {
             "description": "At most 60 published locale-projected Atlas nodes."
@@ -3687,6 +3932,12 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "in": "query",
+            "name": "locale",
+            "required": false,
+            "schema": {}
           }
         ],
         "responses": {
@@ -3844,6 +4095,12 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "in": "query",
+            "name": "locale",
+            "required": false,
+            "schema": {}
           }
         ],
         "responses": {
@@ -3954,6 +4211,13 @@
         "parameters": [],
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            },
             "description": ""
           },
           "default": {
@@ -4071,7 +4335,14 @@
     "/v1/public/signals": {
       "get": {
         "operationId": "PublicSignalsController_list",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "locale",
+            "required": false,
+            "schema": {}
+          }
+        ],
         "responses": {
           "200": {
             "description": "At most 50 published Signal projections."
@@ -4103,7 +4374,14 @@
     "/v1/public/signals/latest": {
       "get": {
         "operationId": "PublicSignalsController_latest",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "locale",
+            "required": false,
+            "schema": {}
+          }
+        ],
         "responses": {
           "200": {
             "description": "The most recently dated published Signal projection."
@@ -4139,7 +4417,7 @@
           {
             "in": "query",
             "name": "cursor",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -4147,10 +4425,22 @@
           {
             "in": "query",
             "name": "q",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {}
+          },
+          {
+            "in": "query",
+            "name": "locale",
+            "required": false,
+            "schema": {}
           }
         ],
         "responses": {
@@ -4184,7 +4474,14 @@
     "/v1/public/speaking": {
       "get": {
         "operationId": "PublicSpeakingController_list",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "locale",
+            "required": false,
+            "schema": {}
+          }
+        ],
         "responses": {
           "200": {
             "description": "At most 50 published, locale-projected speaking themes."

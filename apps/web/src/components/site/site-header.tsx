@@ -2,18 +2,42 @@ import Link from "next/link";
 import { localizePath, type SupportedLocale } from "../../lib/i18n/locale";
 import { ThemeToggle } from "./theme-toggle";
 import { LiteToggle } from "./lite-toggle";
+import { AmanorMark } from "./amanor-mark";
 import type { Theme, ThemePreference } from "../../lib/theme/night-economy";
+import { ActiveNavigationLink } from "./active-navigation-link";
+import { navIcons, type NavIconKey } from "./nav-icons";
 
 const primaryNavigation = [
-  { href: "/record", label: { "en-GB": "The Record", "fr-FR": "Le parcours" } },
+  {
+    href: "/record",
+    icon: "record",
+    label: { "en-GB": "The Record", "fr-FR": "Le parcours" },
+  },
   {
     href: "/speaking",
+    icon: "speaking",
     label: { "en-GB": "Speaking", "fr-FR": "Interventions" },
   },
-  { href: "/signals", label: { "en-GB": "Signals", "fr-FR": "Signaux" } },
-  { href: "/press", label: { "en-GB": "Press", "fr-FR": "Presse" } },
-  { href: "/contact", label: { "en-GB": "Contact", "fr-FR": "Contact" } },
-] as const;
+  {
+    href: "/signals",
+    icon: "signals",
+    label: { "en-GB": "Signals", "fr-FR": "Signaux" },
+  },
+  {
+    href: "/press",
+    icon: "press",
+    label: { "en-GB": "Press", "fr-FR": "Presse" },
+  },
+  {
+    href: "/contact",
+    icon: "contact",
+    label: { "en-GB": "Contact", "fr-FR": "Contact" },
+  },
+] as const satisfies readonly {
+  href: string;
+  icon: NavIconKey;
+  label: Record<SupportedLocale, string>;
+}[];
 
 export function SiteHeader({
   locale = "en-GB",
@@ -32,6 +56,7 @@ export function SiteHeader({
 }>) {
   const isFrench = locale === "fr-FR";
   const isSelah = pathname === "/selah" || pathname === "/fr/selah";
+  const homePath = localizePath("/", locale);
   return (
     <header className="site-header">
       <div className="utility-bar" aria-label="Site utilities">
@@ -58,14 +83,13 @@ export function SiteHeader({
             </Link>
             {lite ? (
               <div className="lite-control">
-                <Link
+                <a
                   href={`/api/lite?enabled=0&return=${encodeURIComponent(pathname)}`}
-                  prefetch={false}
                   aria-pressed="true"
                   role="button"
                 >
                   {isFrench ? "Quitter le mode Lite" : "Exit Lite mode"}
-                </Link>
+                </a>
                 <span>
                   {isFrench
                     ? "Conçu pour fonctionner avec une connexion sahélienne."
@@ -82,10 +106,9 @@ export function SiteHeader({
             )}
             {lite ? (
               <span className="theme-control">
-                <Link
+                <a
                   className="utility-action"
                   href={`/api/theme?theme=${theme === "day" ? "night" : "day"}&return=${encodeURIComponent(pathname)}`}
-                  prefetch={false}
                   role="button"
                   aria-pressed={theme === "night"}
                 >
@@ -96,15 +119,14 @@ export function SiteHeader({
                     : isFrench
                       ? "Économie nocturne"
                       : "Night economy"}
-                </Link>
+                </a>
                 {themePreference !== "auto" ? (
-                  <Link
+                  <a
                     className="theme-reset"
                     href={`/api/theme?theme=auto&return=${encodeURIComponent(pathname)}`}
-                    prefetch={false}
                   >
                     {isFrench ? "Heure d’Accra" : "Accra hours"}
-                  </Link>
+                  </a>
                 ) : null}
               </span>
             ) : (
@@ -119,15 +141,110 @@ export function SiteHeader({
         </div>
       </div>
       <div className="site-frame primary-bar">
-        <Link className="wordmark" href="/" aria-label="Project AMANOR, home">
-          Project AMANOR
+        <Link
+          className="wordmark"
+          href={homePath}
+          aria-label="Project AMANOR, home"
+        >
+          {lite ? null : <AmanorMark className="wordmark__mark" />}
+          <span className="wordmark__lockup">
+            <span className="wordmark__eyebrow">
+              {isFrench ? "Le dossier indépendant" : "The independent record"}
+            </span>
+            <span className="wordmark__text">Project AMANOR</span>
+          </span>
         </Link>
+        {lite ? null : (
+          <>
+            <input
+              type="checkbox"
+              id="amanor-nav-toggle"
+              className="nav-toggle-input"
+              aria-label={isFrench ? "Menu de navigation" : "Navigation menu"}
+            />
+            <label
+              className="nav-toggle"
+              htmlFor="amanor-nav-toggle"
+              aria-hidden="true"
+            >
+              <span className="nav-toggle__bars" />
+            </label>
+            <div
+              className="nav-drawer"
+              role="dialog"
+              aria-modal="true"
+              aria-label={isFrench ? "Menu de navigation" : "Navigation menu"}
+            >
+              <div className="nav-drawer__head">
+                <span className="nav-drawer__brand">
+                  <AmanorMark className="nav-drawer__mark" />
+                  <span>Project AMANOR</span>
+                </span>
+                <label
+                  className="nav-drawer__close"
+                  htmlFor="amanor-nav-toggle"
+                  aria-label={isFrench ? "Fermer le menu" : "Close menu"}
+                >
+                  {navIcons.close}
+                </label>
+              </div>
+              <nav
+                className="nav-drawer__grid"
+                aria-label={isFrench ? "Navigation principale" : "Primary"}
+              >
+                {primaryNavigation.map((item, index) => (
+                  <ActiveNavigationLink
+                    href={localizePath(item.href, locale)}
+                    initialPathname={pathname}
+                    drawerToggleId="amanor-nav-toggle"
+                    key={item.href}
+                  >
+                    <span className="nav-cell__index">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <span className="nav-cell__icon">
+                      {navIcons[item.icon]}
+                    </span>
+                    <span className="nav-cell__label">
+                      {item.label[locale]}
+                    </span>
+                  </ActiveNavigationLink>
+                ))}
+              </nav>
+              {!isSelah ? (
+                <ActiveNavigationLink
+                  href={localizePath("/speaking/request", locale)}
+                  initialPathname={pathname}
+                  drawerToggleId="amanor-nav-toggle"
+                >
+                  <span className="nav-cell__index">
+                    {String(primaryNavigation.length + 1).padStart(2, "0")}
+                  </span>
+                  <span className="nav-cell__icon">{navIcons.engagement}</span>
+                  <span className="nav-cell__label">
+                    {isFrench
+                      ? "Proposer une intervention"
+                      : "Request an engagement"}
+                  </span>
+                </ActiveNavigationLink>
+              ) : null}
+            </div>
+          </>
+        )}
         <nav className="primary-navigation" aria-label="Primary navigation">
-          {primaryNavigation.map((item) => (
-            <Link href={localizePath(item.href, locale)} key={item.href}>
-              {item.label[locale]}
-            </Link>
-          ))}
+          {primaryNavigation.map((item) => {
+            const href = localizePath(item.href, locale);
+            return (
+              <ActiveNavigationLink
+                href={href}
+                initialPathname={pathname}
+                drawerToggleId="amanor-nav-toggle"
+                key={item.href}
+              >
+                {item.label[locale]}
+              </ActiveNavigationLink>
+            );
+          })}
         </nav>
         {!isSelah ? (
           <Link

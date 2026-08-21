@@ -213,16 +213,54 @@ describe("RoomWorkspace", () => {
     );
   });
 
-  it("reports an unavailable inbox without inventing an empty one", async () => {
-    listRoomInbox.mockRejectedValue(new Error("denied"));
+  it("shows a sealed channel without presenting it as an application error", async () => {
+    const { ApiClientError } = await import("../../lib/api/client");
+    listRoomInbox.mockRejectedValue(
+      new ApiClientError(
+        "Room access is not permitted",
+        404,
+        "ROOM_REQUEST_FAILED",
+      ),
+    );
     render(<RoomWorkspace />);
     await waitFor(() =>
       expect(
-        screen.getByText("The Room inbox is not available."),
+        screen.getByText("The confidential channel is sealed."),
       ).toBeInTheDocument(),
     );
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     expect(
       screen.queryByRole("heading", { name: item.reference, level: 3 }),
     ).not.toBeInTheDocument();
+  });
+
+  it("directs a denied operator to complete hardware-key verification", async () => {
+    const { ApiClientError } = await import("../../lib/api/client");
+    listRoomInbox.mockRejectedValue(
+      new ApiClientError(
+        "Room access is not permitted",
+        403,
+        "ROOM_REQUEST_FAILED",
+      ),
+    );
+    render(<RoomWorkspace />);
+
+    expect(
+      await screen.findByText("Hardware-key verification is required."),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Return to Security" }),
+    ).toHaveAttribute("href", "/");
+  });
+
+  it("keeps a genuine transport failure recoverable and explicit", async () => {
+    listRoomInbox.mockRejectedValue(new Error("network"));
+    render(<RoomWorkspace />);
+
+    expect(
+      await screen.findByText("Encrypted inbox connection interrupted."),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Check channel" }));
+    await waitFor(() => expect(listRoomInbox).toHaveBeenCalledTimes(2));
   });
 });

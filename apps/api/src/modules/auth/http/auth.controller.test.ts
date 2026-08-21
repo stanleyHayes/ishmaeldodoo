@@ -21,7 +21,8 @@ import { HardwareKeyService } from "../application/hardware-key.service";
 describe("AuthController HTTP boundary", () => {
   let app: INestApplication;
   const auth = {
-    login: vi.fn(),
+    beginLogin: vi.fn(),
+    completeLogin: vi.fn(),
     refresh: vi.fn(),
     logout: vi.fn(),
     listSessions: vi.fn(),
@@ -124,30 +125,53 @@ describe("AuthController HTTP boundary", () => {
     await request(app.getHttpServer())
       .post("/v1/auth/login")
       .send({
+        stage: "credentials",
         email: "editor@example.test",
         password: "a-long-enough-password",
-        mfaCode: "123456",
       })
       .expect(403);
     await request(app.getHttpServer())
       .post("/v1/auth/login")
       .set("Origin", "https://evil.example.test")
       .send({
+        stage: "credentials",
         email: "editor@example.test",
         password: "a-long-enough-password",
-        mfaCode: "123456",
       })
       .expect(403);
     await request(app.getHttpServer())
       .post("/v1/auth/login")
       .set("Origin", "https://admin.example.test")
-      .send({ email: "not-an-email", password: "short", mfaCode: "x" })
+      .send({ stage: "credentials", email: "not-an-email", password: "short" })
       .expect(400);
-    expect(auth.login).not.toHaveBeenCalled();
+    expect(auth.beginLogin).not.toHaveBeenCalled();
   });
 
-  it("keeps refresh material out of JSON and sets hardened cookies", async () => {
-    auth.login.mockResolvedValue({
+  it("verifies credentials before exposing the MFA step and sets no session cookies", async () => {
+    auth.beginLogin.mockResolvedValue({
+      state: "mfa_required",
+      challenge: "a".repeat(64),
+      expiresIn: 300,
+    });
+    const response = await request(app.getHttpServer())
+      .post("/v1/auth/login")
+      .set("Origin", "https://admin.example.test")
+      .send({
+        stage: "credentials",
+        email: "editor@example.test",
+        password: "a-long-enough-password",
+      })
+      .expect(200);
+    expect(response.body).toEqual({
+      state: "mfa_required",
+      challenge: "a".repeat(64),
+      expiresIn: 300,
+    });
+    expect(response.headers["set-cookie"]).toBeUndefined();
+  });
+
+  it("issues a password-only session and hardened cookies when MFA is not enrolled", async () => {
+    auth.beginLogin.mockResolvedValue({
       accessToken: "signed-access-token",
       refreshToken: "session-id.refresh-secret",
       csrfToken: "csrf-proof-value-that-is-long-enough",
@@ -158,8 +182,57 @@ describe("AuthController HTTP boundary", () => {
       .post("/v1/auth/login")
       .set("Origin", "https://admin.example.test")
       .send({
+        stage: "credentials",
         email: "editor@example.test",
         password: "a-long-enough-password",
+      })
+      .expect(200);
+
+    // Opt-in MFA: the credentials stage returns a full session directly and
+    // must keep refresh material out of the JSON body while setting the same
+    // hardened cookies the verification stage uses.
+    expect(response.body).not.toHaveProperty("refreshToken");
+    expect(response.body).toEqual(
+      expect.objectContaining({
+        accessToken: "signed-access-token",
+        expiresIn: 300,
+      }),
+    );
+    const cookies = response.headers["set-cookie"] as unknown as string[];
+    expect(
+      cookies.some(
+        (cookie) =>
+          cookie.startsWith(`${refreshCookieName}=`) &&
+          cookie.includes("HttpOnly") &&
+          cookie.includes("Secure") &&
+          cookie.includes("SameSite=Strict"),
+      ),
+    ).toBe(true);
+    expect(
+      cookies.some(
+        (cookie) =>
+          cookie.startsWith(`${csrfCookieName}=`) &&
+          !cookie.includes("HttpOnly") &&
+          cookie.includes("Secure"),
+      ),
+    ).toBe(true);
+    expect(auth.completeLogin).not.toHaveBeenCalled();
+  });
+
+  it("keeps refresh material out of JSON and sets hardened cookies", async () => {
+    auth.completeLogin.mockResolvedValue({
+      accessToken: "signed-access-token",
+      refreshToken: "session-id.refresh-secret",
+      csrfToken: "csrf-proof-value-that-is-long-enough",
+      expiresIn: 300,
+      user: { id: "user-1", roles: ["editor"] },
+    });
+    const response = await request(app.getHttpServer())
+      .post("/v1/auth/login")
+      .set("Origin", "https://admin.example.test")
+      .send({
+        stage: "verification",
+        challenge: "a".repeat(64),
         mfaCode: "123456",
       })
       .expect(200);
@@ -192,7 +265,7 @@ describe("AuthController HTTP boundary", () => {
   });
 
   it("forwards a single-use recovery code without requiring a TOTP field", async () => {
-    auth.login.mockResolvedValue({
+    auth.completeLogin.mockResolvedValue({
       accessToken: "recovery-access-token",
       refreshToken: "session-id.refresh-secret",
       csrfToken: "csrf-proof-value-that-is-long-enough",
@@ -203,16 +276,14 @@ describe("AuthController HTTP boundary", () => {
       .post("/v1/auth/login")
       .set("Origin", "https://admin.example.test")
       .send({
-        email: "editor@example.test",
-        password: "a-long-enough-password",
+        stage: "verification",
+        challenge: "a".repeat(64),
         recoveryCode: "ABCD-2345-EFGH-6789",
       })
       .expect(200);
-    expect(auth.login).toHaveBeenCalledWith(
-      "editor@example.test",
-      "a-long-enough-password",
-      { recoveryCode: "ABCD-2345-EFGH-6789" },
-    );
+    expect(auth.completeLogin).toHaveBeenCalledWith("a".repeat(64), {
+      recoveryCode: "ABCD-2345-EFGH-6789",
+    });
   });
 
   it("issues a recent-MFA token and rejects high-risk changes without it", async () => {

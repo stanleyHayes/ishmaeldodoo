@@ -1,5 +1,6 @@
 import type { PublicAtlasNode } from "@amanor/contracts";
 import Link from "next/link";
+import { BrandedSelect } from "../ui/branded-select";
 import type { SupportedLocale } from "../../lib/i18n/locale";
 
 export type AtlasFilters = Readonly<{
@@ -56,54 +57,57 @@ export function AtlasTable({
   return (
     <>
       <form role="search" className="atlas-filters" action={basePath}>
-        <label>
-          {fr ? "Époque" : "Era"}
-          <select name="era" defaultValue={filters.era ?? ""}>
-            <option value="">{fr ? "Toutes" : "All"}</option>
-            {eras.map((value) => (
-              <option key={value}>{value}</option>
-            ))}
-          </select>
-        </label>
-        <label>
-          {fr ? "Institution" : "Institution"}
-          <select name="institution" defaultValue={filters.institution ?? ""}>
-            <option value="">{fr ? "Toutes" : "All"}</option>
-            {institutions.map((value) => (
-              <option key={value}>{value}</option>
-            ))}
-          </select>
-        </label>
-        <label>
-          {fr ? "Thème" : "Theme"}
-          <select name="theme" defaultValue={filters.theme ?? ""}>
-            <option value="">{fr ? "Tous" : "All"}</option>
-            {themes.map((value) => (
-              <option key={value}>{value}</option>
-            ))}
-          </select>
-        </label>
-        <label>
-          {fr ? "Devise" : "Currency"}
-          <select name="currency" defaultValue={filters.currency ?? ""}>
-            <option value="">{fr ? "Toutes" : "All"}</option>
-            {currencies.map((value) => (
-              <option key={value}>{value}</option>
-            ))}
-          </select>
-        </label>
-        <label>
-          {fr ? "Échelle du portefeuille" : "Portfolio scale"}
-          <select name="scale" defaultValue={filters.scale ?? ""}>
-            <option value="">{fr ? "Toutes" : "All"}</option>
-            <option value="under-1m">&lt; 1m</option>
-            <option value="1m-100m">1m–100m</option>
-            <option value="100m-plus">100m+</option>
-            <option value="unvalued">
-              {fr ? "Sans valeur publiée" : "No published value"}
-            </option>
-          </select>
-        </label>
+        <BrandedSelect
+          name="era"
+          label={fr ? "Époque" : "Era"}
+          defaultValue={filters.era ?? ""}
+          options={[
+            { value: "", label: fr ? "Toutes" : "All" },
+            ...eras.map((value) => ({ value, label: value })),
+          ]}
+        />
+        <BrandedSelect
+          name="institution"
+          label="Institution"
+          defaultValue={filters.institution ?? ""}
+          options={[
+            { value: "", label: fr ? "Toutes" : "All" },
+            ...institutions.map((value) => ({ value, label: value })),
+          ]}
+        />
+        <BrandedSelect
+          name="theme"
+          label={fr ? "Thème" : "Theme"}
+          defaultValue={filters.theme ?? ""}
+          options={[
+            { value: "", label: fr ? "Tous" : "All" },
+            ...themes.map((value) => ({ value, label: value })),
+          ]}
+        />
+        <BrandedSelect
+          name="currency"
+          label={fr ? "Devise" : "Currency"}
+          defaultValue={filters.currency ?? ""}
+          options={[
+            { value: "", label: fr ? "Toutes" : "All" },
+            ...currencies.map((value) => ({ value, label: value })),
+          ]}
+        />
+        <BrandedSelect
+          name="scale"
+          label={fr ? "Échelle du portefeuille" : "Portfolio scale"}
+          defaultValue={filters.scale ?? ""}
+          options={[
+            { value: "", label: fr ? "Toutes" : "All" },
+            { value: "under-1m", label: "< 1m" },
+            { value: "1m-100m", label: "1m–100m" },
+            { value: "100m-plus", label: "100m+" },
+            {
+              value: "unvalued",
+              label: fr ? "Sans valeur publiée" : "No published value",
+            },
+          ]}
+        />
         <button>{fr ? "Filtrer" : "Filter"}</button>
         <Link href={basePath}>{fr ? "Effacer" : "Clear"}</Link>
       </form>

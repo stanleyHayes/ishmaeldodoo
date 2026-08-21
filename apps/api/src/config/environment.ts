@@ -368,9 +368,11 @@ export function validateEnvironment(
       "PROTOCOL_DECISION_DERIVATION_KEY",
       "PRESS_CONTACT_EMAIL",
       "GENERAL_CONTACT_EMAIL",
-      "CALENDAR_API_URL",
-      "CALENDAR_API_TOKEN",
-      "CALENDAR_ID",
+      // Calendar sync is an optional integration, not a boot requirement:
+      // CalendarSyncWorker stays dormant until all three CALENDAR_* values are
+      // present (protocol-desk/application/calendar-sync.worker.ts), and the
+      // configured-together and HTTPS-endpoint checks above still reject a
+      // partial or unsafe calendar configuration.
       "CHROME_EXECUTABLE_PATH",
       "METRICS_BEARER_TOKEN",
     ] as const) {

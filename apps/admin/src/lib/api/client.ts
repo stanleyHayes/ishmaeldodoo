@@ -17,6 +17,7 @@ import {
   auditExportSchema,
   apiErrorSchema,
   authSessionResponseSchema,
+  loginChallengeResponseSchema,
   loginRequestSchema,
   type AdminSession,
   type AdministratorRolesUpdate,
@@ -31,6 +32,7 @@ import {
   type AuditExport,
   type AuthSessionResponse,
   type LoginRequest,
+  type LoginChallengeResponse,
   type ApiOperations,
   cmsCreateDraftRequestSchema,
   cmsPublishRequestSchema,
@@ -231,7 +233,9 @@ async function request(
   return response;
 }
 
-export async function login(input: LoginRequest): Promise<AuthSessionResponse> {
+async function submitLogin(
+  input: LoginRequest,
+): Promise<LoginChallengeResponse | AuthSessionResponse> {
   const validated = loginRequestSchema.parse(input);
   const response = await fetch(`${adminApiBaseUrl()}${authPaths.login}`, {
     method: "POST",
@@ -241,7 +245,10 @@ export async function login(input: LoginRequest): Promise<AuthSessionResponse> {
     body: JSON.stringify(validated),
   });
   if (!response.ok) throw await errorFrom(response);
-  const parsed = authSessionResponseSchema.safeParse(await response.json());
+  const payload: unknown = await response.json();
+  const challenge = loginChallengeResponseSchema.safeParse(payload);
+  if (challenge.success) return challenge.data;
+  const parsed = authSessionResponseSchema.safeParse(payload);
   if (!parsed.success || !parsed.data.csrfToken) {
     throw new ApiClientError(
       "The API returned an invalid authentication response",
@@ -254,6 +261,34 @@ export async function login(input: LoginRequest): Promise<AuthSessionResponse> {
     csrfToken: parsed.data.csrfToken,
   });
   return parsed.data;
+}
+
+export async function beginLogin(
+  email: string,
+  password: string,
+): Promise<LoginChallengeResponse | AuthSessionResponse> {
+  // The credentials stage returns either an MFA challenge (for an enrolled
+  // account) or, when the account has no MFA enrolled, a completed session.
+  // Both are valid; submitLogin already persists auth state for a session.
+  return submitLogin({ stage: "credentials", email, password });
+}
+
+export async function completeLogin(
+  challenge: string,
+  verification: Readonly<{ mfaCode?: string; recoveryCode?: string }>,
+): Promise<AuthSessionResponse> {
+  const result = await submitLogin({
+    stage: "verification",
+    challenge,
+    ...verification,
+  });
+  if ("state" in result)
+    throw new ApiClientError(
+      "The API returned an invalid authentication response",
+      502,
+      "INVALID_API_RESPONSE",
+    );
+  return result;
 }
 
 export async function logout(): Promise<void> {

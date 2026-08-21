@@ -1,6 +1,47 @@
 import { describe, expect, it } from "vitest";
 import { emailMailboxAddress, validateEnvironment } from "./environment";
 
+// A minimal but fully valid production environment. Used to prove which
+// integrations are genuinely required to boot versus optional.
+const completeProductionEnvironment = () => ({
+  NODE_ENV: "production",
+  ADMIN_ORIGIN: "https://admin.example.test",
+  PUBLIC_WEB_ORIGIN: "https://www.example.test",
+  MONGODB_URI: "mongodb://amanor_app:password@database.example/amanor",
+  RUN_MIGRATIONS: "false",
+  JWT_ISSUER: "https://api.example.test",
+  JWT_AUDIENCE: "amanor-admin",
+  JWT_KEY_ID: "primary",
+  // Only presence is validated for the key material here, so use non-PEM
+  // placeholders to keep private-key patterns out of the tracked test.
+  JWT_PRIVATE_KEY_PEM: "test-signing-key-present-only-for-boot-validation",
+  JWT_PUBLIC_KEY_PEM: "test-verification-key-present-only-for-boot",
+  JWT_VERIFICATION_KEYS: JSON.stringify({
+    primary: "-----BEGIN PUBLIC KEY-----\nMFkw\n-----END PUBLIC KEY-----",
+  }),
+  SESSION_PEPPER: "session-pepper-with-at-least-thirty-two-bytes",
+  MFA_ENCRYPTION_KEY: Buffer.alloc(32, 1).toString("base64"),
+  WEB_REVALIDATION_URL: "https://www.example.test/api/revalidate",
+  REVALIDATION_WEBHOOK_KEYS: JSON.stringify({
+    "reval-1": "revalidation-secret-with-at-least-thirty-two-bytes",
+  }),
+  REVALIDATION_ACTIVE_KEY_ID: "reval-1",
+  PUBLIC_WEB_SERVICE_KEYS: JSON.stringify({
+    "web-1": "public-web-service-secret-of-at-least-thirty-two",
+  }),
+  RATE_LIMIT_PEPPER: "rate-limit-pepper-with-at-least-thirty-two-bytes",
+  CLOUDINARY_CLOUD_NAME: "amanor",
+  CLOUDINARY_API_KEY: "cloudinary-api-key",
+  CLOUDINARY_API_SECRET: "cloudinary-api-secret",
+  RESEND_API_KEY: "re_example_key",
+  EMAIL_FROM: "no-reply@example.test",
+  PROTOCOL_DECISION_DERIVATION_KEY: Buffer.alloc(32, 2).toString("base64"),
+  PRESS_CONTACT_EMAIL: "press@example.test",
+  GENERAL_CONTACT_EMAIL: "contact@example.test",
+  CHROME_EXECUTABLE_PATH: "/usr/bin/chromium",
+  METRICS_BEARER_TOKEN: "metrics-bearer-token-with-thirty-two-plus-bytes",
+});
+
 describe("API environment", () => {
   it("uses safe local defaults", () => {
     expect(validateEnvironment({})).toEqual(
@@ -197,6 +238,26 @@ describe("API environment", () => {
       expect(() =>
         validateEnvironment({ ...configured, CALENDAR_API_URL }),
       ).toThrow(/prohibited URL parts/u);
+  });
+
+  it("boots a complete production environment and treats calendar sync as optional", () => {
+    const base = completeProductionEnvironment();
+    // A fully provisioned production deploy without any calendar adapter boots:
+    // the sync worker simply stays dormant until CALENDAR_* is configured.
+    expect(() => validateEnvironment(base)).not.toThrow();
+    // A partial calendar configuration is still rejected outright.
+    expect(() =>
+      validateEnvironment({ ...base, CALENDAR_ID: "principal-calendar" }),
+    ).toThrow(/must be configured together/u);
+    // A complete, well-formed calendar configuration remains accepted.
+    expect(() =>
+      validateEnvironment({
+        ...base,
+        CALENDAR_API_URL: "https://calendar-adapter.example.test/events",
+        CALENDAR_API_TOKEN: "calendar-token-with-at-least-thirty-two-bytes",
+        CALENDAR_ID: "principal-calendar",
+      }),
+    ).not.toThrow();
   });
 
   it("binds revalidation delivery to the exact public Web endpoint", () => {

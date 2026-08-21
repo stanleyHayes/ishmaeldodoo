@@ -57,7 +57,10 @@ import {
   hardwareKeyAuthenticationSchema,
   hardwareKeyRegistrationSchema,
 } from "./auth.dto";
-import type { AuthenticatedSession } from "../application/auth.service";
+import type {
+  AuthenticatedSession,
+  LoginChallenge,
+} from "../application/auth.service";
 import { AccessTokenGuard } from "./access-token.guard";
 import type { AuthenticatedRequest } from "./authenticated-request";
 import { AuthRateLimitGuard } from "./auth-rate-limit.guard";
@@ -83,6 +86,7 @@ type SessionResponse = Readonly<{
   user: AuthenticatedSession["user"];
 }>;
 type LoginResponse = SessionResponse & Readonly<{ csrfToken: string }>;
+type LoginFlowResponse = LoginResponse | LoginChallenge;
 type SessionListItem = Readonly<{
   sessionId: string;
   familyId: string;
@@ -198,7 +202,10 @@ export class AuthController {
   @Post("login")
   @UseGuards(AuthRateLimitGuard)
   @HttpCode(200)
-  @ApiOkResponse({ description: "Password and MFA verified; session created." })
+  @ApiOkResponse({
+    description:
+      "Credentials verified and MFA challenge issued, or MFA verified and session created.",
+  })
   @ApiUnauthorizedResponse({
     description: "Credentials or MFA verification failed.",
   })
@@ -206,21 +213,36 @@ export class AuthController {
     @Body() input: LoginDto,
     @Headers("origin") origin: string | undefined,
     @Res({ passthrough: true }) response: Response,
-  ): Promise<LoginResponse> {
+  ): Promise<LoginFlowResponse> {
     this.assertOrigin(origin);
     const parsed = loginInputSchema.safeParse(input);
     if (!parsed.success)
       throw new BadRequestException("Login request is invalid");
-    const result = await this.auth.login(
-      parsed.data.email,
-      parsed.data.password,
-      {
-        ...(parsed.data.mfaCode ? { mfaCode: parsed.data.mfaCode } : {}),
-        ...(parsed.data.recoveryCode
-          ? { recoveryCode: parsed.data.recoveryCode }
-          : {}),
-      },
-    );
+    if (parsed.data.stage === "credentials") {
+      const outcome = await this.auth.beginLogin(
+        parsed.data.email,
+        parsed.data.password,
+      );
+      // MFA is opt-in: an MFA-enrolled administrator receives a challenge to
+      // complete at the verification stage, while a password-only account
+      // receives a full session directly, with the same hardened cookie and
+      // CSRF handling the verification stage uses.
+      if ("state" in outcome) return outcome;
+      return this.issueSessionResponse(outcome, response);
+    }
+    const result = await this.auth.completeLogin(parsed.data.challenge, {
+      ...(parsed.data.mfaCode ? { mfaCode: parsed.data.mfaCode } : {}),
+      ...(parsed.data.recoveryCode
+        ? { recoveryCode: parsed.data.recoveryCode }
+        : {}),
+    });
+    return this.issueSessionResponse(result, response);
+  }
+
+  private issueSessionResponse(
+    result: AuthenticatedSession,
+    response: Response,
+  ): LoginResponse {
     response.cookie(
       refreshCookieName,
       result.refreshToken,

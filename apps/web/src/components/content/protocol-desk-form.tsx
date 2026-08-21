@@ -3,6 +3,7 @@
 import { useEffect, useId, useState, type FormEvent } from "react";
 import { trackAnalyticsEvent } from "../../lib/analytics-client";
 import type { SupportedLocale } from "../../lib/i18n/locale";
+import { BrandedSelect, type BrandedSelectOption } from "../ui/branded-select";
 
 type Draft = Record<string, string | boolean>;
 const initialDraft: Draft = {
@@ -296,17 +297,37 @@ export function ProtocolDeskForm({
       maxLength?: number;
       placeholder?: string;
     }> = {},
-  ) => (
-    <label>
-      {label}
-      <input
-        name={key}
-        value={text(draft, key)}
-        onChange={(event) => update(key, event.target.value)}
-        {...options}
-      />
-    </label>
-  );
+  ) => {
+    const isTemporal = options.type === "date" || options.type === "time";
+    return (
+      <label>
+        {label}
+        <input
+          name={key}
+          value={text(draft, key)}
+          onChange={(event) => update(key, event.target.value)}
+          {...options}
+          type={isTemporal ? "text" : options.type}
+          inputMode={isTemporal ? "numeric" : undefined}
+          pattern={
+            options.type === "date"
+              ? "[0-9]{4}-[0-9]{2}-[0-9]{2}"
+              : options.type === "time"
+                ? "[0-9]{2}:[0-9]{2}"
+                : undefined
+          }
+          placeholder={
+            options.placeholder ??
+            (options.type === "date"
+              ? "YYYY-MM-DD"
+              : options.type === "time"
+                ? "HH:MM"
+                : undefined)
+          }
+        />
+      </label>
+    );
+  };
   const choice = (key: string, label: string, value: string) => (
     <label className="protocol-choice">
       <input
@@ -330,6 +351,19 @@ export function ProtocolDeskForm({
       />{" "}
       <span>{label}</span>
     </label>
+  );
+  const select = (
+    key: string,
+    label: string,
+    options: readonly BrandedSelectOption[],
+  ) => (
+    <BrandedSelect
+      label={label}
+      value={text(draft, key)}
+      onChange={(value) => update(key, value)}
+      required
+      options={[{ value: "", label: "—" }, ...options]}
+    />
   );
 
   return (
@@ -439,29 +473,19 @@ export function ProtocolDeskForm({
             french ? "Nom de l’organisation" : "Organisation name",
             { required: true, minLength: 2, maxLength: 180 },
           )}
-          <label>
-            {french ? "Type d’organisation" : "Organisation type"}
-            <select
-              value={text(draft, "organisationType")}
-              onChange={(e) => update("organisationType", e.target.value)}
-              required
-            >
-              <option value="">—</option>
-              {[
-                ["government", french ? "Gouvernement" : "Government"],
-                ["multilateral", "Multilateral"],
-                ["private_sector", french ? "Secteur privé" : "Private sector"],
-                ["academic", french ? "Université" : "Academic"],
-                ["civil_society", french ? "Société civile" : "Civil society"],
-                ["media", "Media"],
-                ["other", french ? "Autre" : "Other"],
-              ].map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </label>
+          {select(
+            "organisationType",
+            french ? "Type d’organisation" : "Organisation type",
+            [
+              ["government", french ? "Gouvernement" : "Government"],
+              ["multilateral", "Multilateral"],
+              ["private_sector", french ? "Secteur privé" : "Private sector"],
+              ["academic", french ? "Université" : "Academic"],
+              ["civil_society", french ? "Société civile" : "Civil society"],
+              ["media", "Media"],
+              ["other", french ? "Autre" : "Other"],
+            ].map(([value, label]) => ({ value: value!, label: label! })),
+          )}
           <div className="protocol-grid">
             {input(
               "organisationCountry",
@@ -506,50 +530,40 @@ export function ProtocolDeskForm({
         </fieldset>
         <fieldset data-step="2" hidden={step !== 2} disabled={step !== 2}>
           <legend>{french ? "L’intervention" : "The engagement"}</legend>
-          <label>
-            {french ? "Type" : "Type"}
-            <select
-              value={text(draft, "engagementType")}
-              onChange={(e) => update("engagementType", e.target.value)}
-              required
-            >
-              <option value="">—</option>
-              {[
-                ["keynote", french ? "Discours principal" : "Keynote address"],
-                ["panel", french ? "Plénière ou panel" : "Plenary or panel"],
-                ["fireside", "Fireside conversation"],
-                [
-                  "institutional_briefing",
-                  french
-                    ? "Briefing institutionnel fermé"
-                    : "Closed-door institutional briefing",
-                ],
-                [
-                  "media_interview",
-                  french ? "Entretien média" : "Media interview",
-                ],
-                [
-                  "advisory",
-                  french
-                    ? "Conseil ou conseil d’administration"
-                    : "Advisory or board engagement",
-                ],
-                [
-                  "academic",
-                  french ? "Conférence universitaire" : "Academic lecture",
-                ],
-                ["youth", french ? "Intervention jeunesse" : "Youth address"],
-                [
-                  "written_contribution",
-                  french ? "Contribution écrite" : "Written contribution",
-                ],
-              ].map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </label>
+          {select(
+            "engagementType",
+            "Type",
+            [
+              ["keynote", french ? "Discours principal" : "Keynote address"],
+              ["panel", french ? "Plénière ou panel" : "Plenary or panel"],
+              ["fireside", "Fireside conversation"],
+              [
+                "institutional_briefing",
+                french
+                  ? "Briefing institutionnel fermé"
+                  : "Closed-door institutional briefing",
+              ],
+              [
+                "media_interview",
+                french ? "Entretien média" : "Media interview",
+              ],
+              [
+                "advisory",
+                french
+                  ? "Conseil ou conseil d’administration"
+                  : "Advisory or board engagement",
+              ],
+              [
+                "academic",
+                french ? "Conférence universitaire" : "Academic lecture",
+              ],
+              ["youth", french ? "Intervention jeunesse" : "Youth address"],
+              [
+                "written_contribution",
+                french ? "Contribution écrite" : "Written contribution",
+              ],
+            ].map(([value, label]) => ({ value: value!, label: label! })),
+          )}
           {input("eventName", french ? "Nom de l’événement" : "Event name", {
             required: true,
             minLength: 2,
@@ -578,36 +592,19 @@ export function ProtocolDeskForm({
           </div>
           {input("venue", french ? "Lieu" : "Venue", { maxLength: 200 })}
           <div className="protocol-grid">
-            <label>
-              {french ? "Format" : "Format"}
-              <select
-                value={text(draft, "format")}
-                onChange={(e) => update("format", e.target.value)}
-                required
-              >
-                <option value="">—</option>
-                <option value="in_person">
-                  {french ? "En personne" : "In person"}
-                </option>
-                <option value="virtual">
-                  {french ? "Virtuel" : "Virtual"}
-                </option>
-                <option value="hybrid">{french ? "Hybride" : "Hybrid"}</option>
-              </select>
-            </label>
-            <label>
-              {french ? "Langue" : "Language"}
-              <select
-                value={text(draft, "language")}
-                onChange={(e) => update("language", e.target.value)}
-                required
-              >
-                <option value="">—</option>
-                <option value="english">English</option>
-                <option value="french">Français</option>
-                <option value="both">{french ? "Les deux" : "Both"}</option>
-              </select>
-            </label>
+            {select("format", "Format", [
+              {
+                value: "in_person",
+                label: french ? "En personne" : "In person",
+              },
+              { value: "virtual", label: french ? "Virtuel" : "Virtual" },
+              { value: "hybrid", label: french ? "Hybride" : "Hybrid" },
+            ])}
+            {select("language", french ? "Langue" : "Language", [
+              { value: "english", label: "English" },
+              { value: "french", label: "Français" },
+              { value: "both", label: french ? "Les deux" : "Both" },
+            ])}
           </div>
           {text(draft, "language") !== "" &&
           text(draft, "language") !== "english"
@@ -700,46 +697,37 @@ export function ProtocolDeskForm({
           <legend>
             {french ? "Logistique et protocole" : "Logistics and protocol"}
           </legend>
-          <label>
-            {french ? "Voyage et hébergement" : "Travel and accommodation"}
-            <select
-              value={text(draft, "travel")}
-              onChange={(e) => update("travel", e.target.value)}
-              required
-            >
-              <option value="">—</option>
-              <option value="host_covered">
-                {french ? "Pris en charge par l’hôte" : "Covered by host"}
-              </option>
-              <option value="not_covered">
-                {french ? "Non pris en charge" : "Not covered"}
-              </option>
-              <option value="discuss">
-                {french ? "À discuter" : "To be discussed"}
-              </option>
-            </select>
-          </label>
-          {text(draft, "capacity") !== "official" ? (
-            <label>
-              {french ? "Honoraires" : "Honorarium"}
-              <select
-                value={text(draft, "honorarium")}
-                onChange={(e) => update("honorarium", e.target.value)}
-                required
-              >
-                <option value="">—</option>
-                <option value="offered">
-                  {french ? "Proposés" : "Offered"}
-                </option>
-                <option value="not_offered">
-                  {french ? "Non proposés" : "Not offered"}
-                </option>
-                <option value="discuss">
-                  {french ? "À discuter" : "To be discussed"}
-                </option>
-              </select>
-            </label>
-          ) : null}
+          {select(
+            "travel",
+            french ? "Voyage et hébergement" : "Travel and accommodation",
+            [
+              {
+                value: "host_covered",
+                label: french ? "Pris en charge par l’hôte" : "Covered by host",
+              },
+              {
+                value: "not_covered",
+                label: french ? "Non pris en charge" : "Not covered",
+              },
+              {
+                value: "discuss",
+                label: french ? "À discuter" : "To be discussed",
+              },
+            ],
+          )}
+          {text(draft, "capacity") !== "official"
+            ? select("honorarium", french ? "Honoraires" : "Honorarium", [
+                { value: "offered", label: french ? "Proposés" : "Offered" },
+                {
+                  value: "not_offered",
+                  label: french ? "Non proposés" : "Not offered",
+                },
+                {
+                  value: "discuss",
+                  label: french ? "À discuter" : "To be discussed",
+                },
+              ])
+            : null}
           <div className="protocol-inset">
             {toggle(
               "invitationLetter",

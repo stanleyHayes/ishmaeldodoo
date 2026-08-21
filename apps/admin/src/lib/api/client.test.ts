@@ -8,7 +8,8 @@ import {
   listContentAudit,
   listContentVersions,
   listSessions,
-  login,
+  beginLogin,
+  completeLogin,
   logout,
   publishContentVersion,
   rollbackContentVersion,
@@ -52,20 +53,32 @@ describe("admin API client", () => {
   it("keeps access and CSRF tokens in memory and relies on API-origin cookies", async () => {
     const setItem = vi.fn();
     vi.stubGlobal("localStorage", { setItem });
-    const fetchMock = vi.fn().mockResolvedValue(
-      response(200, {
-        accessToken: "access-token",
-        csrfToken: "csrf-token-that-is-at-least-thirty-two-bytes",
-        expiresIn: 300,
-        user: { id: "user-1", roles: ["editor"] },
-      }),
-    );
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        response(200, {
+          state: "mfa_required",
+          challenge: "a".repeat(64),
+          expiresIn: 300,
+        }),
+      )
+      .mockResolvedValueOnce(
+        response(200, {
+          accessToken: "access-token",
+          csrfToken: "csrf-token-that-is-at-least-thirty-two-bytes",
+          expiresIn: 300,
+          user: { id: "user-1", roles: ["editor"] },
+        }),
+      );
     vi.stubGlobal("fetch", fetchMock);
-    await login({
-      email: "editor@example.test",
-      password: "a-long-development-passphrase",
-      mfaCode: "123456",
-    });
+    const challenge = await beginLogin(
+      "editor@example.test",
+      "a-long-development-passphrase",
+    );
+    if (!("state" in challenge))
+      throw new Error("expected an MFA challenge for an enrolled account");
+    expect(getAuthState()).toBeNull();
+    await completeLogin(challenge.challenge, { mfaCode: "123456" });
     expect(getAuthState()).toEqual(
       expect.objectContaining({ accessToken: "access-token" }),
     );
@@ -75,7 +88,7 @@ describe("admin API client", () => {
     );
     const [, loginInit] = fetchMock.mock.calls[0] as [
       string,
-      { headers: Headers },
+      { headers: Headers; body: string },
     ];
     expect(loginInit.headers.get("X-Request-ID")).toMatch(/^[0-9a-f-]{36}$/u);
     expect(loginInit.headers.get("traceparent")).toMatch(
@@ -83,6 +96,20 @@ describe("admin API client", () => {
     );
     expect(document.cookie).not.toContain("access-token");
     expect(setItem).not.toHaveBeenCalled();
+    expect(JSON.parse(loginInit.body)).toEqual({
+      stage: "credentials",
+      email: "editor@example.test",
+      password: "a-long-development-passphrase",
+    });
+    const [, verificationInit] = fetchMock.mock.calls[1] as [
+      string,
+      { body: string },
+    ];
+    expect(JSON.parse(verificationInit.body)).toEqual({
+      stage: "verification",
+      challenge: "a".repeat(64),
+      mfaCode: "123456",
+    });
   });
 
   it("replaces only the in-memory access token after recent MFA step-up", async () => {

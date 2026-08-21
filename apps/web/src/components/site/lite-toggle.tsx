@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect } from "react";
 import type { SupportedLocale } from "../../lib/i18n/locale";
 import { analyticsRoutes } from "../../lib/analytics-catalog";
@@ -49,9 +48,8 @@ export function LiteToggle({
 
   return (
     <div className="lite-control">
-      <Link
+      <a
         href={destination}
-        prefetch={false}
         aria-pressed={active}
         role="button"
         onClick={() => {
@@ -76,7 +74,7 @@ export function LiteToggle({
           : french
             ? "Mode Lite"
             : "Lite mode"}
-      </Link>
+      </a>
       <span>
         {french
           ? "Conçu pour fonctionner avec une connexion sahélienne."

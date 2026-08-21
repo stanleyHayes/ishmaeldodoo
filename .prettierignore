@@ -1,6 +1,6 @@
 **/.next/**
 .raven/**
-.impeccable/**
+**/.impeccable/**
 **/coverage/**
 .lighthouseci/**
 **/dist/**

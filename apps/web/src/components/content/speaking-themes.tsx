@@ -6,6 +6,7 @@ import {
 } from "@amanor/contracts";
 import Image from "next/image";
 import Link from "next/link";
+import { BrandedSelect } from "../ui/branded-select";
 import { structuredDataJson } from "../../lib/discoverability/structured-data";
 import { localizePath, type SupportedLocale } from "../../lib/i18n/locale";
 import styles from "./speaking-evidence.module.css";
@@ -361,17 +362,18 @@ export function SpeakingThemes({
         </p>
       ) : null}
       <form action={path} method="get" className="speaking-filters">
-        <label>
-          {copy.format}
-          <select name="format" defaultValue={selected ?? ""}>
-            <option value="">{copy.all}</option>
-            {speakingFormats.map((value) => (
-              <option key={value} value={value}>
-                {copy.formats[value]}
-              </option>
-            ))}
-          </select>
-        </label>
+        <BrandedSelect
+          name="format"
+          label={copy.format}
+          defaultValue={selected ?? ""}
+          options={[
+            { value: "", label: copy.all },
+            ...speakingFormats.map((value) => ({
+              value,
+              label: copy.formats[value],
+            })),
+          ]}
+        />
         <button type="submit">{copy.apply}</button>
         {selected ? <Link href={path}>{copy.reset}</Link> : null}
       </form>

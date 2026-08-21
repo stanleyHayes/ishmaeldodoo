@@ -132,8 +132,8 @@ export function AuthenticationAudit() {
                   <td>{eventLabels[item.type]}</td>
                   <td>{item.outcome}</td>
                   <td>{item.actorId ?? "System"}</td>
-                  <td>{item.subjectId ?? "—"}</td>
-                  <td>{item.reason?.replaceAll("_", " ") ?? "—"}</td>
+                  <td>{item.subjectId ?? "Not recorded"}</td>
+                  <td>{item.reason?.replaceAll("_", " ") ?? "Not recorded"}</td>
                 </tr>
               ))}
             </tbody>

@@ -1697,7 +1697,8 @@ async function seedDevContent(): Promise<void> {
       {
         assetId: "00000000-0000-4000-8000-000000000102",
         publicId: "amanor/legacy/ama-mensah",
-        secureUrl: "/seed/scholar-placeholder.png",
+        secureUrl:
+          "https://res.cloudinary.com/dvoqbonr2/image/upload/amanor/seed/scholar-placeholder.png",
         resourceType: "image",
         format: "png",
         width: 900,
@@ -1757,7 +1758,7 @@ async function seedDevContent(): Promise<void> {
       ].map(([suffix, file, actEn, actFr, themeEn, themeFr]) => ({
         assetId: `00000000-0000-4000-8000-000000000${suffix}`,
         publicId: `amanor/record/act-${suffix}`,
-        secureUrl: `/seed/${file}`,
+        secureUrl: `https://res.cloudinary.com/dvoqbonr2/image/upload/amanor/seed/${file}`,
         resourceType: "image",
         format: "png",
         width: 1600,

@@ -20,6 +20,16 @@ export function ThemeToggle({
 }>) {
   const french = locale === "fr-FR";
   const next: Theme = theme === "day" ? "night" : "day";
+  // The control is icon-only, so its accessible name must announce the action
+  // it performs — the theme it switches to — not a generic "toggle" label.
+  const label =
+    theme === "night"
+      ? french
+        ? "Mode jour"
+        : "Day mode"
+      : french
+        ? "Économie nocturne"
+        : "Night economy";
   const toggleHref = `/api/theme?theme=${next}&return=${encodeURIComponent(pathname)}`;
   return (
     <span className="theme-control">
@@ -28,10 +38,8 @@ export function ThemeToggle({
         href={toggleHref}
         role="button"
         aria-pressed={theme === "night"}
-        aria-label={
-          french ? "Basculer le thème jour / nuit" : "Toggle day / night theme"
-        }
-        title={french ? "Thème jour / nuit" : "Day / night theme"}
+        aria-label={label}
+        title={label}
         onClick={() => {
           window.localStorage.setItem(themeStorageName, next);
           // Apply the theme to the document immediately so the switch — and the

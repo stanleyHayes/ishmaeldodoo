@@ -323,7 +323,7 @@ export function RoomWorkspace() {
                 </button>
                 <AdminSelect
                   label="Extend retention"
-                  defaultValue=""
+                  value=""
                   disabled={busy}
                   onChange={(event) => {
                     const reason = event.target.value;

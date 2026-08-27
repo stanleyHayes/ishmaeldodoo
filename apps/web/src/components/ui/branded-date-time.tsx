@@ -32,7 +32,13 @@ export function BrandedDateTime({
         new Date(month.getFullYear(), month.getMonth(), index - offset + 1),
     );
   }, [month]);
-  const value = date ? `${date}T${hour}:${minute}` : "";
+  // Normalise the submitted time so it is always a valid, zero-padded HH:MM.
+  // Clamping only on blur left an out-of-range or single-digit entry (e.g.
+  // "9" or "99") in the hidden field when the form was submitted with the
+  // input still focused, producing an unparseable datetime.
+  const clamp = (raw: string, max: number) =>
+    String(Math.min(max, Number(raw) || 0)).padStart(2, "0");
+  const value = date ? `${date}T${clamp(hour, 23)}:${clamp(minute, 59)}` : "";
 
   return (
     <div className="brand-date-time" ref={root}>

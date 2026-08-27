@@ -47,8 +47,15 @@ export function AdminTemporalField({
   }, [month]);
 
   function update(nextDate: string, nextHour = hour, nextMinute = minute) {
-    const next =
-      mode === "date" ? nextDate : `${nextDate}T${nextHour}:${nextMinute}`;
+    // Never emit a time-only value: without a date the datetime string
+    // (`T09:00`) is malformed and would pass a truthy `!scheduledFor` guard
+    // while failing to parse. Editing the time before a date is picked is a
+    // no-op until a day is selected.
+    const next = !nextDate
+      ? ""
+      : mode === "date"
+        ? nextDate
+        : `${nextDate}T${nextHour}:${nextMinute}`;
     setInternal(next);
     onValueChange?.(next);
   }

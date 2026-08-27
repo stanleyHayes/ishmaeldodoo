@@ -1380,7 +1380,8 @@ async function seedDevContent(): Promise<void> {
         country: "Senegal",
         date: new Date("2026-07-10T00:00:00.000Z"),
         language: "en",
-        mediaUrl: "https://media.example.test/regional-broadcast.mp4",
+        mediaUrl:
+          "https://res.cloudinary.com/dvoqbonr2/video/upload/amanor/seed/speaking-forum.mp4",
         transcript: localized(
           "Opening remarks.\nA discussion of regional investment priorities.",
           "Remarques liminaires.\nUne discussion sur les priorités régionales d’investissement.",
@@ -1674,7 +1675,8 @@ async function seedDevContent(): Promise<void> {
       {
         assetId: "00000000-0000-4000-8000-000000000101",
         publicId: "amanor/speaking/forum-2026",
-        secureUrl: "https://media.example.test/forum-2026.mp4",
+        secureUrl:
+          "https://res.cloudinary.com/dvoqbonr2/video/upload/amanor/seed/speaking-forum.mp4",
         resourceType: "video",
         format: "mp4",
         duration: 90,

@@ -1,6 +1,20 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "www.ishmaelniidodoo.com" }],
+      "destination": "https://ishmaelniidodoo.com/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "theamanorproject.vercel.app" }],
+      "destination": "https://ishmaelniidodoo.com/:path*",
+      "permanent": true
+    }
+  ],
   "installCommand": "npm ci",
   "buildCommand": "npm run build --workspace @amanor/contracts && npm run build --workspace @amanor/web"
 }

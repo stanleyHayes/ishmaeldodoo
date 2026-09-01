@@ -1,11 +1,30 @@
 # Render and Vercel deployment preparation
 
-- Status: provider adapters complete; accounts, domains, secrets and first deployments not yet provisioned
+- Status: demo services are deployed; production-domain cutover is in progress
 - Repository: `stanleyHayes/ishmaeldodoo`
 - Render adapter: `render.yaml`
 - Vercel adapters: `apps/web/vercel.json` and `apps/admin/vercel.json`
 
 The three applications remain separate release units. Render runs only the NestJS API and the isolated retention cron. Vercel uses two projects for the public Web and Admin/CMS. MongoDB remains an external MongoDB service; Render does not substitute PostgreSQL for it.
+
+## Production domain contract
+
+The approved production namespace is deliberately split by deployable:
+
+- public Web and sole SEO canonical: `https://ishmaelniidodoo.com`;
+- `www.ishmaelniidodoo.com`: permanent redirect to the apex host;
+- Admin/CMS: `https://admin.ishmaelniidodoo.com`;
+- API: `https://api.ishmaelniidodoo.com`, with the public contract rooted at `/v1`.
+
+The public and Admin Vercel projects own only their respective hostnames. Render must accept the API hostname and provision its certificate before either frontend is rebuilt with the custom API origin. The API accepts the exact Admin origin for credentialed CORS and mutation-origin checks; it does not use wildcard or suffix-based origin matching. Temporary `vercel.app` public/Admin aliases permanently redirect to their canonical custom hosts after cutover. The direct `onrender.com` hostname remains an operational health path until edge restriction and rollback evidence are approved; it is never advertised as a public canonical.
+
+Production sender and routing values use the Resend-verified domain:
+
+- `EMAIL_FROM=Project AMANOR <no-reply@ishmaelniidodoo.com>`;
+- `PRESS_CONTACT_EMAIL=press@ishmaelniidodoo.com`;
+- `GENERAL_CONTACT_EMAIL=contact@ishmaelniidodoo.com`.
+
+Resend domain verification alone does not prove delivery. Retain a dated test of all governed templates, SPF/DKIM/DMARC alignment and recipient delivery before closing the launch gate.
 
 ## Render Blueprint
 

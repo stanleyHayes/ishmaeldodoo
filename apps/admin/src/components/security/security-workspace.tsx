@@ -40,6 +40,25 @@ export function SecurityWorkspace({
         </dl>
       </section>
 
+      <nav className="security-index" aria-label="Security workspace sections">
+        <a href="#sessions-title">
+          <span>01</span>
+          Active sessions
+        </a>
+        <a href="#step-up-title">
+          <span>02</span>
+          Verification
+        </a>
+        <a href="#administrators-title">
+          <span>03</span>
+          Administrators
+        </a>
+        <a href="#authentication-audit-title">
+          <span>04</span>
+          Audit evidence
+        </a>
+      </nav>
+
       <div className="security-workspace__flow">
         <SessionManager />
         <StepUpPanel />

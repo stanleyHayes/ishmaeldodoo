@@ -444,6 +444,7 @@ function OperatorShell({
   );
   const [signingOut, setSigningOut] = useState(false);
   const [navOpen, setNavOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const active =
     allowedNavigation.find((item) => item.id === activeId) ??
     allowedNavigation[0];
@@ -460,7 +461,11 @@ function OperatorShell({
   }
 
   return (
-    <main className="admin-shell" data-nav-open={navOpen ? "true" : undefined}>
+    <main
+      className="admin-shell"
+      data-nav-open={navOpen ? "true" : undefined}
+      data-sidebar-collapsed={sidebarCollapsed ? "true" : undefined}
+    >
       <div className="admin-mobile-bar">
         <div className="admin-brand admin-brand--compact">
           <AmanorMark className="admin-brand__mark" />
@@ -488,13 +493,13 @@ function OperatorShell({
       <aside className="admin-sidebar" id="admin-sidebar">
         <div className="admin-brand">
           <AmanorMark className="admin-brand__mark" />
-          <div>
+          <div className="admin-brand__copy">
             <p className="product-mark">Project AMANOR</p>
             <p className="console-name">Administration</p>
           </div>
         </div>
         <nav className="admin-navigation" aria-label="Administration sections">
-          {allowedNavigation.map((item) => (
+          {allowedNavigation.map((item, index) => (
             <button
               key={item.id}
               type="button"
@@ -504,27 +509,49 @@ function OperatorShell({
                 setNavOpen(false);
               }}
             >
-              <span>{item.label}</span>
-              <small>{item.description}</small>
+              <span className="admin-navigation__index" aria-hidden="true">
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              <span className="admin-navigation__copy">
+                <strong>{item.label}</strong>
+                <small>{item.description}</small>
+              </span>
             </button>
           ))}
         </nav>
-        <div className="operator-card">
-          <p className="operator-eyebrow">Operator</p>
-          <p className="operator-id">{user.id}</p>
-          <div className="role-list" aria-label="Assigned roles">
-            {user.roles.map((role) => (
-              <span key={role}>{roleLabels[role]}</span>
-            ))}
+      </aside>
+
+      <section className="admin-stage" aria-labelledby="workspace-title">
+        <header className="admin-navbar">
+          <div className="admin-navbar__route">
+            <button
+              className="admin-sidebar-toggle"
+              type="button"
+              aria-label={
+                sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"
+              }
+              aria-pressed={sidebarCollapsed}
+              onClick={() => setSidebarCollapsed((collapsed) => !collapsed)}
+            >
+              <span aria-hidden="true">{sidebarCollapsed ? "›" : "‹"}</span>
+            </button>
+            <p>
+              Administration <span aria-hidden="true">/</span>{" "}
+              <strong>{active?.label ?? "Overview"}</strong>
+            </p>
           </div>
-          <div className="operator-actions">
+          <div className="admin-navbar__actions">
+            <span className="admin-navbar__identity">
+              {roleLabels[user.roles[0] ?? "editor"]}
+              {user.roles.length > 1 ? ` +${user.roles.length - 1}` : ""}
+            </span>
             {user.roles.includes("principal") ? (
               <Link className="text-button" href="/room">
-                Open The Room
+                The Room
               </Link>
             ) : null}
             <button
-              className="text-button"
+              className="admin-navbar__signout"
               type="button"
               onClick={handleSignOut}
               disabled={signingOut}
@@ -532,66 +559,68 @@ function OperatorShell({
               {signingOut ? "Signing out" : "Sign out"}
             </button>
           </div>
-        </div>
-      </aside>
-
-      <section className="admin-content" aria-labelledby="workspace-title">
-        <header className="workspace-header">
-          <div>
-            <p className="section-context">Protected workspace</p>
-            <h1 id="workspace-title">{active?.label ?? "Overview"}</h1>
-            <p>{active?.description}</p>
-          </div>
-          <span className="access-state">Authenticated</span>
         </header>
 
-        {active?.id === "security" ? (
-          <SecurityWorkspace currentUserId={user.id} />
-        ) : active?.id === "content" ? (
-          <ContentWorkspace roles={user.roles} />
-        ) : active?.id === "media" ? (
-          <MediaWorkspace />
-        ) : active?.id === "protocol" ? (
-          <ProtocolDeskWorkspace roles={user.roles} />
-        ) : (
-          <>
-            <div className="status-grid" aria-label="Workspace status">
-              <article>
-                <p>Publishing</p>
-                <strong>Editorial controls active</strong>
-                <span>Review and source validation apply before release.</span>
-              </article>
-              <article>
-                <p>Translation</p>
-                <strong>Parity tracked by field</strong>
-                <span>
-                  Missing or stale French content remains visible to editors.
-                </span>
-              </article>
-              <article>
-                <p>Access</p>
-                <strong>
-                  {user.roles.length} assigned{" "}
-                  {user.roles.length === 1 ? "role" : "roles"}
-                </strong>
-                <span>
-                  Navigation is limited to the current account permissions.
-                </span>
-              </article>
+        <div className="admin-content">
+          <header className="workspace-header">
+            <div>
+              <p className="section-context">Protected workspace</p>
+              <h1 id="workspace-title">{active?.label ?? "Overview"}</h1>
+              <p>{active?.description}</p>
             </div>
+            <span className="access-state">Authenticated</span>
+          </header>
 
-            <section className="work-queue" aria-labelledby="queue-title">
-              <div>
-                <p className="section-context">Current queue</p>
-                <h2 id="queue-title">No assigned items</h2>
+          {active?.id === "security" ? (
+            <SecurityWorkspace currentUserId={user.id} />
+          ) : active?.id === "content" ? (
+            <ContentWorkspace roles={user.roles} />
+          ) : active?.id === "media" ? (
+            <MediaWorkspace />
+          ) : active?.id === "protocol" ? (
+            <ProtocolDeskWorkspace roles={user.roles} />
+          ) : (
+            <>
+              <div className="status-grid" aria-label="Workspace status">
+                <article>
+                  <p>Publishing</p>
+                  <strong>Editorial controls active</strong>
+                  <span>
+                    Review and source validation apply before release.
+                  </span>
+                </article>
+                <article>
+                  <p>Translation</p>
+                  <strong>Parity tracked by field</strong>
+                  <span>
+                    Missing or stale French content remains visible to editors.
+                  </span>
+                </article>
+                <article>
+                  <p>Access</p>
+                  <strong>
+                    {user.roles.length} assigned{" "}
+                    {user.roles.length === 1 ? "role" : "roles"}
+                  </strong>
+                  <span>
+                    Navigation is limited to the current account permissions.
+                  </span>
+                </article>
               </div>
-              <p>
-                Assigned drafts, reviews and operational requests will appear
-                here when their API views are enabled.
-              </p>
-            </section>
-          </>
-        )}
+
+              <section className="work-queue" aria-labelledby="queue-title">
+                <div>
+                  <p className="section-context">Current queue</p>
+                  <h2 id="queue-title">No assigned items</h2>
+                </div>
+                <p>
+                  Assigned drafts, reviews and operational requests will appear
+                  here when their API views are enabled.
+                </p>
+              </section>
+            </>
+          )}
+        </div>
       </section>
     </main>
   );

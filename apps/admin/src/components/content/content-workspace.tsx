@@ -650,62 +650,62 @@ export function ContentWorkspace({
             schema. Internal validation errors never create a partial draft.
           </p>
         </section>
-
-        <aside className="version-panel" aria-labelledby="versions-title">
-          <div className="version-heading">
-            <h2 id="versions-title">Versions</h2>
-            <button
-              className="text-button"
-              type="button"
-              onClick={() => void loadAudit()}
-              disabled={busy !== null}
-            >
-              Audit trail
-            </button>
-            <button
-              className="text-button"
-              type="button"
-              onClick={() => void prepareAuditExport()}
-              disabled={busy !== null}
-            >
-              {busy === "audit-export" ? (
-                <LoadingDots label="Preparing audit" />
-              ) : (
-                "Export audit"
-              )}
-            </button>
-          </div>
-          {versions.length === 0 ? (
-            <AdminEmptyState
-              kind="history"
-              title="No version selected"
-              description="Open a record to reveal its immutable history, review state and publication path."
-            />
-          ) : (
-            <div className="version-list">
-              {versions.map((version) => (
-                <button
-                  type="button"
-                  key={version.version}
-                  aria-current={
-                    version.version === selectedVersion ? "true" : undefined
-                  }
-                  onClick={() => {
-                    setSelectedVersion(version.version);
-                    if (isRecord(version.payload))
-                      setEditorValue(
-                        `${JSON.stringify(version.payload, null, 2)}\n`,
-                      );
-                  }}
-                >
-                  <strong>Version {version.version}</strong>
-                  <span>{version.state.replace("_", " ")}</span>
-                </button>
-              ))}
-            </div>
-          )}
-        </aside>
       </div>
+
+      <section className="version-panel" aria-labelledby="versions-title">
+        <div className="version-heading">
+          <h2 id="versions-title">Versions</h2>
+          <button
+            className="text-button"
+            type="button"
+            onClick={() => void loadAudit()}
+            disabled={busy !== null}
+          >
+            Audit trail
+          </button>
+          <button
+            className="text-button"
+            type="button"
+            onClick={() => void prepareAuditExport()}
+            disabled={busy !== null}
+          >
+            {busy === "audit-export" ? (
+              <LoadingDots label="Preparing audit" />
+            ) : (
+              "Export audit"
+            )}
+          </button>
+        </div>
+        {versions.length === 0 ? (
+          <AdminEmptyState
+            kind="history"
+            title="No version selected"
+            description="Open a record to reveal its immutable history, review state and publication path."
+          />
+        ) : (
+          <div className="version-list">
+            {versions.map((version) => (
+              <button
+                type="button"
+                key={version.version}
+                aria-current={
+                  version.version === selectedVersion ? "true" : undefined
+                }
+                onClick={() => {
+                  setSelectedVersion(version.version);
+                  if (isRecord(version.payload))
+                    setEditorValue(
+                      `${JSON.stringify(version.payload, null, 2)}\n`,
+                    );
+                }}
+              >
+                <strong>Version {version.version}</strong>
+                <span>{version.state.replace("_", " ")}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </section>
 
       {selected ? (
         <section className="workflow-panel" aria-labelledby="workflow-title">

@@ -250,6 +250,15 @@ describe("admin application", () => {
       screen.queryByRole("button", { name: /Security/ }),
     ).not.toBeInTheDocument();
     expect(screen.getByText("Editor")).toBeInTheDocument();
+    expect(screen.queryByText("Operator")).not.toBeInTheDocument();
+    expect(screen.queryByText("editor-1")).not.toBeInTheDocument();
+
+    const shell = screen.getByRole("main");
+    fireEvent.click(screen.getByRole("button", { name: "Collapse sidebar" }));
+    expect(shell).toHaveAttribute("data-sidebar-collapsed", "true");
+    expect(
+      screen.getByRole("button", { name: "Expand sidebar" }),
+    ).toHaveAttribute("aria-pressed", "true");
   });
 
   it("downloads the complete source and claim audit for an editorial reviewer", async () => {

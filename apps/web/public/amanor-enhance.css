@@ -68,7 +68,8 @@
 /* Hamburger toggle — hidden until the mobile breakpoint. */
 :root:not([data-mode="lite"]) .nav-toggle-input,
 :root:not([data-mode="lite"]) .nav-toggle,
-:root:not([data-mode="lite"]) .nav-drawer {
+:root:not([data-mode="lite"]) .nav-drawer,
+:root:not([data-mode="lite"]) .nav-drawer__utilities {
   display: none;
 }
 
@@ -132,6 +133,10 @@
 }
 
 @media (max-width: 47.9375rem) {
+  :root:not([data-mode="lite"]) .utility-bar {
+    display: none;
+  }
+
   :root:not([data-mode="lite"]) .primary-bar {
     position: relative;
     display: flex;
@@ -317,6 +322,70 @@
     font-weight: 600;
     letter-spacing: 0.12em;
     text-transform: uppercase;
+  }
+
+  :root:not([data-mode="lite"]) .nav-drawer__utilities {
+    display: grid;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem 1.1rem;
+    border-top: 0.0625rem solid rgba(232, 230, 225, 0.1);
+    border-bottom: 0.0625rem solid rgba(232, 230, 225, 0.1);
+  }
+
+  :root:not([data-mode="lite"]) .nav-drawer__utilities > p {
+    margin: 0;
+    color: rgba(232, 230, 225, 0.5);
+    font-family: var(--font-data, monospace);
+    font-size: 0.65rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  :root:not([data-mode="lite"]) .nav-drawer__utility-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  :root:not([data-mode="lite"]) .nav-drawer__utility-row a {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    padding: 0.55rem 0.8rem;
+    border: 0.0625rem solid rgba(232, 230, 225, 0.18);
+    border-radius: var(--radius);
+    color: rgba(232, 230, 225, 0.84);
+    font-family: var(--font-data, monospace);
+    font-size: 0.68rem;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+
+  :root:not([data-mode="lite"])
+    .nav-drawer__utility-row
+    a:is(:hover, :focus-visible, [aria-current="page"]) {
+    border-color: var(--gold);
+    color: #ffffff;
+  }
+
+  :root:not([data-mode="lite"]) .nav-drawer__locale-links {
+    display: inline-flex;
+    gap: 0.5rem;
+  }
+
+  :root:not([data-mode="lite"]) .nav-drawer__utilities .lite-control > span {
+    inset-inline-start: 0;
+    inset-inline-end: auto;
+    border-color: rgba(232, 230, 225, 0.18);
+    background: #171d21;
+    color: rgba(232, 230, 225, 0.78);
+  }
+
+  :root:not([data-mode="lite"]) .nav-drawer__utilities .theme-reset {
+    font-size: 0.6rem;
   }
 
   /* Full-width engagement CTA with gold reticle brackets. */

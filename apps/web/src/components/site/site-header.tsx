@@ -211,6 +211,54 @@ export function SiteHeader({
                   </ActiveNavigationLink>
                 ))}
               </nav>
+              <div
+                className="nav-drawer__utilities"
+                aria-label={isFrench ? "Outils du site" : "Site utilities"}
+              >
+                <p>{isFrench ? "Outils" : "Utilities"}</p>
+                <div className="nav-drawer__utility-row">
+                  <div
+                    className="nav-drawer__locale-links"
+                    aria-label={
+                      isFrench ? "Choix de la langue" : "Language selection"
+                    }
+                  >
+                    <a
+                      href={`/locale/en-GB?returnTo=${encodeURIComponent(pathname)}`}
+                      hrefLang="en-GB"
+                      aria-current={isFrench ? undefined : "page"}
+                    >
+                      English
+                    </a>
+                    <a
+                      href={`/locale/fr-FR?returnTo=${encodeURIComponent(pathname)}`}
+                      hrefLang="fr-FR"
+                      aria-current={isFrench ? "page" : undefined}
+                    >
+                      Français
+                    </a>
+                  </div>
+                  <ActiveNavigationLink
+                    href={localizePath("/search", locale)}
+                    initialPathname={pathname}
+                    drawerToggleId="amanor-nav-toggle"
+                  >
+                    {isFrench ? "Recherche" : "Search"}
+                  </ActiveNavigationLink>
+                  <LiteToggle
+                    active={false}
+                    autoDismissed={liteAutoDismissed}
+                    locale={locale}
+                    pathname={pathname}
+                  />
+                  <ThemeToggle
+                    locale={locale}
+                    pathname={pathname}
+                    theme={theme}
+                    preference={themePreference}
+                  />
+                </div>
+              </div>
               {!isSelah ? (
                 <ActiveNavigationLink
                   href={localizePath("/speaking/request", locale)}

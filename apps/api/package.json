@@ -8,6 +8,7 @@
     "start": "node dist/main.js",
     "migrate": "node dist/migrate.js",
     "retain": "node dist/retention.js",
+    "bootstrap:production-admin": "tsx scripts/bootstrap-production-admin.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src --max-warnings=0",
     "test": "vitest run",
@@ -52,6 +53,7 @@
     "@types/supertest": "7.2.1",
     "eslint": "9.39.5",
     "supertest": "7.2.2",
+    "tsx": "^4.20.6",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.67.0",
     "vitest": "4.1.10"

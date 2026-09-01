@@ -3711,6 +3711,145 @@ dialog.admin-dialog::backdrop {
   font-weight: 700;
 }
 
+.workspace-header__actions {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.workspace-help {
+  position: relative;
+}
+
+.workspace-help summary {
+  display: inline-flex;
+  min-height: 2.5rem;
+  align-items: center;
+  gap: 0.45rem;
+  border: 0.0625rem solid var(--rule);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.75rem;
+  background: var(--panel-raised);
+  color: var(--text);
+  font-size: 0.76rem;
+  font-weight: 800;
+  cursor: pointer;
+  list-style: none;
+}
+
+.workspace-help summary::-webkit-details-marker {
+  display: none;
+}
+
+.workspace-help summary > span {
+  display: grid;
+  width: 1.25rem;
+  height: 1.25rem;
+  place-items: center;
+  border: 0.0625rem solid color-mix(in srgb, var(--accent) 55%, var(--rule));
+  border-radius: 50%;
+  color: var(--accent);
+  font-family: "Courier New", monospace;
+}
+
+.workspace-help summary:hover,
+.workspace-help summary:focus-visible,
+.workspace-help[open] summary {
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--rule));
+  color: var(--accent);
+}
+
+.workspace-help__panel {
+  position: absolute;
+  top: calc(100% + 0.65rem);
+  right: 0;
+  z-index: 30;
+  width: min(26rem, calc(100vw - 2rem));
+  max-height: min(34rem, calc(100vh - 9rem));
+  overflow-y: auto;
+  border: 0.0625rem solid color-mix(in srgb, var(--accent) 32%, var(--rule));
+  border-top: 0.1875rem solid var(--accent);
+  border-radius: var(--radius);
+  padding: 1.15rem;
+  background: var(--panel-raised);
+  box-shadow: 0 1rem 2.5rem rgba(24, 20, 13, 0.18);
+}
+
+.workspace-help__heading {
+  display: grid;
+  gap: 0.35rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 0.0625rem solid var(--rule);
+}
+
+.workspace-help__heading p,
+.workspace-help__heading h2,
+.workspace-help__heading span,
+.workspace-help__note {
+  margin: 0;
+}
+
+.workspace-help__heading p {
+  color: var(--accent);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.workspace-help__heading h2 {
+  font-size: 1.05rem;
+}
+
+.workspace-help__heading span,
+.workspace-help__note {
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1.55;
+}
+
+.workspace-help ol {
+  display: grid;
+  gap: 0.8rem;
+  margin: 1rem 0;
+  padding: 0;
+  counter-reset: help-step;
+  list-style: none;
+}
+
+.workspace-help li {
+  position: relative;
+  min-height: 1.65rem;
+  padding-left: 2.35rem;
+  color: var(--text);
+  font-size: 0.78rem;
+  line-height: 1.55;
+  counter-increment: help-step;
+}
+
+.workspace-help li::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  width: 1.65rem;
+  height: 1.65rem;
+  place-items: center;
+  border: 0.0625rem solid var(--rule);
+  border-radius: 50%;
+  color: var(--accent);
+  font-family: "Courier New", monospace;
+  font-size: 0.68rem;
+  font-weight: 700;
+  content: counter(help-step, decimal-leading-zero);
+}
+
+.workspace-help__note {
+  padding-top: 0.8rem;
+  border-top: 0.0625rem solid var(--rule);
+}
+
 /* Security: a compact overview, explicit section index and bounded stages. */
 .security-workspace {
   display: grid;
@@ -3892,6 +4031,16 @@ dialog.admin-dialog::backdrop {
 }
 
 @media (max-width: 34rem) {
+  .workspace-header__actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .workspace-help__panel {
+    right: auto;
+    left: 0;
+  }
+
   .security-command__assurance,
   .security-index {
     grid-template-columns: 1fr;

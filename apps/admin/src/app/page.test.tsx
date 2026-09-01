@@ -4,6 +4,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiClientError } from "../lib/api/client";
@@ -259,6 +260,33 @@ describe("admin application", () => {
     expect(
       screen.getByRole("button", { name: "Expand sidebar" }),
     ).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("shows page-specific operating steps from the shared Help control", async () => {
+    apiMocks.login.mockResolvedValue({
+      accessToken: "access",
+      csrfToken: "csrf-token-that-is-at-least-thirty-two-bytes",
+      expiresIn: 300,
+      user: { id: "principal-1", roles: ["principal"] },
+    });
+    render(<AdminPage />);
+    completeLoginForm();
+
+    const overviewHelp = await screen.findByLabelText("Open help for Overview");
+    fireEvent.click(overviewHelp);
+    expect(
+      screen.getByRole("region", { name: "Overview operating guide" }),
+    ).toHaveTextContent("Review the status cards");
+
+    fireEvent.click(screen.getByRole("button", { name: /Content/ }));
+    const contentHelp = screen.getByLabelText("Open help for Content");
+    expect(contentHelp).not.toHaveAttribute("open");
+    fireEvent.click(contentHelp);
+    const contentGuide = screen.getByRole("region", {
+      name: "Content operating guide",
+    });
+    expect(contentGuide).toHaveTextContent("English and French fields");
+    expect(within(contentGuide).getAllByRole("listitem")).toHaveLength(5);
   });
 
   it("downloads the complete source and claim audit for an editorial reviewer", async () => {

@@ -16,6 +16,7 @@ import { AmanorMark } from "./amanor-mark";
 import { MediaWorkspace } from "./media/media-workspace";
 import { SegmentedCodeInput } from "./security/segmented-code-input";
 import { AuthFrame } from "./security/auth-frame";
+import { WorkspaceHelp, type WorkspaceHelpGuide } from "./ui/workspace-help";
 
 const MFA_CODE_LENGTH = 6;
 const RECOVERY_CODE_LENGTH = 19;
@@ -86,6 +87,78 @@ const navigation = [
   description: string;
   roles: readonly AdminRole[];
 }[];
+
+const workspaceHelp = {
+  overview: {
+    title: "Overview",
+    summary: "Start here to understand what is ready and what needs attention.",
+    steps: [
+      "Review the status cards for publishing, translation parity and access controls.",
+      "Check the work queue for the next assignment available to your role.",
+      "Open the relevant section from the navigation to complete that assignment.",
+      "Return here to confirm the workspace status after your action.",
+    ],
+  },
+  content: {
+    title: "Content",
+    summary:
+      "Create, translate, review and release source-backed public content.",
+    steps: [
+      "Choose the document or page you want to work on, or create a new draft.",
+      "Complete the English and French fields and attach a source to every public claim.",
+      "Save the draft, then submit it into the editorial review workflow.",
+      "Use the audit and parity checks to resolve missing sources or stale translations.",
+      "Publish only after the required second-person approval is recorded.",
+    ],
+  },
+  media: {
+    title: "Media",
+    summary: "Manage approved portraits, field media and transcript records.",
+    steps: [
+      "Choose the media collection that matches the asset you are managing.",
+      "Add the file details, caption, credit, consent and source information.",
+      "Review its language, accessibility text and publication status.",
+      "Release only assets with the required rights and approval; otherwise keep them governed.",
+    ],
+  },
+  protocol: {
+    title: "Protocol Desk",
+    summary: "Triage engagement requests and record each governed decision.",
+    steps: [
+      "Review operational health, then filter the queue to the requests needing attention.",
+      "Open a request and verify the requester, event details, flags and availability.",
+      "Assign an owner and add an internal note when more context is required.",
+      "Move the request through only the available next state and record the reason.",
+      "For accepted work, verify correspondence and calendar delivery, then download the Protocol Note.",
+    ],
+  },
+  legacy: {
+    title: "Legacy",
+    summary:
+      "Review scholar consent and giving records without exposing private data.",
+    steps: [
+      "Review the status cards to identify consent or stewardship work requiring attention.",
+      "Open the relevant record from the work queue available to your role.",
+      "Confirm the consent basis and permitted public fields before making a change.",
+      "Record the outcome and return to the overview to confirm the updated status.",
+    ],
+  },
+  security: {
+    title: "Security",
+    summary:
+      "Manage administrators, sessions and authentication audit evidence.",
+    steps: [
+      "Review the security summary and integrity status before taking action.",
+      "Use administrator access to invite or review an operator and assign only the required roles.",
+      "Use active sessions to revoke access that is no longer trusted or required.",
+      "Inspect the authentication audit for the event, actor and time you need to verify.",
+      "Confirm the integrity check remains valid after completing the review.",
+    ],
+  },
+} as const satisfies Record<
+  (typeof navigation)[number]["id"],
+  WorkspaceHelpGuide
+>;
 
 function hasAnyRole(
   userRoles: readonly AdminRole[],
@@ -568,7 +641,13 @@ function OperatorShell({
               <h1 id="workspace-title">{active?.label ?? "Overview"}</h1>
               <p>{active?.description}</p>
             </div>
-            <span className="access-state">Authenticated</span>
+            <div className="workspace-header__actions">
+              <WorkspaceHelp
+                key={active?.id}
+                guide={workspaceHelp[active?.id ?? "overview"]}
+              />
+              <span className="access-state">Authenticated</span>
+            </div>
           </header>
 
           {active?.id === "security" ? (

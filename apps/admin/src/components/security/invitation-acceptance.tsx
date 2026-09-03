@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { acceptInvitation, getInvitationSetup } from "../../lib/api/client";
 import { AdminWorkspace } from "../admin-workspace";
+import { AdminSkeleton } from "../ui/admin-state";
 import { SegmentedCodeInput } from "./segmented-code-input";
 import { AuthFrame } from "./auth-frame";
 
@@ -72,13 +73,7 @@ export function InvitationAcceptance({ token }: Readonly<{ token: string }>) {
         </span>
       </div>
       {state === "loading" ? (
-        <div className="auth-state" role="status">
-          <span className="auth-state__indicator" aria-hidden="true" />
-          <div>
-            <strong>Validating invitation</strong>
-            <p>Checking the one-time link and preparing secure setup…</p>
-          </div>
-        </div>
+        <AdminSkeleton variant="panel" label="Validating invitation" />
       ) : null}
       {state === "error" ? (
         <div className="auth-state auth-state--error" role="alert">

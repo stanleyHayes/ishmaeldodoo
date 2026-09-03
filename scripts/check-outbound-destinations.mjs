@@ -47,7 +47,7 @@ const fetchCount = outboundSources.reduce(
 );
 assert.equal(
   fetchCount,
-  35,
+  33,
   "The production outbound-fetch inventory changed; review the new or removed destination boundary",
 );
 

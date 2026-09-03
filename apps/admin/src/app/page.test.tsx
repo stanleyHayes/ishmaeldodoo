@@ -16,6 +16,7 @@ const apiMocks = vi.hoisted(() => ({
   logout: vi.fn(),
   listSessions: vi.fn(),
   revokeSession: vi.fn(),
+  resumeSession: vi.fn(),
   listAdministrators: vi.fn(),
   listAuthenticationAudit: vi.fn(),
   getAuthenticationAuditIntegrity: vi.fn(),
@@ -53,6 +54,7 @@ vi.mock("../lib/api/client", async (importOriginal) => {
     logout: apiMocks.logout,
     listSessions: apiMocks.listSessions,
     revokeSession: apiMocks.revokeSession,
+    resumeSession: apiMocks.resumeSession,
     listAdministrators: apiMocks.listAdministrators,
     listAuthenticationAudit: apiMocks.listAuthenticationAudit,
     getAuthenticationAuditIntegrity: apiMocks.getAuthenticationAuditIntegrity,
@@ -102,6 +104,14 @@ function completeLoginForm() {
 
 describe("admin application", () => {
   beforeEach(() => {
+    // No stored session by default, so each case starts at sign-in.
+    apiMocks.resumeSession.mockResolvedValue(null);
+    // The content library loads on arrival, so every case needs a well-formed
+    // empty page unless it supplies its own records.
+    apiMocks.listContentDocuments.mockResolvedValue({ items: [] });
+    // Sections are addressable, so one case's navigation would otherwise
+    // decide where the next one starts.
+    window.history.replaceState(null, "", "/");
     apiMocks.beginLogin.mockResolvedValue({
       state: "mfa_required",
       challenge: "a".repeat(64),
@@ -169,6 +179,7 @@ describe("admin application", () => {
     apiMocks.listAuthenticationAudit.mockReset();
     apiMocks.getAuthenticationAuditIntegrity.mockReset();
     apiMocks.listContentVersions.mockReset();
+    apiMocks.resumeSession.mockReset();
     apiMocks.listContentDocuments.mockReset();
     apiMocks.createContentDraft.mockReset();
     apiMocks.transitionContentVersion.mockReset();
@@ -245,7 +256,7 @@ describe("admin application", () => {
     expect(screen.getByRole("button", { name: /Content/ })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Media/ })).toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: /Protocol Desk/ }),
+      screen.queryByRole("button", { name: /Requests and events/ }),
     ).not.toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: /Security/ }),
@@ -253,6 +264,15 @@ describe("admin application", () => {
     expect(screen.getByText("Editor")).toBeInTheDocument();
     expect(screen.queryByText("Operator")).not.toBeInTheDocument();
     expect(screen.queryByText("editor-1")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "What would you like to do?" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Go to content tools" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Go to protocol tools" }),
+    ).not.toBeInTheDocument();
 
     const shell = screen.getByRole("main");
     fireEvent.click(screen.getByRole("button", { name: "Collapse sidebar" }));
@@ -260,6 +280,60 @@ describe("admin application", () => {
     expect(
       screen.getByRole("button", { name: "Expand sidebar" }),
     ).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("offers account actions and a replayable guided tour", async () => {
+    apiMocks.login.mockResolvedValue({
+      accessToken: "access",
+      csrfToken: "csrf-token-that-is-at-least-thirty-two-bytes",
+      expiresIn: 300,
+      user: { id: "editor-1", roles: ["editor"] },
+    });
+    render(<AdminPage />);
+    completeLoginForm();
+
+    const accountMenu = await screen.findByRole("button", {
+      name: "Open account menu",
+    });
+    fireEvent.click(accountMenu);
+    expect(screen.getByRole("menu")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("menuitem", { name: /Guided tour/ }));
+    expect(
+      screen.getByRole("dialog", { name: "Welcome to your workspace" }),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    expect(
+      screen.getByRole("heading", { name: "Choose work from the sidebar" }),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Skip tour" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("opens Access and Security from the account menu", async () => {
+    apiMocks.login.mockResolvedValue({
+      accessToken: "access",
+      csrfToken: "csrf-token-that-is-at-least-thirty-two-bytes",
+      expiresIn: 300,
+      user: { id: "security-1", roles: ["security_admin"] },
+    });
+    apiMocks.listSessions.mockResolvedValue([]);
+    render(<AdminPage />);
+    completeLoginForm();
+
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Open account menu" }),
+    );
+    fireEvent.click(
+      screen.getByRole("menuitem", { name: /Access and security/ }),
+    );
+
+    expect(
+      await screen.findByRole("heading", {
+        name: "Access and Security",
+        level: 1,
+      }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("menu")).not.toBeInTheDocument();
   });
 
   it("shows page-specific operating steps from the shared Help control", async () => {
@@ -336,7 +410,7 @@ describe("admin application", () => {
       screen.queryByRole("button", { name: /Content/ }),
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: /Protocol Desk/ }),
+      screen.queryByRole("button", { name: /Requests and events/ }),
     ).not.toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: /Security/ }),
@@ -497,18 +571,18 @@ describe("admin application", () => {
     render(<AdminPage />);
     completeLoginForm();
     fireEvent.click(
-      await screen.findByRole("button", { name: /Protocol Desk/ }),
+      await screen.findByRole("button", { name: /Requests and events/ }),
     );
     expect(await screen.findByText("PD-2026-0042")).toBeInTheDocument();
     expect(screen.getByText("Operational health")).toBeInTheDocument();
-    expect(screen.getByText("Overdue 48-hour responses")).toBeInTheDocument();
-    expect(screen.getByText("Failed calendar sync")).toBeInTheDocument();
-    expect(screen.getByText("Pending calendar sync")).toBeInTheDocument();
+    expect(screen.getByText("48-hour response window")).toBeInTheDocument();
+    expect(screen.getByText(/Failed calendar sync:/)).toBeInTheDocument();
+    expect(screen.getByText(/Pending calendar sync:/)).toBeInTheDocument();
     expect(
-      screen.getByText("Failed Principal decision delivery"),
+      screen.getByText(/Failed Principal decision delivery:/),
     ).toBeInTheDocument();
     expect(
-      screen.getByText("Pending Principal decision delivery"),
+      screen.getByText(/Pending Principal decision delivery:/),
     ).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("Availability starts"), {
       target: { value: "2026-12-01T09:00" },
@@ -703,6 +777,20 @@ describe("admin application", () => {
     expect(
       screen.queryByRole("button", { name: "Revoke session" }),
     ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "Administrators" }),
+    ).not.toBeInTheDocument();
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /AdministratorsInvite people and manage their access/,
+      }),
+    );
+    expect(
+      await screen.findByRole("heading", { name: "Administrators" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "Active sessions" }),
+    ).not.toBeInTheDocument();
   });
 
   it("provides a recoverable session-loading error state", async () => {
@@ -728,6 +816,35 @@ describe("admin application", () => {
       await screen.findByText(/no sessions were returned/i),
     ).toBeInTheDocument();
     expect(apiMocks.listSessions).toHaveBeenCalledTimes(2);
+  });
+
+  it("says what is holding publication up and who has to act", async () => {
+    apiMocks.login.mockResolvedValue({
+      accessToken: "access",
+      csrfToken: "csrf-token-that-is-at-least-thirty-two-bytes",
+      expiresIn: 300,
+      user: { id: "editor-1", roles: ["editor"] },
+    });
+    apiMocks.listContentVersions.mockResolvedValue([
+      {
+        documentType: "page",
+        documentId: "home",
+        version: 4,
+        state: "in_review",
+        authorId: "editor-1",
+        payload: { slug: "/", title: { "en-GB": "Home" } },
+      },
+    ]);
+    render(<AdminPage />);
+    completeLoginForm();
+    fireEvent.click(await screen.findByRole("button", { name: /Content/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Open document" }));
+
+    // An editor cannot approve, so the blocker has to name the reviewer rather
+    // than leave the operator looking for a button that is not theirs.
+    expect(
+      await screen.findByText(/Waiting on a reviewer to approve it/i),
+    ).toBeInTheDocument();
   });
 
   it("loads immutable CMS history, creates a draft, and submits it for review", async () => {
@@ -758,12 +875,12 @@ describe("admin application", () => {
     fireEvent.click(screen.getByRole("button", { name: "Open document" }));
 
     expect(await screen.findByText("Version 1")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "JSON" }));
+    fireEvent.click(screen.getByRole("button", { name: "Advanced JSON" }));
     expect(
       (screen.getByLabelText("Draft payload as JSON") as HTMLTextAreaElement)
         .value,
     ).toContain('"slug": "/"');
-    fireEvent.click(screen.getByRole("button", { name: "Create draft" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save as new draft" }));
     await waitFor(() =>
       expect(apiMocks.createContentDraft).toHaveBeenCalledWith(
         "page",
@@ -816,7 +933,12 @@ describe("admin application", () => {
     fireEvent.change(englishTitle, { target: { value: "Home" } });
     expect(titleStatus).toHaveValue("stale");
 
-    fireEvent.click(screen.getByRole("button", { name: "JSON" }));
+    fireEvent.click(screen.getByRole("button", { name: "Preview changes" }));
+    expect(
+      screen.getByRole("region", { name: "Website page preview" }),
+    ).toHaveTextContent("Home");
+
+    fireEvent.click(screen.getByRole("button", { name: "Advanced JSON" }));
     expect(
       (screen.getByLabelText("Draft payload as JSON") as HTMLTextAreaElement)
         .value,
@@ -844,13 +966,62 @@ describe("admin application", () => {
     render(<AdminPage />);
     completeLoginForm();
     fireEvent.click(await screen.findByRole("button", { name: /Content/ }));
-    fireEvent.click(screen.getByRole("button", { name: "Browse records" }));
 
-    expect(await screen.findByText("v3 · in review")).toBeInTheDocument();
-    fireEvent.click(
-      screen.getByRole("button", { name: /select record, version 3/i }),
-    );
+    // The library loads on arrival: nothing has to be pressed to see what
+    // exists, and the row carries its status before anything is opened.
+    const row = await screen.findByRole("button", {
+      name: /select record, version 3/i,
+    });
+    expect(row).toHaveTextContent("In review");
+    expect(row).toHaveTextContent("v3");
+    fireEvent.click(row);
     expect(screen.getByLabelText("Document ID")).toHaveValue("record");
+  });
+
+  it("explains CMS connection failures without discarding unsaved work", async () => {
+    apiMocks.login.mockResolvedValue({
+      accessToken: "access",
+      csrfToken: "csrf-token-that-is-at-least-thirty-two-bytes",
+      expiresIn: 300,
+      user: { id: "editor-1", roles: ["editor"] },
+    });
+    apiMocks.listContentVersions.mockRejectedValueOnce(
+      new TypeError("Failed to fetch"),
+    );
+    render(<AdminPage />);
+    completeLoginForm();
+    fireEvent.click(await screen.findByRole("button", { name: /Content/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Open document" }));
+
+    expect(
+      await screen.findByText(/could not connect to the content service/i),
+    ).toHaveTextContent(/changes remain in this browser/i);
+    expect(screen.queryByText(/CMS operation failed/i)).not.toBeInTheDocument();
+  });
+
+  it("shows a CMS support reference returned by the API", async () => {
+    apiMocks.login.mockResolvedValue({
+      accessToken: "access",
+      csrfToken: "csrf-token-that-is-at-least-thirty-two-bytes",
+      expiresIn: 300,
+      user: { id: "editor-1", roles: ["editor"] },
+    });
+    apiMocks.listContentVersions.mockRejectedValueOnce(
+      new ApiClientError(
+        "Service unavailable",
+        503,
+        "SERVICE_UNAVAILABLE",
+        "request-cms-215",
+      ),
+    );
+    render(<AdminPage />);
+    completeLoginForm();
+    fireEvent.click(await screen.findByRole("button", { name: /Content/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Open document" }));
+
+    expect(
+      await screen.findByText(/content service is temporarily unavailable/i),
+    ).toHaveTextContent(/request-cms-215/i);
   });
 
   it("offers an authoritative reload after a concurrent workflow conflict", async () => {
@@ -902,7 +1073,7 @@ describe("admin application", () => {
     render(<AdminPage />);
     completeLoginForm();
     fireEvent.click(await screen.findByRole("button", { name: /Content/ }));
-    const selector = screen.getByLabelText("Content type");
+    const selector = screen.getByLabelText("What kind of content?");
     for (const kind of [
       "identity",
       "atlasNode",
@@ -936,7 +1107,7 @@ describe("admin application", () => {
     render(<AdminPage />);
     completeLoginForm();
     fireEvent.click(await screen.findByRole("button", { name: /Content/ }));
-    const selector = screen.getByLabelText("Content type");
+    const selector = screen.getByLabelText("What kind of content?");
     const fields = [
       ["scholar", "Consent notice version"],
       ["officeHoursCycle", "Draw at"],
@@ -968,7 +1139,7 @@ describe("admin application", () => {
     render(<AdminPage />);
     completeLoginForm();
     fireEvent.click(await screen.findByRole("button", { name: /Content/ }));
-    fireEvent.change(screen.getByLabelText("Content type"), {
+    fireEvent.change(screen.getByLabelText("What kind of content?"), {
       target: { value: "archiveItem" },
     });
     fireEvent.click(
@@ -997,7 +1168,7 @@ describe("admin application", () => {
     render(<AdminPage />);
     completeLoginForm();
     fireEvent.click(await screen.findByRole("button", { name: /Content/ }));
-    fireEvent.change(screen.getByLabelText("Content type"), {
+    fireEvent.change(screen.getByLabelText("What kind of content?"), {
       target: { value: "speakingTheme" },
     });
     fireEvent.click(
@@ -1037,7 +1208,7 @@ describe("admin application", () => {
     render(<AdminPage />);
     completeLoginForm();
     fireEvent.click(await screen.findByRole("button", { name: /Content/ }));
-    fireEvent.change(screen.getByLabelText("Content type"), {
+    fireEvent.change(screen.getByLabelText("What kind of content?"), {
       target: { value: "source" },
     });
     fireEvent.click(
@@ -1058,7 +1229,7 @@ describe("admin application", () => {
     fireEvent.change(screen.getByLabelText("Source type"), {
       target: { value: "official" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Create draft" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save as new draft" }));
 
     await waitFor(() =>
       expect(apiMocks.createContentDraft).toHaveBeenCalledWith(

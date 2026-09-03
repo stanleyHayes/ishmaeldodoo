@@ -9,6 +9,7 @@
     "migrate": "node dist/migrate.js",
     "retain": "node dist/retention.js",
     "bootstrap:production-admin": "tsx scripts/bootstrap-production-admin.ts",
+    "rename:production-admin": "tsx scripts/rename-production-admin.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src --max-warnings=0",
     "test": "vitest run",

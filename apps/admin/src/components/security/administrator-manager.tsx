@@ -3,6 +3,7 @@
 import { adminRoles, type AdministratorSummary } from "@amanor/contracts";
 import { useCallback, useEffect, useState } from "react";
 import { AdminSelect } from "../ui/admin-select";
+import { AdminEmptyState, AdminNotice } from "../ui/admin-state";
 import {
   changeAdministratorRoles,
   inviteAdministrator,
@@ -26,7 +27,11 @@ export function AdministratorManager({
   );
   const [working, setWorking] = useState<string | null>(null);
   const [confirmDisable, setConfirmDisable] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useState<Readonly<{
+    tone: "error" | "success" | "information";
+    title: string;
+    description?: string;
+  }> | null>(null);
   const [invitationUrl, setInvitationUrl] = useState<string | null>(null);
 
   const load = useCallback(() => {
@@ -67,16 +72,29 @@ export function AdministratorManager({
   async function saveRoles(userId: string) {
     const roles = draftRoles[userId] ?? [];
     if (roles.length === 0) {
-      setMessage("Every administrator must retain at least one role.");
+      setMessage({
+        tone: "error",
+        title: "Choose at least one role",
+        description: "Every administrator needs one role to keep access.",
+      });
       return;
     }
     setWorking(userId);
     setMessage(null);
     try {
       replace(await changeAdministratorRoles(userId, roles));
-      setMessage("Roles saved. Existing sessions were revoked.");
+      setMessage({
+        tone: "success",
+        title: "Roles saved",
+        description: "Existing sessions were revoked for security.",
+      });
     } catch {
-      setMessage("Roles could not be saved. Refresh and try again.");
+      setMessage({
+        tone: "error",
+        title: "We couldn't save these roles",
+        description:
+          "Refresh the account list and try again. No access was changed.",
+      });
     } finally {
       setWorking(null);
     }
@@ -88,13 +106,20 @@ export function AdministratorManager({
     try {
       replace(await setAdministratorDisabled(userId, disabled));
       setConfirmDisable(null);
-      setMessage(
-        disabled
-          ? "Account disabled and existing sessions revoked."
-          : "Account re-enabled. A fresh sign-in is required.",
-      );
+      setMessage({
+        tone: "success",
+        title: disabled ? "Account disabled" : "Account re-enabled",
+        description: disabled
+          ? "Existing sessions were revoked."
+          : "The administrator can sign in again with a fresh session.",
+      });
     } catch {
-      setMessage("Account status could not be changed. Refresh and try again.");
+      setMessage({
+        tone: "error",
+        title: "We couldn't change this account",
+        description:
+          "Refresh the account list and try again. The current access remains unchanged.",
+      });
     } finally {
       setWorking(null);
     }
@@ -122,14 +147,20 @@ export function AdministratorManager({
       setInvitationUrl(
         `${window.location.origin}/?invitation=${encodeURIComponent(result.invitationToken)}`,
       );
-      setMessage(
-        "Invitation created. Share the one-time link through an approved secure channel.",
-      );
+      setMessage({
+        tone: "success",
+        title: "Invitation created",
+        description:
+          "Share the one-time link through an approved secure channel.",
+      });
       form.reset();
     } catch {
-      setMessage(
-        "Invitation could not be created. Check the address and try again.",
-      );
+      setMessage({
+        tone: "error",
+        title: "We couldn't create the invitation",
+        description:
+          "Check the email address and selected role, then try again.",
+      });
     } finally {
       setWorking(null);
     }
@@ -150,7 +181,7 @@ export function AdministratorManager({
           Refresh
         </button>
       </div>
-      {message ? <p role="status">{message}</p> : null}
+      {message ? <AdminNotice {...message} /> : null}
       <form className="administrator-invitation" onSubmit={invite}>
         <div className="field">
           <label htmlFor="invitation-email">Administrator email</label>
@@ -206,9 +237,22 @@ export function AdministratorManager({
           <span />
         </div>
       ) : status === "error" ? (
-        <div className="session-state" role="alert">
-          Administrator accounts could not be loaded.
-        </div>
+        <AdminNotice
+          tone="error"
+          title="We couldn't load administrator accounts"
+          description="Check your connection and refresh the list. No account settings were changed."
+          action={
+            <button className="secondary-button" type="button" onClick={load}>
+              Try again
+            </button>
+          }
+        />
+      ) : users.length === 0 ? (
+        <AdminEmptyState
+          kind="work"
+          title="No administrator accounts yet"
+          description="Invite the first administrator above and choose the smallest role they need."
+        />
       ) : (
         <ul className="administrator-list">
           {users.map((user) => {
@@ -217,10 +261,23 @@ export function AdministratorManager({
             const immutable = ownAccount || principal;
             return (
               <li key={user.userId}>
-                <div>
-                  <strong>{user.emailCanonical}</strong>
-                  <code>{user.userId}</code>
-                  <span>{user.disabledAt ? "Disabled" : "Active"}</span>
+                <div className="administrator-identity">
+                  <span className="administrator-avatar" aria-hidden="true">
+                    {user.emailCanonical.slice(0, 1).toUpperCase()}
+                  </span>
+                  <div>
+                    <strong>{user.emailCanonical}</strong>
+                    <span
+                      className="administrator-status"
+                      data-disabled={Boolean(user.disabledAt)}
+                    >
+                      {user.disabledAt ? "Disabled" : "Active"}
+                    </span>
+                    <details>
+                      <summary>Account reference</summary>
+                      <code>{user.userId}</code>
+                    </details>
+                  </div>
                 </div>
                 <fieldset disabled={immutable || working === user.userId}>
                   <legend>Assigned roles</legend>
@@ -291,11 +348,13 @@ export function AdministratorManager({
                     </button>
                   )}
                 </div>
-                {ownAccount ? (
-                  <p>Your own access cannot be changed here.</p>
-                ) : null}
-                {principal ? (
-                  <p>Principal governance requires break-glass review.</p>
+                {ownAccount || principal ? (
+                  <p className="administrator-lock-note">
+                    <span aria-hidden="true">i</span>
+                    {ownAccount
+                      ? "This is your account. Ask another authorised administrator to change it."
+                      : "Principal access can only be changed through the break-glass process."}
+                  </p>
                 ) : null}
               </li>
             );

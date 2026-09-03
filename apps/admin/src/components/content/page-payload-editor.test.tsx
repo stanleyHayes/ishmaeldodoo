@@ -56,10 +56,13 @@ describe("PagePayloadEditor Record fields", () => {
         onChange={onChange}
       />,
     );
-    expect(screen.getByLabelText("Record act")).toHaveValue("forest");
+    expect(screen.getByLabelText("Record chapter")).toHaveValue("forest");
     const fieldImage = screen.getByLabelText("Field image");
     expect(fieldImage.tagName).toBe("SELECT");
-    await screen.findAllByRole("option", { name: /Governed field image/iu });
+    await screen.findAllByRole("option", {
+      name: /Governed field image/iu,
+      hidden: true,
+    });
     expect(fieldImage).toHaveValue("00000000-0000-4000-8000-000000000001");
     fireEvent.click(screen.getByRole("button", { name: "Add claim" }));
     fireEvent.click(screen.getByRole("button", { name: "Add marginal note" }));
@@ -103,7 +106,10 @@ describe("PagePayloadEditor Record fields", () => {
       />,
     );
 
-    await screen.findAllByRole("option", { name: /Governed field image/iu });
+    await screen.findAllByRole("option", {
+      name: /Governed field image/iu,
+      hidden: true,
+    });
     for (const label of ["Open Graph image", "Marginal note 1 image"]) {
       const picker = screen.getByLabelText(label);
       expect(picker.tagName).toBe("SELECT");

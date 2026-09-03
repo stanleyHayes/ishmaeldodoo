@@ -100,51 +100,61 @@ export function TwoLedgers({
   return (
     <section className="two-ledgers" aria-labelledby="ledgers-heading">
       <div className="two-ledgers__heading">
-        <p className="section-number">03</p>
+        <p className="section-number">
+          {fr ? "Couche de preuves" : "Evidence layer"}
+        </p>
         <h2 id="ledgers-heading">
-          {fr ? "Les deux registres" : "The Two Ledgers"}
+          {fr
+            ? "Deux façons de lire le parcours"
+            : "Two ways to read the career"}
         </h2>
         <p>
           {fr
-            ? "Les mêmes faits, lus dans deux registres."
-            : "The same facts, read in two registers."}
+            ? "Passez de l’historique de carrière à un résumé des institutions, pays, résultats et portefeuilles."
+            : "Switch between the career history and a summary of institutions, countries, results and portfolio values."}
         </p>
       </div>
-      <div
-        className="ledger-tabs"
-        role="tablist"
-        aria-label={fr ? "Choisir un registre" : "Choose a ledger"}
-      >
-        <button
-          id="diplomatic-ledger-tab"
-          role="tab"
-          aria-selected={view === "diplomatic"}
-          aria-controls="diplomatic-ledger"
-          tabIndex={view === "diplomatic" ? 0 : -1}
-          onClick={() => choose("diplomatic")}
-          onKeyDown={(event) => moveTab(event, "diplomatic")}
+      <div className="ledger-toolbar">
+        <div
+          className="ledger-tabs"
+          role="tablist"
+          aria-label={fr ? "Choisir un registre" : "Choose a ledger"}
         >
-          {fr ? "Registre diplomatique" : "Diplomatic Record"}
-        </button>
+          <button
+            id="diplomatic-ledger-tab"
+            role="tab"
+            aria-label={fr ? "Historique de carrière" : "Career history"}
+            aria-selected={view === "diplomatic"}
+            aria-controls="diplomatic-ledger"
+            tabIndex={view === "diplomatic" ? 0 : -1}
+            onClick={() => choose("diplomatic")}
+            onKeyDown={(event) => moveTab(event, "diplomatic")}
+          >
+            <span>{fr ? "Parcours" : "Timeline"}</span>
+            {fr ? "Historique de carrière" : "Career history"}
+          </button>
+          <button
+            id="operator-ledger-tab"
+            role="tab"
+            aria-label={fr ? "Résumé des résultats" : "Results summary"}
+            aria-selected={view === "operator"}
+            aria-controls="operator-ledger"
+            tabIndex={view === "operator" ? 0 : -1}
+            onClick={() => choose("operator")}
+            onKeyDown={(event) => moveTab(event, "operator")}
+          >
+            <span>{fr ? "En chiffres" : "By the numbers"}</span>
+            {fr ? "Résumé des résultats" : "Results summary"}
+          </button>
+        </div>
         <button
-          id="operator-ledger-tab"
-          role="tab"
-          aria-selected={view === "operator"}
-          aria-controls="operator-ledger"
-          tabIndex={view === "operator" ? 0 : -1}
-          onClick={() => choose("operator")}
-          onKeyDown={(event) => moveTab(event, "operator")}
+          type="button"
+          className="ledger-print-button"
+          onClick={printSelectedLedger}
         >
-          {fr ? "Registre de l’opérateur" : "Operator’s Record"}
+          {fr ? "Imprimer cette vue" : "Print this view"}
         </button>
       </div>
-      <button
-        type="button"
-        className="ledger-print-button"
-        onClick={printSelectedLedger}
-      >
-        {fr ? "Imprimer ce registre" : "Print this ledger"}
-      </button>
       {view === "diplomatic" ? (
         <div
           id="diplomatic-ledger"

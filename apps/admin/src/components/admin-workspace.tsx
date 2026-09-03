@@ -2,12 +2,14 @@
 
 import type { AuthSessionResponse } from "@amanor/contracts";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ApiClientError,
   beginLogin,
   completeLogin,
+  hasResumableSession,
   logout,
+  resumeSession,
 } from "../lib/api/client";
 import { SecurityWorkspace } from "./security/security-workspace";
 import { ContentWorkspace } from "./content/content-workspace";
@@ -17,9 +19,11 @@ import { MediaWorkspace } from "./media/media-workspace";
 import { SegmentedCodeInput } from "./security/segmented-code-input";
 import { AuthFrame } from "./security/auth-frame";
 import { WorkspaceHelp, type WorkspaceHelpGuide } from "./ui/workspace-help";
+import { AdminEmptyState, AdminSkeleton } from "./ui/admin-state";
 
 const MFA_CODE_LENGTH = 6;
 const RECOVERY_CODE_LENGTH = 19;
+const ONBOARDING_STORAGE_KEY = "amanor-admin-onboarding-v1";
 
 type AdminRole = AuthSessionResponse["user"]["roles"][number];
 type AdminUser = AuthSessionResponse["user"];
@@ -38,8 +42,9 @@ const roleLabels: Record<AdminRole, string> = {
 const navigation = [
   {
     id: "overview",
-    label: "Overview",
-    description: "Publishing readiness and assigned work",
+    symbol: "⌂",
+    label: "Home",
+    description: "See what needs your attention",
     roles: [
       "principal",
       "desk_officer",
@@ -53,36 +58,42 @@ const navigation = [
   },
   {
     id: "content",
-    label: "Content",
-    description: "Identity, pages, sources and editorial workflow",
+    symbol: "✎",
+    label: "Website Content",
+    description: "Write, translate, review and publish pages",
     roles: ["principal", "editor", "translator", "reviewer"],
   },
   {
     id: "media",
-    label: "Media",
-    description: "Governed portraits, field archive and transcripts",
+    symbol: "▧",
+    label: "Images and Media",
+    description: "Manage approved images, audio and video",
     roles: ["principal", "editor", "press_officer"],
   },
   {
     id: "protocol",
-    label: "Protocol Desk",
-    description: "Engagement intake and correspondence",
+    symbol: "◇",
+    label: "Requests and events",
+    description: "Review speaking requests and event messages",
     roles: ["principal", "desk_officer"],
   },
   {
     id: "legacy",
-    label: "Legacy",
-    description: "Scholar consent and giving records",
+    symbol: "♧",
+    label: "Scholar support",
+    description: "Manage scholar consent and support records",
     roles: ["principal", "trust_admin"],
   },
   {
     id: "security",
-    label: "Security",
-    description: "Sessions, roles and audit review",
+    symbol: "⌾",
+    label: "Access and Security",
+    description: "Manage accounts, sessions and security history",
     roles: ["principal", "security_admin"],
   },
 ] as const satisfies readonly {
   id: string;
+  symbol: string;
   label: string;
   description: string;
   roles: readonly AdminRole[];
@@ -159,6 +170,29 @@ const workspaceHelp = {
   (typeof navigation)[number]["id"],
   WorkspaceHelpGuide
 >;
+
+/**
+ * Every section is addressable. The shell drives the URL with `history` rather
+ * than the app router, because it is one client tree that owns its own section
+ * state; the route files under `app/` exist so a reload or a pasted link lands
+ * on the same place.
+ */
+const sectionPaths: Readonly<Record<string, string>> = {
+  overview: "/",
+  content: "/content",
+  media: "/media",
+  protocol: "/protocol",
+  legacy: "/legacy",
+  security: "/security",
+};
+
+function sectionFromPath(pathname: string): string | null {
+  const match = Object.entries(sectionPaths).find(
+    ([, path]) => path !== "/" && pathname.startsWith(path),
+  );
+  if (match) return match[0];
+  return pathname === "/" ? "overview" : null;
+}
 
 function hasAnyRole(
   userRoles: readonly AdminRole[],
@@ -512,15 +546,85 @@ function OperatorShell({
   const allowedNavigation = navigation.filter((item) =>
     hasAnyRole(user.roles, item.roles),
   );
-  const [activeId, setActiveId] = useState(
-    allowedNavigation[0]?.id ?? "overview",
-  );
+  const fallbackId = allowedNavigation[0]?.id ?? "overview";
+  const [activeId, setActiveId] = useState(() => {
+    const fromPath =
+      typeof window === "undefined"
+        ? null
+        : sectionFromPath(window.location.pathname);
+    return fromPath && allowedNavigation.some((item) => item.id === fromPath)
+      ? fromPath
+      : fallbackId;
+  });
   const [signingOut, setSigningOut] = useState(false);
   const [navOpen, setNavOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const [onboardingStep, setOnboardingStep] = useState<number | null>(null);
+  const accountMenuRef = useRef<HTMLDivElement>(null);
   const active =
     allowedNavigation.find((item) => item.id === activeId) ??
     allowedNavigation[0];
+  const accountLabel = "Signed-in operator";
+
+  useEffect(() => {
+    function syncFromHistory() {
+      const fromPath = sectionFromPath(window.location.pathname);
+      if (fromPath && allowedNavigation.some((item) => item.id === fromPath))
+        setActiveId(fromPath);
+    }
+    window.addEventListener("popstate", syncFromHistory);
+    return () => window.removeEventListener("popstate", syncFromHistory);
+  }, [allowedNavigation]);
+
+  function openSection(id: string) {
+    setActiveId(id);
+    setNavOpen(false);
+    const path = sectionPaths[id];
+    if (path && window.location.pathname !== path)
+      window.history.pushState(null, "", path);
+  }
+
+  useEffect(() => {
+    if (
+      window.localStorage?.getItem(ONBOARDING_STORAGE_KEY) !== "complete" &&
+      process.env.NODE_ENV !== "test"
+    ) {
+      const timer = window.setTimeout(() => setOnboardingStep(0), 0);
+      return () => window.clearTimeout(timer);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!accountOpen) return;
+    const close = (event: MouseEvent) => {
+      if (!accountMenuRef.current?.contains(event.target as Node)) {
+        setAccountOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, [accountOpen]);
+
+  function finishOnboarding() {
+    window.localStorage?.setItem(ONBOARDING_STORAGE_KEY, "complete");
+    setOnboardingStep(null);
+  }
+
+  const onboarding = [
+    {
+      title: "Welcome to your workspace",
+      copy: "This is the private control room for the public website. Only the tools allowed for your account are shown.",
+    },
+    {
+      title: "Choose work from the sidebar",
+      copy: "Website Content handles pages and translations. Images and Media stores approved assets. Requests and events manages incoming engagements.",
+    },
+    {
+      title: "Use the account menu",
+      copy: "The menu at the top right shows your access, opens help, restarts this guide and signs you out securely.",
+    },
+  ] as const;
 
   async function handleSignOut() {
     setSigningOut(true);
@@ -572,18 +676,15 @@ function OperatorShell({
           </div>
         </div>
         <nav className="admin-navigation" aria-label="Administration sections">
-          {allowedNavigation.map((item, index) => (
+          {allowedNavigation.map((item) => (
             <button
               key={item.id}
               type="button"
               aria-current={item.id === active?.id ? "page" : undefined}
-              onClick={() => {
-                setActiveId(item.id);
-                setNavOpen(false);
-              }}
+              onClick={() => openSection(item.id)}
             >
               <span className="admin-navigation__index" aria-hidden="true">
-                {String(index + 1).padStart(2, "0")}
+                {item.symbol}
               </span>
               <span className="admin-navigation__copy">
                 <strong>{item.label}</strong>
@@ -592,6 +693,13 @@ function OperatorShell({
             </button>
           ))}
         </nav>
+        <div className="admin-sidebar__footer">
+          <span className="admin-sidebar__status" aria-hidden="true" />
+          <div className="admin-navigation__copy">
+            <strong>Secure workspace</strong>
+            <small>Protected operator access</small>
+          </div>
+        </div>
       </aside>
 
       <section className="admin-stage" aria-labelledby="workspace-title">
@@ -609,36 +717,115 @@ function OperatorShell({
               <span aria-hidden="true">{sidebarCollapsed ? "›" : "‹"}</span>
             </button>
             <p>
-              Administration <span aria-hidden="true">/</span>{" "}
+              <span className="admin-navbar__greeting">Welcome back</span>
               <strong>{active?.label ?? "Overview"}</strong>
             </p>
           </div>
           <div className="admin-navbar__actions">
-            <span className="admin-navbar__identity">
-              {roleLabels[user.roles[0] ?? "editor"]}
-              {user.roles.length > 1 ? ` +${user.roles.length - 1}` : ""}
-            </span>
             {user.roles.includes("principal") ? (
               <Link className="text-button" href="/room">
                 The Room
               </Link>
             ) : null}
+            <div className="admin-account" ref={accountMenuRef}>
+              <button
+                className="admin-account__trigger"
+                type="button"
+                aria-label="Open account menu"
+                aria-haspopup="menu"
+                aria-expanded={accountOpen}
+                onClick={() => setAccountOpen((open) => !open)}
+              >
+                <span className="admin-account__avatar" aria-hidden="true">
+                  {accountLabel.slice(0, 1).toUpperCase()}
+                </span>
+                <span className="admin-account__copy">
+                  <strong>{accountLabel}</strong>
+                  <small>
+                    {roleLabels[user.roles[0] ?? "editor"]}
+                    {user.roles.length > 1 ? ` +${user.roles.length - 1}` : ""}
+                  </small>
+                </span>
+                <span className="admin-account__chevron" aria-hidden="true">
+                  ⌄
+                </span>
+              </button>
+              {accountOpen ? (
+                <div className="admin-account__menu" role="menu">
+                  <div className="admin-account__summary">
+                    <strong>{accountLabel}</strong>
+                    <span>
+                      {user.roles.length} assigned{" "}
+                      {user.roles.length === 1 ? "role" : "roles"}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setAccountOpen(false);
+                      setOnboardingStep(0);
+                    }}
+                  >
+                    <span aria-hidden="true">?</span>
+                    <span>
+                      <strong>Guided tour</strong>
+                      <small>Learn how this workspace works</small>
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setAccountOpen(false);
+                      openSection("security");
+                      window.setTimeout(() => {
+                        document.getElementById("workspace-title")?.focus();
+                      }, 0);
+                    }}
+                  >
+                    <span aria-hidden="true">⌾</span>
+                    <span>
+                      <strong>Access and security</strong>
+                      <small>Review sessions and account access</small>
+                    </span>
+                  </button>
+                  <button
+                    className="admin-account__signout"
+                    type="button"
+                    role="menuitem"
+                    onClick={handleSignOut}
+                    disabled={signingOut}
+                  >
+                    <span aria-hidden="true">↗</span>
+                    <span>
+                      <strong>{signingOut ? "Signing out" : "Sign out"}</strong>
+                      <small>End this secure session</small>
+                    </span>
+                  </button>
+                </div>
+              ) : null}
+            </div>
             <button
-              className="admin-navbar__signout"
+              className="admin-navbar__signout admin-navbar__signout--icon"
               type="button"
+              aria-label="Sign out"
+              title="Sign out"
               onClick={handleSignOut}
               disabled={signingOut}
             >
-              {signingOut ? "Signing out" : "Sign out"}
+              <span aria-hidden="true">↗</span>
             </button>
           </div>
         </header>
 
-        <div className="admin-content">
+        <div className="admin-content" data-workspace={active?.id}>
           <header className="workspace-header">
             <div>
-              <p className="section-context">Protected workspace</p>
-              <h1 id="workspace-title">{active?.label ?? "Overview"}</h1>
+              <p className="section-context">Your workspace</p>
+              <h1 id="workspace-title" tabIndex={-1}>
+                {active?.label ?? "Overview"}
+              </h1>
               <p>{active?.description}</p>
             </div>
             <div className="workspace-header__actions">
@@ -646,7 +833,7 @@ function OperatorShell({
                 key={active?.id}
                 guide={workspaceHelp[active?.id ?? "overview"]}
               />
-              <span className="access-state">Authenticated</span>
+              <span className="access-state">Signed in</span>
             </div>
           </header>
 
@@ -660,53 +847,203 @@ function OperatorShell({
             <ProtocolDeskWorkspace roles={user.roles} />
           ) : (
             <>
-              <div className="status-grid" aria-label="Workspace status">
-                <article>
-                  <p>Publishing</p>
-                  <strong>Editorial controls active</strong>
-                  <span>
-                    Review and source validation apply before release.
-                  </span>
-                </article>
-                <article>
-                  <p>Translation</p>
-                  <strong>Parity tracked by field</strong>
-                  <span>
-                    Missing or stale French content remains visible to editors.
-                  </span>
-                </article>
-                <article>
-                  <p>Access</p>
-                  <strong>
-                    {user.roles.length} assigned{" "}
-                    {user.roles.length === 1 ? "role" : "roles"}
-                  </strong>
-                  <span>
-                    Navigation is limited to the current account permissions.
-                  </span>
-                </article>
-              </div>
-
-              <section className="work-queue" aria-labelledby="queue-title">
-                <div>
-                  <p className="section-context">Current queue</p>
-                  <h2 id="queue-title">No assigned items</h2>
+              <section
+                className="admin-quick-start"
+                aria-labelledby="quick-start-title"
+              >
+                <div className="admin-quick-start__heading">
+                  <div>
+                    <p className="section-context">Start here</p>
+                    <h2 id="quick-start-title">What would you like to do?</h2>
+                  </div>
+                  <p>
+                    Choose a task below. You will only see areas available to
+                    your account.
+                  </p>
                 </div>
-                <p>
-                  Assigned drafts, reviews and operational requests will appear
-                  here when their API views are enabled.
-                </p>
+                <div className="admin-quick-start__grid">
+                  {allowedNavigation
+                    .filter((item) => item.id !== "overview")
+                    .map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        aria-label={`Go to ${item.id} tools`}
+                        onClick={() => openSection(item.id)}
+                      >
+                        <span>{item.label}</span>
+                        <small>{item.description}</small>
+                        <b aria-hidden="true">→</b>
+                      </button>
+                    ))}
+                </div>
+              </section>
+
+              <section
+                className="admin-rules"
+                aria-labelledby="admin-rules-title"
+              >
+                <div className="admin-rules__heading">
+                  <p className="section-context">Keep in mind</p>
+                  <h2 id="admin-rules-title">
+                    Three rules that protect every update
+                  </h2>
+                </div>
+                <div className="status-grid" aria-label="Workspace rules">
+                  <article>
+                    <p>
+                      <span aria-hidden="true">01</span> Before a page goes live
+                    </p>
+                    <strong>Review and sources are required</strong>
+                    <span>
+                      Every public claim must have a source and another
+                      authorised person must approve publication.
+                    </span>
+                  </article>
+                  <article>
+                    <p>
+                      <span aria-hidden="true">02</span> English and French
+                    </p>
+                    <strong>Both versions stay together</strong>
+                    <span>
+                      The workspace clearly marks missing or outdated French
+                      text before publication.
+                    </span>
+                  </article>
+                  <article>
+                    <p>
+                      <span aria-hidden="true">03</span> Your access
+                    </p>
+                    <strong>
+                      {user.roles.length} assigned{" "}
+                      {user.roles.length === 1 ? "role" : "roles"}
+                    </strong>
+                    <span>
+                      Only the tools your role is allowed to use appear in the
+                      menu.
+                    </span>
+                  </article>
+                </div>
+              </section>
+
+              <section className="work-queue" aria-label="Your work queue">
+                <AdminEmptyState
+                  kind="work"
+                  title="You're all caught up"
+                  description="Drafts, reviews and engagement requests assigned to you will appear here with the next action to take."
+                />
               </section>
             </>
           )}
         </div>
       </section>
+      {onboardingStep !== null ? (
+        <div
+          className="admin-onboarding"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="admin-onboarding-title"
+        >
+          <button
+            className="admin-onboarding__backdrop"
+            type="button"
+            aria-label="Close guided tour"
+            onClick={finishOnboarding}
+          />
+          <section className="admin-onboarding__card">
+            <div className="admin-onboarding__progress">
+              <span>Getting started</span>
+              <span>
+                Step {onboardingStep + 1} of {onboarding.length}
+              </span>
+            </div>
+            <div className="admin-onboarding__illustration" aria-hidden="true">
+              <AmanorMark />
+            </div>
+            <h2 id="admin-onboarding-title">
+              {onboarding[onboardingStep]?.title}
+            </h2>
+            <p>{onboarding[onboardingStep]?.copy}</p>
+            <div className="admin-onboarding__dots" aria-hidden="true">
+              {onboarding.map((step, index) => (
+                <span
+                  key={step.title}
+                  data-current={index === onboardingStep ? "true" : undefined}
+                />
+              ))}
+            </div>
+            <div className="admin-onboarding__actions">
+              <button
+                type="button"
+                className="text-button"
+                onClick={finishOnboarding}
+              >
+                Skip tour
+              </button>
+              <div>
+                {onboardingStep > 0 ? (
+                  <button
+                    type="button"
+                    className="text-button"
+                    onClick={() => setOnboardingStep(onboardingStep - 1)}
+                  >
+                    Back
+                  </button>
+                ) : null}
+                <button
+                  type="button"
+                  className="primary-button"
+                  onClick={() =>
+                    onboardingStep === onboarding.length - 1
+                      ? finishOnboarding()
+                      : setOnboardingStep(onboardingStep + 1)
+                  }
+                >
+                  {onboardingStep === onboarding.length - 1
+                    ? "Start working"
+                    : "Next"}
+                </button>
+              </div>
+            </div>
+          </section>
+        </div>
+      ) : null}
     </main>
   );
 }
 
 export function AdminWorkspace() {
   const [user, setUser] = useState<AdminUser | null>(null);
+  // Only wait when there is something to wait for: an operator returning to a
+  // live session should not be asked to sign in again, and a first-time visitor
+  // should not be shown a placeholder for a session that never existed.
+  const [resuming, setResuming] = useState(() =>
+    typeof window === "undefined" ? false : hasResumableSession(),
+  );
+
+  useEffect(() => {
+    if (!resuming) return;
+    let current = true;
+    void resumeSession()
+      .then((session) => {
+        if (current && session) setUser(session.user);
+      })
+      .finally(() => {
+        if (current) setResuming(false);
+      });
+    return () => {
+      current = false;
+    };
+    // Runs once: `resuming` only ever goes from true to false.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (resuming)
+    return (
+      <main className="login-page" aria-busy="true">
+        <AdminSkeleton variant="panel" label="Restoring your session" />
+      </main>
+    );
   return user ? (
     <OperatorShell user={user} onSignedOut={() => setUser(null)} />
   ) : (

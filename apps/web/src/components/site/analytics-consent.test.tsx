@@ -25,6 +25,16 @@ describe("AnalyticsConsentControl", () => {
     );
   });
 
+  it("dismisses and persists a choice even when the server is unavailable", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
+    render(<AnalyticsConsentControl locale="en-GB" initialConsent={null} />);
+    fireEvent.click(screen.getByRole("button", { name: "Allow measurement" }));
+    expect(
+      await screen.findByText("Anonymous analytics enabled"),
+    ).toBeVisible();
+    expect(document.cookie).toContain("amanor-analytics=granted");
+  });
+
   it("emits one pageview per route session only after consent", async () => {
     window.sessionStorage.clear();
     const fetchMock = vi

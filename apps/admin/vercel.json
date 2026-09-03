@@ -4,9 +4,7 @@
   "redirects": [
     {
       "source": "/:path*",
-      "has": [
-        { "type": "host", "value": "theamanorproject-admin.vercel.app" }
-      ],
+      "has": [{ "type": "host", "value": "theamanorproject-admin.vercel.app" }],
       "destination": "https://admin.ishmaelniidodoo.com/:path*",
       "permanent": true
     }

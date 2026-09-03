@@ -17,6 +17,12 @@ const webEnvironmentSchema = z
       .enum(["local", "preview", "staging", "production"])
       .default("local"),
     PUBLIC_API_BASE_URL: z.url().default("http://localhost:4000/v1"),
+    PUBLIC_API_TIMEOUT_MS: z.coerce
+      .number()
+      .int()
+      .min(1_000)
+      .max(120_000)
+      .default(3_000),
     PUBLIC_WEB_BASE_URL: z.url().default("http://localhost:3000"),
     REVALIDATION_WEBHOOK_KEYS: z.string().optional(),
     REVALIDATION_AUDIENCE: z.string().min(1).default("amanor-public-web"),

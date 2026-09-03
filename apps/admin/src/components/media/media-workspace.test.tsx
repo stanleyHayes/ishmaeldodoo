@@ -137,4 +137,30 @@ describe("MediaWorkspace", () => {
     expect(click).toHaveBeenCalledOnce();
     click.mockRestore();
   });
+
+  it("shows a useful empty library state with the next action", async () => {
+    api.listMediaAssets.mockResolvedValue({ items: [] });
+    render(<MediaWorkspace />);
+
+    expect(
+      await screen.findByRole("heading", {
+        name: "No media has been added yet",
+      }),
+    ).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "Add the first file" }));
+    expect(
+      screen.getByRole("heading", { name: "Register a governed asset" }),
+    ).toBeVisible();
+  });
+
+  it("explains a library error and lets the operator dismiss it", async () => {
+    api.listMediaAssets.mockRejectedValue(new Error("offline"));
+    render(<MediaWorkspace />);
+
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent("We couldn't open the media library");
+    expect(alert).toHaveTextContent("Try again");
+    fireEvent.click(screen.getByRole("button", { name: "Dismiss" }));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
 });

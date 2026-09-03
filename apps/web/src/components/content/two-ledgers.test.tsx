@@ -79,7 +79,7 @@ describe("TwoLedgers", () => {
   it("switches projections, persists shared state and updates the URL", () => {
     render(<TwoLedgers items={items} locale="en-GB" />);
     expect(screen.getByRole("heading", { name: "Role A" })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("tab", { name: "Operator’s Record" }));
+    fireEvent.click(screen.getByRole("tab", { name: "Results summary" }));
     expect(screen.getByText("Verified outcomes")).toBeInTheDocument();
     expect(localStorage.getItem("amanor-ledger")).toBe("operator");
     expect(new URL(window.location.href).searchParams.get("ledger")).toBe(
@@ -93,9 +93,9 @@ describe("TwoLedgers", () => {
   it("implements roving focus and arrow, Home and End keyboard navigation", () => {
     render(<TwoLedgers items={items} locale="en-GB" />);
     const diplomatic = screen.getByRole("tab", {
-      name: "Diplomatic Record",
+      name: "Career history",
     });
-    const operator = screen.getByRole("tab", { name: "Operator’s Record" });
+    const operator = screen.getByRole("tab", { name: "Results summary" });
     expect(diplomatic).toHaveAttribute("tabindex", "0");
     expect(operator).toHaveAttribute("tabindex", "-1");
 
@@ -118,7 +118,7 @@ describe("TwoLedgers", () => {
   it("scopes printing to the selected ledger and cleans up afterward", () => {
     const print = vi.spyOn(window, "print").mockImplementation(() => undefined);
     render(<TwoLedgers items={items} locale="en-GB" />);
-    fireEvent.click(screen.getByRole("button", { name: "Print this ledger" }));
+    fireEvent.click(screen.getByRole("button", { name: "Print this view" }));
     expect(document.body).toHaveClass("ledger-print");
     expect(print).toHaveBeenCalledOnce();
     window.dispatchEvent(new Event("afterprint"));

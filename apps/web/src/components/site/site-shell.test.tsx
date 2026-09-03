@@ -11,15 +11,16 @@ describe("public site shell", () => {
   });
 
   it("keeps the five-item primary navigation and persistent engagement route", () => {
-    render(<SiteHeader />);
+    const { container } = render(<SiteHeader />);
 
     const navigation = screen.getByRole("navigation", {
       name: "Primary navigation",
     });
     expect(navigation.querySelectorAll("a")).toHaveLength(5);
-    expect(
-      screen.getByRole("link", { name: "Request an engagement" }),
-    ).toHaveAttribute("href", "/speaking/request");
+    expect(container.querySelector(".engagement-link")).toHaveAttribute(
+      "href",
+      "/speaking/request",
+    );
   });
 
   it("offers a server-consistent Night Economy override and carries both statements", () => {
@@ -69,13 +70,16 @@ describe("public site shell", () => {
   it("marks nested primary routes as the current section", () => {
     render(<SiteHeader pathname="/record/atlas/table" />);
 
-    expect(screen.getByRole("link", { name: "The Record" })).toHaveAttribute(
-      "aria-current",
-      "page",
-    );
-    expect(screen.getByRole("link", { name: "Press" })).not.toHaveAttribute(
-      "aria-current",
-    );
+    const navigation = screen.getByRole("navigation", {
+      name: "Primary navigation",
+    });
+
+    expect(
+      within(navigation).getByRole("link", { name: "The Record" }),
+    ).toHaveAttribute("aria-current", "page");
+    expect(
+      within(navigation).getByRole("link", { name: "Press" }),
+    ).not.toHaveAttribute("aria-current");
   });
 
   it("renders reciprocal French navigation and utility labels", () => {
@@ -83,10 +87,13 @@ describe("public site shell", () => {
       <SiteHeader locale="fr-FR" pathname="/fr/record" />,
     );
 
-    expect(screen.getByRole("link", { name: "Le parcours" })).toHaveAttribute(
-      "href",
-      "/fr/record",
-    );
+    const navigation = screen.getByRole("navigation", {
+      name: "Navigation principale",
+    });
+
+    expect(
+      within(navigation).getByRole("link", { name: "Le parcours" }),
+    ).toHaveAttribute("href", "/fr/record");
     expect(screen.getByRole("link", { name: "EN" })).toHaveAttribute(
       "href",
       "/locale/en-GB?returnTo=%2Ffr%2Frecord",
@@ -143,6 +150,13 @@ describe("public site shell", () => {
       "href",
       "/api/lite?enabled=1&return=%2Ffr%2Frecord",
     );
+
+    const drawerNavigation = container.querySelector(".nav-drawer__grid");
+    expect(drawerNavigation).not.toBeNull();
+    const links = within(drawerNavigation as HTMLElement).getAllByRole("link");
+    expect(links).toHaveLength(6);
+    expect(links[0]).toHaveAccessibleName("Accueil");
+    expect(links[0]).toHaveAttribute("href", "/fr");
   });
 
   it("removes the persistent engagement call to action from Selah", () => {

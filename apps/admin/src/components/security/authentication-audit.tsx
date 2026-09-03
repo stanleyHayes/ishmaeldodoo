@@ -9,6 +9,7 @@ import {
   getAuthenticationAuditIntegrity,
   listAuthenticationAudit,
 } from "../../lib/api/client";
+import { AdminEmptyState, AdminNotice, AdminSkeleton } from "../ui/admin-state";
 
 const eventLabels: Record<AuthenticationAuditItem["type"], string> = {
   login_succeeded: "Login succeeded",
@@ -30,6 +31,10 @@ const eventLabels: Record<AuthenticationAuditItem["type"], string> = {
   hardware_key_authenticated: "Security key authenticated",
   hardware_key_revoked: "Security key revoked",
 };
+
+function personLabel(value: string | undefined, fallback: string) {
+  return value ? value : fallback;
+}
 
 export function AuthenticationAudit() {
   const [items, setItems] = useState<readonly AuthenticationAuditItem[]>([]);
@@ -87,58 +92,97 @@ export function AuthenticationAudit() {
         </div>
       </div>
       {state === "loading" ? (
-        <p role="status">Loading authentication events…</p>
+        <AdminSkeleton
+          variant="content"
+          label="Loading authentication events"
+        />
       ) : null}
       {integrity ? (
-        <p
-          className={`integrity-state integrity-state--${integrity.status}`}
+        <div
+          className="audit-integrity-card"
+          data-status={integrity.status}
           role={integrity.status === "invalid" ? "alert" : "status"}
         >
-          Chain integrity: {integrity.status}. {integrity.checkedEvents} events
-          checked.
-        </p>
+          <span aria-hidden="true">
+            {integrity.status === "valid" ? "✓" : "!"}
+          </span>
+          <div>
+            <strong>
+              {integrity.status === "valid"
+                ? "Audit chain verified"
+                : "Audit chain needs attention"}
+            </strong>
+            <p>
+              Chain integrity: {integrity.status}. {integrity.checkedEvents}{" "}
+              events checked.
+            </p>
+          </div>
+        </div>
       ) : null}
       {state === "error" ? (
-        <p role="alert">Authentication events could not be loaded.</p>
+        <AdminNotice
+          tone="error"
+          title="We couldn't load the security history"
+          description="Refresh this workspace and try again. Existing audit evidence has not been changed."
+        />
       ) : null}
       {state === "ready" && items.length === 0 ? (
-        <p>No authentication events were returned.</p>
+        <AdminEmptyState
+          kind="audit"
+          title="No security events yet"
+          description="Sign-ins, access changes and protected data reads will appear here when they occur."
+        />
       ) : null}
       {items.length > 0 ? (
-        <div
-          className="table-scroll"
-          tabIndex={0}
+        <ol
+          className="authentication-timeline"
           aria-label="Security and data-access event history"
         >
-          <table>
-            <thead>
-              <tr>
-                <th>Time</th>
-                <th>Event</th>
-                <th>Outcome</th>
-                <th>Actor</th>
-                <th>Subject</th>
-                <th>Reason</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((item) => (
-                <tr key={item.eventId}>
-                  <td>
+          {items.map((item) => (
+            <li key={item.eventId}>
+              <div
+                className="authentication-timeline__marker"
+                aria-hidden="true"
+              />
+              <article>
+                <header>
+                  <div>
                     <time dateTime={item.occurredAt.toISOString()}>
                       {item.occurredAt.toLocaleString()}
                     </time>
-                  </td>
-                  <td>{eventLabels[item.type]}</td>
-                  <td>{item.outcome}</td>
-                  <td>{item.actorId ?? "System"}</td>
-                  <td>{item.subjectId ?? "Not recorded"}</td>
-                  <td>{item.reason?.replaceAll("_", " ") ?? "Not recorded"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                    <h3>{eventLabels[item.type]}</h3>
+                  </div>
+                  <span className="audit-outcome" data-outcome={item.outcome}>
+                    {item.outcome}
+                  </span>
+                </header>
+                <dl>
+                  <div>
+                    <dt>Actor</dt>
+                    <dd>
+                      <code>{personLabel(item.actorId, "System")}</code>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Subject</dt>
+                    <dd>
+                      <code>{personLabel(item.subjectId, "Not recorded")}</code>
+                    </dd>
+                  </div>
+                  <div className="authentication-timeline__reason">
+                    <dt>Reason</dt>
+                    <dd>
+                      {item.reason?.replaceAll("_", " ") ?? "Not recorded"}
+                    </dd>
+                  </div>
+                </dl>
+              </article>
+            </li>
+          ))}
+        </ol>
+      ) : null}
+      {loadingMore ? (
+        <AdminSkeleton variant="rows" label="Loading older security events" />
       ) : null}
       {cursor ? (
         <button
@@ -147,7 +191,7 @@ export function AuthenticationAudit() {
           disabled={loadingMore}
           onClick={() => void loadMore()}
         >
-          {loadingMore ? "Loading events" : "Load older events"}
+          Load older events
         </button>
       ) : null}
     </section>

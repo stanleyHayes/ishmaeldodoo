@@ -16,7 +16,7 @@ import { isLiteValue, liteCookieName } from "../lib/lite/mode";
 export async function generateMetadata(): Promise<Metadata> {
   const result = await getPublicContent({
     documentType: "identity",
-    documentId: "principal",
+    documentId: "canonical",
     locale: "en-GB",
   });
   const identity =
@@ -45,7 +45,7 @@ export default async function FoundationPage({
       getPublicAtlas(locale),
       getPublicContent({
         documentType: "identity",
-        documentId: "principal",
+        documentId: "canonical",
         locale,
       }),
       getPublicSignal(locale),

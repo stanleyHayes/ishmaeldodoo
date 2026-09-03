@@ -431,13 +431,15 @@ test("keeps the Lite homepage functional without downloading JavaScript", async 
   ).toBe(0);
 
   await page
-    .getByRole("link", {
-      name: "You are looking for structured, de-risked pipeline in Ghana. Choose",
-    })
+    .getByRole("link", { name: /investment opportunities in Ghana/iu })
     .click();
   await expect(page).toHaveURL(/door=investor/u);
   await expect(page).toHaveURL(/lite=1/u);
+  await expect(page).toHaveURL(/#atlas-preview-heading$/u);
   await expect(page.locator("[data-audience='investor']")).toBeVisible();
+  await expect(page.getByRole("status").first()).toContainText(
+    "investment opportunities in Ghana",
+  );
   await expect(
     page.getByLabel("Nine proof points").getByRole("link").first(),
   ).toContainText("Homepage proof 9");
@@ -617,10 +619,11 @@ test("persists and resets an adaptive audience without hiding the public shell",
       .getByRole("link"),
   ).toHaveCount(5);
   await page
-    .getByRole("link", { name: /structured, de-risked pipeline/i })
+    .getByRole("link", { name: /investment opportunities in Ghana/iu })
     .click();
 
   await expect(page).toHaveURL(/door=investor/u);
+  await expect(page).toHaveURL(/#atlas-preview-heading$/u);
   await expect(page.locator("[data-audience='investor']")).toBeVisible();
   await expect
     .poll(async () =>
@@ -636,7 +639,7 @@ test("persists and resets an adaptive audience without hiding the public shell",
   await page.reload();
   await expect(page.locator("html")).not.toHaveAttribute("data-mode", "lite");
   await expect(page.locator("[data-audience='investor']")).toBeVisible();
-  await page.getByRole("link", { name: "Reset view" }).click();
+  await page.getByRole("link", { name: "Show the general view" }).click();
   await expect(page.locator("[data-audience='general']")).toBeVisible();
   await expect
     .poll(async () =>

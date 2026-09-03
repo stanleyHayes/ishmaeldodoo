@@ -179,4 +179,18 @@ describe("PressRoom", () => {
     expect(dossier).toHaveAttribute("action", "/api/living-dossier");
     expect(dossier).toHaveAttribute("method", "post");
   });
+
+  it("keeps generated portrait artwork separate from approved press assets", () => {
+    render(<PressRoom result={result} portraits={[]} locale="en-GB" />);
+
+    expect(
+      screen.getByRole("img", {
+        name: "Abstract, non-identifying editorial portrait placeholder",
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/not a likeness of the person/i),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Download" })).toBeNull();
+  });
 });

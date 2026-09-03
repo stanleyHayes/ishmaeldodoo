@@ -22,6 +22,12 @@ const svg = (children: ReactNode): ReactNode => (
 );
 
 export const navIcons = {
+  home: svg(
+    <>
+      <path d="m4 10 8-6.5 8 6.5" />
+      <path d="M6.5 9v11h11V9M10 20v-6h4v6" />
+    </>,
+  ),
   record: svg(
     <>
       <path d="M6.5 3.5h7L18 8v11.5a1 1 0 0 1-1 1H6.5a1 1 0 0 1-1-1v-15a1 1 0 0 1 1-1Z" />

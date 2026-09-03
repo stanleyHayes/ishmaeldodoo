@@ -1,4 +1,5 @@
 import { resolveDateRangedRecord } from "@amanor/contracts";
+import Image from "next/image";
 import Link from "next/link";
 import type { PublicContentResult } from "../../lib/content/public-content-client";
 import type { PublicMediaResult } from "../../lib/content/public-media-client";
@@ -282,11 +283,42 @@ export function PressRoom({
               portrait.status !== "available" ||
               portrait.asset.resourceType !== "image",
           ) ? (
-            <p className="register-state">
-              {french
-                ? "Aucun portrait approuvé n’est actuellement disponible."
-                : "No approved portraits are currently available."}
-            </p>
+            lite ? (
+              <p className="register-state">
+                {french
+                  ? "Aucun portrait approuvé n’est actuellement disponible."
+                  : "No approved portraits are currently available."}
+              </p>
+            ) : (
+              <figure className="portrait-placeholder">
+                <div className="portrait-placeholder__image">
+                  <Image
+                    src="/images/editorial/portrait-placeholder-v1.jpg"
+                    alt="Abstract, non-identifying editorial portrait placeholder"
+                    width={1122}
+                    height={1402}
+                    sizes="(max-width: 48rem) 100vw, 52vw"
+                  />
+                  <svg viewBox="0 0 240 240" aria-hidden="true">
+                    <circle cx="120" cy="120" r="88" />
+                    <path d="M32 120h176M120 32v176M58 58l124 124" />
+                  </svg>
+                  <span>{french ? "APERÇU" : "PREVIEW"}</span>
+                </div>
+                <figcaption>
+                  <strong>
+                    {french
+                      ? "Le portrait officiel est en attente d’approbation"
+                      : "The official portrait is awaiting approval"}
+                  </strong>
+                  <p>
+                    {french
+                      ? "Aucun portrait approuvé n’est actuellement disponible. Cette composition est un repère éditorial, pas un portrait de la personne ni un document téléchargeable."
+                      : "No approved portraits are currently available. This composition is an editorial placeholder, not a likeness of the person or a downloadable press asset."}
+                  </p>
+                </figcaption>
+              </figure>
+            )
           ) : null}
         </div>
       </section>

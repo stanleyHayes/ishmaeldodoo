@@ -7,7 +7,7 @@ import { publicMetadata } from "../../lib/discoverability/metadata";
 export async function generateMetadata(): Promise<Metadata> {
   const result = await getPublicContent({
     documentType: "identity",
-    documentId: "principal",
+    documentId: "canonical",
     locale: "fr-FR",
   });
   const identity =

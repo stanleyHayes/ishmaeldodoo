@@ -23,7 +23,7 @@ import type { Role } from "../src/modules/auth/domain/roles";
 const scriptDirectory = dirname(fileURLToPath(import.meta.url));
 loadEnv({ path: resolve(scriptDirectory, "../.env.production") });
 
-const bootstrapEmail = "admin@theamanorproject.org";
+const bootstrapEmail = "admin@ishmaelniidodoo.com";
 const confirmation = process.env.AMANOR_BOOTSTRAP_CONFIRM;
 const mongoUri = process.env.MONGODB_URI;
 const credentialOutput = process.env.AMANOR_CREDENTIAL_OUTPUT;

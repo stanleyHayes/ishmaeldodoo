@@ -3,6 +3,7 @@
 import type { MediaAsset, MediaAssetListQuery } from "@amanor/contracts";
 import { useEffect, useState } from "react";
 import { listMediaAssets } from "../../lib/api/client";
+import { AdminSelect } from "../ui/admin-select";
 
 export function GovernedMediaPicker({
   id,
@@ -96,30 +97,46 @@ export function GovernedMediaPicker({
 
   return (
     <div className="field">
-      <label htmlFor={id}>{label}</label>
-      <select
-        id={id}
-        multiple={multiple}
-        size={multiple ? Math.min(7, Math.max(3, assets.length)) : undefined}
-        value={selected}
-        disabled={readOnly}
-        onChange={(event) =>
-          onChange(
+      {multiple ? (
+        <>
+          <label htmlFor={id}>{label}</label>
+          <select
+            id={id}
             multiple
-              ? Array.from(event.currentTarget.selectedOptions)
+            size={Math.min(7, Math.max(3, assets.length))}
+            value={selected}
+            disabled={readOnly}
+            onChange={(event) =>
+              onChange(
+                Array.from(event.currentTarget.selectedOptions)
                   .map((option) => option.value)
-                  .slice(0, maximum)
-              : event.currentTarget.value,
-          )
-        }
-      >
-        {!multiple ? <option value="">No media selected</option> : null}
-        {assets.map((asset) => (
-          <option key={asset.assetId} value={asset.assetId}>
-            {asset.altText["en-GB"]} · {asset.publicId}
-          </option>
-        ))}
-      </select>
+                  .slice(0, maximum),
+              )
+            }
+          >
+            {assets.map((asset) => (
+              <option key={asset.assetId} value={asset.assetId}>
+                {asset.altText["en-GB"]} · {asset.publicId}
+              </option>
+            ))}
+          </select>
+        </>
+      ) : (
+        <AdminSelect
+          id={id}
+          label={label}
+          value={selected}
+          disabled={readOnly}
+          onChange={(event) => onChange(event.currentTarget.value)}
+        >
+          <option value="">No media selected</option>
+          {assets.map((asset) => (
+            <option key={asset.assetId} value={asset.assetId}>
+              {asset.altText["en-GB"]} · {asset.publicId}
+            </option>
+          ))}
+        </AdminSelect>
+      )}
       <p className="field-help">
         Choose from the governed library. New media must be selected from a
         local file and uploaded through Media first; URLs and pasted asset IDs

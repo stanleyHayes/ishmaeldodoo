@@ -1,8 +1,10 @@
 import type { PublicAtlasNode, PublicSignal } from "@amanor/contracts";
 import { render, screen, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { Identity } from "../../lib/content/identity-payload";
 import { AdaptiveHome } from "./adaptive-home";
+
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 
 const acts = ["forest", "system", "bridge", "architecture"] as const;
 const atlas: PublicAtlasNode[] = Array.from({ length: 9 }, (_, index) => ({
@@ -89,9 +91,14 @@ describe("AdaptiveHome", () => {
     expect(screen.getByLabelText("Nine proof points")).toBeInTheDocument();
     expect(screen.getAllByText(/^Proof \d$/u)).toHaveLength(9);
     expect(
-      screen.getByRole("heading", { name: "The record in four acts" }),
+      screen.getByRole("heading", { name: "A career in four chapters" }),
     ).toBeInTheDocument();
     expect(screen.getAllByText(/^Act \d$/u)).toHaveLength(4);
+    expect(
+      screen.getAllByText(
+        "Illustrative editorial scene · not documentary evidence",
+      ),
+    ).toHaveLength(4);
     expect(screen.getByText("The latest governed signal.")).toBeInTheDocument();
     expect(screen.getAllByText("Figure 4")).toHaveLength(2);
   });
@@ -110,7 +117,7 @@ describe("AdaptiveHome", () => {
       screen.queryByLabelText("Nine proof points"),
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("heading", { name: "The record in four acts" }),
+      screen.queryByRole("heading", { name: "A career in four chapters" }),
     ).not.toBeInTheDocument();
     expect(screen.queryByText("Latest signal")).not.toBeInTheDocument();
   });
@@ -163,7 +170,8 @@ describe("AdaptiveHome", () => {
         signal={staleSignal}
       />,
     );
-    expect(screen.getByRole("status")).toHaveTextContent(
+    const signalRegion = () => screen.getByRole("region", { name: "finance" });
+    expect(within(signalRegion()).getByRole("status")).toHaveTextContent(
       /Traduction en cours de révision.*10\/08\/2026/u,
     );
     rerender(
@@ -175,6 +183,52 @@ describe("AdaptiveHome", () => {
         signal={staleSignal}
       />,
     );
-    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(
+      within(signalRegion()).queryByRole("status"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("aims each door at the block that audience promotes", () => {
+    render(
+      <AdaptiveHome
+        locale="en-GB"
+        audience={null}
+        atlas={atlas}
+        identity={identity}
+        signal={signal}
+      />,
+    );
+    expect(
+      screen.getByRole("link", { name: /investment opportunities/iu }),
+    ).toHaveAttribute(
+      "href",
+      "/api/audience?door=investor&return=%2F%3Fdoor%3Dinvestor%23atlas-preview-heading",
+    );
+    expect(
+      screen.getByRole("link", { name: /bring institutions together/iu }),
+    ).toHaveAttribute(
+      "href",
+      "/api/audience?door=government&return=%2F%3Fdoor%3Dgovernment%23home-record-heading",
+    );
+  });
+
+  it("skips unpublished blocks when aiming a door", () => {
+    render(
+      <AdaptiveHome
+        locale="en-GB"
+        audience={null}
+        atlas={atlas}
+        identity={null}
+        signal={null}
+      />,
+    );
+    expect(
+      screen.getByRole("link", {
+        name: /speaker or an informed perspective/iu,
+      }),
+    ).toHaveAttribute(
+      "href",
+      "/api/audience?door=media&return=%2F%3Fdoor%3Dmedia%23home-record-heading",
+    );
   });
 });

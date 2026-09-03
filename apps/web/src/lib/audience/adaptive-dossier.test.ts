@@ -3,6 +3,9 @@ import {
   adaptiveOrder,
   atlasQuery,
   audienceCta,
+  audienceDestination,
+  audienceDestinations,
+  audienceDoorsAnchor,
   audienceKey,
   audienceKeys,
 } from "./adaptive-dossier";
@@ -29,5 +32,27 @@ describe("adaptive dossier model", () => {
     expect(atlasQuery("youth")).toBe("?door=youth");
     expect(audienceCta("government")).toBe("/contact#the-room");
     expect(audienceCta("media")).toBe("/speaking/request");
+  });
+
+  it("sends each door to the block that choice promotes", () => {
+    const complete = adaptiveOrder(null);
+    expect(audienceDestinations(complete)).toEqual({
+      government: "home-record-heading",
+      investor: "atlas-preview-heading",
+      media: "current-position-heading",
+      youth: "home-record-heading",
+      philanthropy: "home-signal-heading",
+    });
+    expect(audienceDestination(null, complete)).toBe("home-record-heading");
+  });
+
+  it("falls back past blocks this render did not publish", () => {
+    expect(audienceDestination("media", ["record", "invitation"])).toBe(
+      "home-record-heading",
+    );
+    expect(audienceDestination("philanthropy", ["invitation"])).toBe(
+      "invitation-heading",
+    );
+    expect(audienceDestination("investor", [])).toBe(audienceDoorsAnchor);
   });
 });

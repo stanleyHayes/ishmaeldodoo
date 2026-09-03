@@ -11,6 +11,7 @@ import type {
   ProtocolNoteInput,
 } from "@amanor/contracts";
 import { AdminSelect } from "../ui/admin-select";
+import { AdminEmptyState, AdminNotice, AdminSkeleton } from "../ui/admin-state";
 import { useEffect, useState } from "react";
 import {
   addProtocolDeskNote,
@@ -77,6 +78,7 @@ export function ProtocolDeskWorkspace({
   const [actionError, setActionError] = useState<string>();
   const [operations, setOperations] = useState<ProtocolDeskOperations>();
   const [availability, setAvailability] = useState<ProtocolDeskAvailability>();
+  const hasFilters = Object.keys(filters).length > 0;
 
   async function load(
     input: Partial<ProtocolDeskQueueQuery>,
@@ -122,6 +124,11 @@ export function ProtocolDeskWorkspace({
     void load(next);
   }
 
+  function clearFilters(): void {
+    setFilters({});
+    void load({});
+  }
+
   function checkAvailability(event: React.FormEvent<HTMLFormElement>): void {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -156,6 +163,31 @@ export function ProtocolDeskWorkspace({
 
   return (
     <div className="desk-workspace">
+      <aside className="admin-page-guide" aria-label="How to manage requests">
+        <div>
+          <span>1</span>
+          <p>
+            <strong>Check what needs attention</strong>
+            <small>Warnings and overdue work appear first.</small>
+          </p>
+        </div>
+        <div>
+          <span>2</span>
+          <p>
+            <strong>Find a request</strong>
+            <small>Search or filter the queue by state and flag.</small>
+          </p>
+        </div>
+        <div>
+          <span>3</span>
+          <p>
+            <strong>Open and continue it</strong>
+            <small>
+              Review the record before taking the next allowed action.
+            </small>
+          </p>
+        </div>
+      </aside>
       {operations ? (
         <section
           className="desk-operations"
@@ -164,39 +196,87 @@ export function ProtocolDeskWorkspace({
           <div>
             <p className="section-context">Service level</p>
             <h2 id="desk-operations-title">Operational health</h2>
+            <p>
+              Start here. Items needing attention are highlighted automatically.
+            </p>
           </div>
-          <dl>
-            <div>
-              <dt>Overdue 48-hour responses</dt>
-              <dd>{operations.overdueInitialResponses}</dd>
+          <dl className="desk-health-grid">
+            <div
+              data-state={
+                operations.overdueInitialResponses ? "attention" : "clear"
+              }
+            >
+              <dt>48-hour response window</dt>
+              <dd>
+                {operations.overdueInitialResponses
+                  ? `${operations.overdueInitialResponses} overdue`
+                  : "On track"}
+              </dd>
+              <small>
+                Overdue 48-hour responses: {operations.overdueInitialResponses}
+              </small>
             </div>
-            <div>
-              <dt>Failed correspondence</dt>
-              <dd>{operations.failedCorrespondence}</dd>
+            <div
+              data-state={
+                operations.failedCorrespondence ? "attention" : "clear"
+              }
+            >
+              <dt>Correspondence</dt>
+              <dd>
+                {operations.failedCorrespondence
+                  ? `${operations.failedCorrespondence} failed`
+                  : "Healthy"}
+              </dd>
+              <small>
+                <span>
+                  Failed correspondence: {operations.failedCorrespondence}
+                </span>
+                <span>
+                  Pending correspondence: {operations.pendingCorrespondence}
+                </span>
+              </small>
             </div>
-            <div>
-              <dt>Pending correspondence</dt>
-              <dd>{operations.pendingCorrespondence}</dd>
+            <div
+              data-state={operations.failedCalendarSync ? "attention" : "clear"}
+            >
+              <dt>Calendar connection</dt>
+              <dd>
+                {operations.failedCalendarSync
+                  ? `${operations.failedCalendarSync} failed`
+                  : "Healthy"}
+              </dd>
+              <small>
+                <span>
+                  Failed calendar sync: {operations.failedCalendarSync}
+                </span>
+                <span>
+                  Pending calendar sync: {operations.pendingCalendarSync}
+                </span>
+              </small>
             </div>
-            <div>
-              <dt>Failed calendar sync</dt>
-              <dd>{operations.failedCalendarSync}</dd>
-            </div>
-            <div>
-              <dt>Pending calendar sync</dt>
-              <dd>{operations.pendingCalendarSync}</dd>
-            </div>
-            <div>
-              <dt>Failed Principal decision delivery</dt>
-              <dd>{operations.failedPrincipalDecisionDeliveries}</dd>
-            </div>
-            <div>
-              <dt>Pending Principal decision delivery</dt>
-              <dd>{operations.pendingPrincipalDecisionDeliveries}</dd>
-            </div>
-            <div>
-              <dt>Open escalations</dt>
-              <dd>{operations.openEscalations.length}</dd>
+            <div
+              data-state={
+                operations.failedPrincipalDecisionDeliveries
+                  ? "attention"
+                  : "clear"
+              }
+            >
+              <dt>Principal decisions</dt>
+              <dd>
+                {operations.failedPrincipalDecisionDeliveries
+                  ? `${operations.failedPrincipalDecisionDeliveries} failed`
+                  : "Healthy"}
+              </dd>
+              <small>
+                <span>
+                  Failed Principal decision delivery:{" "}
+                  {operations.failedPrincipalDecisionDeliveries}
+                </span>
+                <span>
+                  Pending Principal decision delivery:{" "}
+                  {operations.pendingPrincipalDecisionDeliveries}
+                </span>
+              </small>
             </div>
           </dl>
           {operations.openEscalations.length ? (
@@ -209,21 +289,34 @@ export function ProtocolDeskWorkspace({
               ))}
             </ul>
           ) : (
-            <p>No open SLA escalations.</p>
+            <div className="desk-health-clear">
+              <span aria-hidden="true">✓</span>
+              <p>
+                <strong>No open escalations</strong>
+                <small>Nothing needs urgent service-level attention.</small>
+              </p>
+            </div>
           )}
-          <form className="desk-availability" onSubmit={checkAvailability}>
-            <label>
-              Availability starts
-              <input name="startsAt" type="datetime-local" required />
-            </label>
-            <label>
-              Availability ends
-              <input name="endsAt" type="datetime-local" required />
-            </label>
-            <button type="submit" className="secondary-button">
-              Check availability
-            </button>
-          </form>
+          <details className="desk-availability-disclosure">
+            <summary>Check a date and time</summary>
+            <p>
+              See whether an engagement overlaps a hold, confirmation or
+              blackout.
+            </p>
+            <form className="desk-availability" onSubmit={checkAvailability}>
+              <label>
+                Availability starts
+                <input name="startsAt" type="datetime-local" required />
+              </label>
+              <label>
+                Availability ends
+                <input name="endsAt" type="datetime-local" required />
+              </label>
+              <button type="submit" className="secondary-button">
+                Check availability
+              </button>
+            </form>
+          </details>
           {availability ? (
             <div role="status" className="desk-availability-result">
               <strong>
@@ -284,22 +377,49 @@ export function ProtocolDeskWorkspace({
         <p>Scores order review only. Every decision remains human.</p>
       </div>
       {status === "error" ? (
-        <div className="form-error" role="alert">
-          The Protocol Desk queue could not be loaded.{" "}
-          <button
-            type="button"
-            className="text-button"
-            onClick={() => void load(filters)}
-          >
-            Try again
-          </button>
-        </div>
+        <AdminNotice
+          tone="error"
+          title="We couldn't load the engagement requests"
+          description="Your filters are still saved. Check your connection and try again."
+          action={
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={() => void load(filters)}
+            >
+              Try again
+            </button>
+          }
+        />
       ) : null}
       {status === "loading" && items.length === 0 ? (
-        <p role="status">Loading engagement requests…</p>
+        <AdminSkeleton variant="content" label="Loading engagement requests" />
       ) : null}
       {status === "ready" && items.length === 0 ? (
-        <p className="empty-state">No requests match these filters.</p>
+        <AdminEmptyState
+          kind="queue"
+          title={
+            hasFilters
+              ? "No requests match these filters"
+              : "No engagement requests yet"
+          }
+          description={
+            hasFilters
+              ? "Try clearing the filters to see the complete queue, or change one filter at a time."
+              : "New speaking and event requests will appear here in advisory order when they arrive."
+          }
+          action={
+            hasFilters ? (
+              <button
+                type="button"
+                className="secondary-button"
+                onClick={clearFilters}
+              >
+                Clear filters
+              </button>
+            ) : undefined
+          }
+        />
       ) : null}
       {items.length ? (
         <div className="desk-table-wrap">
@@ -388,9 +508,20 @@ export function ProtocolDeskWorkspace({
         </button>
       ) : null}
       {actionError ? (
-        <p className="form-error" role="alert">
-          {actionError}
-        </p>
+        <AdminNotice
+          tone="error"
+          title="That action didn't finish"
+          description={actionError}
+          action={
+            <button
+              type="button"
+              className="text-button"
+              onClick={() => setActionError(undefined)}
+            >
+              Dismiss
+            </button>
+          }
+        />
       ) : null}
       {detail ? (
         <RequestDetail

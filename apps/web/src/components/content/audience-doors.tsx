@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, type MouseEvent } from "react";
 import {
   audienceCookieName,
   audienceDoorLabels,
+  audienceDoorsAnchor,
   audienceKeys,
   audienceMaxAgeSeconds,
   audienceStorageName,
@@ -12,6 +14,7 @@ import {
 } from "../../lib/audience/adaptive-dossier";
 import type { SupportedLocale } from "../../lib/i18n/locale";
 import { trackAnalyticsEvent } from "../../lib/analytics-client";
+import { audienceDoorsCopy } from "./audience-doors-copy";
 
 function writePreference(audience: AudienceKey | null): void {
   if (audience) {
@@ -23,12 +26,48 @@ function writePreference(audience: AudienceKey | null): void {
   }
 }
 
+// The browser handles modified clicks itself (new tab, save, download), so the
+// no-JavaScript href stays authoritative for them.
+function opensElsewhere(event: MouseEvent<HTMLAnchorElement>): boolean {
+  return (
+    event.defaultPrevented ||
+    event.button !== 0 ||
+    event.metaKey ||
+    event.ctrlKey ||
+    event.shiftKey ||
+    event.altKey
+  );
+}
+
 export function AudienceDoors({
   locale,
   selected,
-}: Readonly<{ locale: SupportedLocale; selected: AudienceKey | null }>) {
-  const french = locale === "fr-FR";
-  const root = french ? "/fr" : "/";
+  destinations,
+  resetDestination = audienceDoorsAnchor,
+}: Readonly<{
+  locale: SupportedLocale;
+  selected: AudienceKey | null;
+  destinations: Readonly<Record<AudienceKey, string>>;
+  resetDestination?: string;
+}>) {
+  const copy = audienceDoorsCopy(locale);
+  const root = locale === "fr-FR" ? "/fr" : "/";
+  const router = useRouter();
+  // A client transition swaps the server payload without moving the viewport,
+  // and `Response.url` drops the fragment on the redirect path, so the landing
+  // section is remembered here and applied once the requested blocks arrive.
+  const pending = useRef<{
+    audience: AudienceKey | null;
+    anchor: string;
+  } | null>(null);
+
+  useEffect(() => {
+    if (!pending.current || pending.current.audience !== selected) return;
+    const destination = document.getElementById(pending.current.anchor);
+    if (!destination) return;
+    pending.current = null;
+    destination.scrollIntoView({ block: "start" });
+  });
 
   useEffect(() => {
     const parameters = new URLSearchParams(window.location.search);
@@ -47,55 +86,77 @@ export function AudienceDoors({
         `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`,
       );
     }
-  }, []);
+  }, [selected]);
+
+  function open(audience: AudienceKey | null, anchor: string, href: string) {
+    // Nothing has to arrive when the choice is unchanged: the requested blocks
+    // are already on screen.
+    if (audience === selected) {
+      document.getElementById(anchor)?.scrollIntoView({ block: "start" });
+    } else {
+      pending.current = { audience, anchor };
+    }
+    router.push(href, { scroll: false });
+  }
 
   return (
     <section className="audience-doors" aria-labelledby="audience-heading">
       <header>
         <p className="section-number">02</p>
         <div>
-          <h2 id="audience-heading">
-            {french
-              ? "Pourquoi êtes-vous ici\u00a0?"
-              : "What brought you here?"}
-          </h2>
-          <p>
-            {french
-              ? "Choisissez un angle. Aucun contenu ne sera masqué."
-              : "Choose an emphasis. No content will be hidden."}
+          <h2 id="audience-heading">{copy.heading}</h2>
+          <p>{copy.guidance}</p>
+          <p className="audience-doors__status" role="status">
+            {copy.status(selected)}
           </p>
         </div>
       </header>
       <div className="audience-doors__grid">
-        {audienceKeys.map((audience) => (
-          <Link
-            key={audience}
-            href={`/api/audience?door=${audience}&return=${encodeURIComponent(`${root}?door=${audience}`)}`}
-            prefetch={false}
-            aria-current={selected === audience ? "true" : undefined}
-            onClick={() => {
-              writePreference(audience);
-              void trackAnalyticsEvent({
-                name: "audience_selected",
-                route: root,
-                locale,
-                audience,
-              });
-            }}
-          >
-            <span>{audienceDoorLabels[locale][audience]}</span>
-            <small>{french ? "Choisir" : "Choose"}</small>
-          </Link>
-        ))}
+        {audienceKeys.map((audience) => {
+          const anchor = destinations[audience];
+          const target = `${root}?door=${audience}#${anchor}`;
+          return (
+            <Link
+              key={audience}
+              href={`/api/audience?door=${audience}&return=${encodeURIComponent(target)}`}
+              prefetch={false}
+              aria-current={selected === audience ? "true" : undefined}
+              onClick={(event) => {
+                writePreference(audience);
+                void trackAnalyticsEvent({
+                  name: "audience_selected",
+                  route: root,
+                  locale,
+                  audience,
+                });
+                if (opensElsewhere(event)) return;
+                event.preventDefault();
+                open(audience, anchor, target);
+              }}
+            >
+              <span>{audienceDoorLabels[locale][audience]}</span>
+              <small>{copy.doorAction(selected === audience)}</small>
+            </Link>
+          );
+        })}
       </div>
       <Link
         className="audience-reset"
-        href={`/api/audience?return=${encodeURIComponent(`${root}?audience=reset`)}`}
+        href={`/api/audience?return=${encodeURIComponent(`${root}?audience=reset#${resetDestination}`)}`}
         prefetch={false}
         aria-disabled={selected === null}
-        onClick={() => writePreference(null)}
+        onClick={(event) => {
+          writePreference(null);
+          if (opensElsewhere(event)) return;
+          event.preventDefault();
+          open(
+            null,
+            resetDestination,
+            `${root}?audience=reset#${resetDestination}`,
+          );
+        }}
       >
-        {french ? "Réinitialiser la vue" : "Reset view"}
+        {copy.reset}
       </Link>
     </section>
   );

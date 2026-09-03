@@ -118,6 +118,25 @@ describe("RecordPage", () => {
     ).toHaveLength(4);
   });
 
+  it("keeps the story readable when governed portraits are not approved", () => {
+    render(
+      <RecordPage
+        result={result}
+        atlas={[]}
+        locale="en-GB"
+        ledger="diplomatic"
+        lite={false}
+      />,
+    );
+    expect(screen.getAllByText("No approved portrait yet")).toHaveLength(4);
+    expect(
+      screen.getAllByText(
+        "The complete story remains available while the image is being approved.",
+      ),
+    ).toHaveLength(4);
+    expect(screen.getByText("Opening 1")).toBeInTheDocument();
+  });
+
   it("fails closed when the complete ordered act set is unavailable", () => {
     const payload = result.status === "available" ? result.content.payload : {};
     render(

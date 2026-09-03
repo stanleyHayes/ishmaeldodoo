@@ -97,7 +97,12 @@ import {
   type WebAuthnOptionsEnvelope,
 } from "@amanor/contracts";
 import { adminApiBaseUrl } from "../env";
-import { clearAuthState, getAuthState, setAuthState } from "./auth-store";
+import {
+  clearAuthState,
+  getAuthState,
+  setAuthState,
+  storedCsrfToken,
+} from "./auth-store";
 
 type WithoutVersionPrefix<Path extends string> =
   Path extends `/v1${infer Relative}` ? Relative : never;
@@ -128,6 +133,39 @@ export class ApiClientError extends Error {
   ) {
     super(message);
     this.name = "ApiClientError";
+  }
+}
+
+const apiRequestTimeoutMs = 20_000;
+
+async function fetchApi(input: string, init: RequestInit): Promise<Response> {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(
+    () => controller.abort(),
+    apiRequestTimeoutMs,
+  );
+  try {
+    return await fetch(input, {
+      ...init,
+      redirect: "error",
+      signal: controller.signal,
+    });
+  } catch (error) {
+    if (controller.signal.aborted)
+      throw new ApiClientError(
+        "The administration service took too long to respond",
+        504,
+        "API_REQUEST_TIMEOUT",
+      );
+    if (error instanceof TypeError)
+      throw new ApiClientError(
+        "The administration service could not be reached",
+        0,
+        "API_CONNECTION_FAILED",
+      );
+    throw error;
+  } finally {
+    window.clearTimeout(timeout);
   }
 }
 
@@ -172,9 +210,8 @@ async function refreshAccessToken(): Promise<void> {
       401,
       "AUTH_REQUIRED",
     );
-  const response = await fetch(`${adminApiBaseUrl()}${authPaths.refresh}`, {
+  const response = await fetchApi(`${adminApiBaseUrl()}${authPaths.refresh}`, {
     method: "POST",
-    redirect: "error",
     credentials: "include",
     headers: correlatedHeaders({ "X-CSRF-Token": current.csrfToken }),
   });
@@ -219,9 +256,8 @@ async function request(
   ) {
     headers.set("X-CSRF-Token", current.csrfToken);
   }
-  const response = await fetch(`${adminApiBaseUrl()}${path}`, {
+  const response = await fetchApi(`${adminApiBaseUrl()}${path}`, {
     ...init,
-    redirect: "error",
     headers,
     credentials: "include",
   });
@@ -237,9 +273,8 @@ async function submitLogin(
   input: LoginRequest,
 ): Promise<LoginChallengeResponse | AuthSessionResponse> {
   const validated = loginRequestSchema.parse(input);
-  const response = await fetch(`${adminApiBaseUrl()}${authPaths.login}`, {
+  const response = await fetchApi(`${adminApiBaseUrl()}${authPaths.login}`, {
     method: "POST",
-    redirect: "error",
     credentials: "include",
     headers: correlatedHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify(validated),
@@ -260,6 +295,68 @@ async function submitLogin(
     accessToken: parsed.data.accessToken,
     csrfToken: parsed.data.csrfToken,
   });
+  return parsed.data;
+}
+
+/**
+ * Restores a session after a page load, so a reload or a pasted link does not
+ * cost the operator their place.
+ *
+ * Nothing here relaxes the session rules. The refresh cookie is still
+ * `HttpOnly` and `SameSite=Strict`, so only this application can cause it to be
+ * sent; the API still checks the Origin and still matches the submitted CSRF
+ * token against its cookie; and the access token is still issued fresh and held
+ * only in memory. The one thing that survives a reload is the CSRF token, which
+ * proves nothing on its own.
+ */
+/**
+ * Whether a resumable session is worth attempting. Checked before rendering so
+ * a first-time visitor is shown the sign-in form immediately rather than a
+ * placeholder for a session that was never there.
+ */
+export function hasResumableSession(): boolean {
+  return storedCsrfToken() !== null;
+}
+
+let resumeInFlight: Promise<AuthSessionResponse | null> | null = null;
+
+export function resumeSession(): Promise<AuthSessionResponse | null> {
+  // Refresh rotates the token, so a second concurrent call would present one
+  // that has already been spent and be refused. React invokes effects twice in
+  // development, so this is not hypothetical.
+  resumeInFlight ??= attemptResume().finally(() => {
+    resumeInFlight = null;
+  });
+  return resumeInFlight;
+}
+
+async function attemptResume(): Promise<AuthSessionResponse | null> {
+  const csrfToken = storedCsrfToken();
+  if (!csrfToken) return null;
+  let response: Response;
+  try {
+    response = await fetchApi(`${adminApiBaseUrl()}${authPaths.refresh}`, {
+      method: "POST",
+      credentials: "include",
+      headers: correlatedHeaders({ "X-CSRF-Token": csrfToken }),
+    });
+  } catch {
+    // Offline or unreachable: fall back to signing in rather than stranding
+    // the operator on a spinner.
+    return null;
+  }
+  if (!response.ok) {
+    clearAuthState();
+    return null;
+  }
+  const parsed = authSessionResponseSchema.safeParse(await response.json());
+  if (!parsed.success) {
+    clearAuthState();
+    return null;
+  }
+  // Refresh rotates the refresh cookie but leaves the CSRF cookie in place, so
+  // the stored half of the pair stays the matching one.
+  setAuthState({ accessToken: parsed.data.accessToken, csrfToken });
   return parsed.data;
 }
 

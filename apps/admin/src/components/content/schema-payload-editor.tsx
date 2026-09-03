@@ -1147,8 +1147,8 @@ export function SchemaPayloadEditor({
     return (
       <AdminEmptyState
         kind="content"
-        title={`${kind} fields are not initialised`}
-        description="Create the validated field structure to begin. No version is saved until you select Create draft."
+        title={`No saved ${kind} content is loaded`}
+        description="Select Open and edit above first. For a new item, initialise a blank form; nothing is saved until you select Save as new draft."
         action={
           !readOnly ? (
             <button

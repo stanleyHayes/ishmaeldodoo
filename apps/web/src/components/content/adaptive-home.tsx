@@ -8,6 +8,8 @@ import {
   adaptiveOrder,
   atlasQuery,
   audienceCta,
+  audienceDestination,
+  audienceDestinations,
   type AdaptiveBlock,
   type AudienceKey,
 } from "../../lib/audience/adaptive-dossier";
@@ -107,12 +109,30 @@ export function AdaptiveHome({
         <div className="home-section-heading">
           <p className="section-number">03</p>
           <h2 id="home-record-heading">
-            {french ? "Le parcours en quatre actes" : "The record in four acts"}
+            {french
+              ? "Un parcours en quatre chapitres"
+              : "A career in four chapters"}
           </h2>
         </div>
         <div className="home-act-grid">
           {acts.map((item, index) => (
             <article key={item.homepageAct.act}>
+              <figure
+                className={`home-act-grid__image home-act-grid__image--${index + 1}`}
+              >
+                <div>
+                  <svg viewBox="0 0 180 180" aria-hidden="true">
+                    <circle cx="90" cy="90" r="62" />
+                    <circle cx="90" cy="90" r="35" />
+                    <path d="M18 90h144M90 18v144" />
+                  </svg>
+                </div>
+                <figcaption>
+                  {french
+                    ? "Scène éditoriale illustrative · non documentaire"
+                    : "Illustrative editorial scene · not documentary evidence"}
+                </figcaption>
+              </figure>
               <div className="home-act-grid__index" aria-hidden="true">
                 {String(index + 1).padStart(2, "0")}
               </div>
@@ -160,15 +180,19 @@ export function AdaptiveHome({
         <p className="section-number">04</p>
         <div className="home-atlas-preview__copy">
           <p className="page-kicker">
-            {french ? "Géographie d’un parcours" : "A geography of service"}
+            {french
+              ? "Lieux, fonctions et résultats"
+              : "Places, roles and results"}
           </p>
           <h2 id="atlas-preview-heading">
-            {french ? "L’Atlas en aperçu" : "The Atlas at a glance"}
+            {french
+              ? "Explorer le parcours sur la carte"
+              : "Explore the career on the map"}
           </h2>
           <p>
             {french
-              ? `${atlas.length} étapes publiées dans un même parcours vérifiable.`
-              : `${atlas.length} published entries in one verifiable record.`}
+              ? `${atlas.length} étapes publiées. Ouvrez un lieu pour voir la fonction, les résultats et les sources.`
+              : `${atlas.length} published entries. Open a place to see the role, results and sources.`}
           </p>
           <Link
             href={`${localizePath("/record/atlas", locale)}${atlasQuery(audience)}`}
@@ -177,9 +201,14 @@ export function AdaptiveHome({
           </Link>
         </div>
         <div className="home-atlas-preview__figure" aria-hidden="true">
+          <div className="home-atlas-preview__image" />
           <strong>{String(atlas.length).padStart(2, "0")}</strong>
           <span>{french ? "entrées publiées" : "published entries"}</span>
           <svg viewBox="0 0 480 280" role="presentation">
+            <path
+              className="home-atlas-preview__watermark"
+              d="M240 18 426 126 426 236 240 262 54 236 54 126Z"
+            />
             <path d="M12 218C72 174 96 222 146 173S232 75 286 116s78 96 182 18" />
             <path d="M32 246c54-24 91-6 124-50s57-93 116-72 66 82 170 66" />
             <path d="M72 78c44 38 67-18 108 9s52 62 96 38 83-70 152-46" />
@@ -197,37 +226,55 @@ export function AdaptiveHome({
         aria-labelledby="current-position-heading"
       >
         <p className="section-number">05</p>
-        <div>
-          <h2 id="current-position-heading">
-            {french ? "Position actuelle" : "Current position"}
-          </h2>
-          <p>{currentIdentity(identity)?.title}</p>
+        <div className="home-current-position__content">
+          <header className="home-current-position__header">
+            <p className="page-kicker">
+              {french ? "Aujourd’hui" : "Where the work stands"}
+            </p>
+            <h2 id="current-position-heading">
+              {french ? "Position actuelle" : "Current position"}
+            </h2>
+            <p className="home-current-position__role">
+              {currentIdentity(identity)?.title}
+            </p>
+          </header>
           {currentAct ? (
-            <>
+            <div className="home-current-position__body">
               <p>{currentAct.homepageAct.sentence}</p>
-              <p className="home-current-figure">
-                {currentAct.homepageAct.figure}
-              </p>
-            </>
+              <aside className="home-current-position__figure">
+                <span>
+                  {french ? "Ambition publiée" : "Published ambition"}
+                </span>
+                <strong>{currentAct.homepageAct.figure}</strong>
+              </aside>
+            </div>
           ) : null}
-          <p className="independence-note">
-            {french
-              ? "Ce site personnel est indépendant et ne représente aucun site officiel de l’État."
-              : "This independent personal site is not an official government website."}
-          </p>
-          <Link href={localizePath("/speaking", locale)}>
-            {french ? "Voir les thèmes d’intervention" : "View speaking themes"}
-          </Link>
+          <footer className="home-current-position__footer">
+            <p className="independence-note">
+              {french
+                ? "Ce site personnel est indépendant et ne représente aucun site officiel de l’État."
+                : "This independent personal site is not an official government website."}
+            </p>
+            <Link href={localizePath("/speaking", locale)}>
+              {french
+                ? "Voir les thèmes d’intervention"
+                : "View speaking themes"}
+              <span aria-hidden="true">↗</span>
+            </Link>
+          </footer>
         </div>
       </section>
     ) : null,
     signal: signal ? (
       <section className="home-signal" aria-labelledby="home-signal-heading">
         <p className="section-number">06</p>
-        <div>
-          <p className="page-kicker">
-            {french ? "Dernier signal" : "Latest signal"}
-          </p>
+        <article className="home-signal__article">
+          <header className="home-signal__header">
+            <p className="page-kicker">
+              {french ? "Dernière analyse publiée" : "Latest published insight"}
+            </p>
+            <h2 id="home-signal-heading">{signal.tags.join(" · ")}</h2>
+          </header>
           {french && signal.translation.stale ? (
             <p className="translation-notice" role="status">
               Traduction en cours de révision. Texte source mis à jour le{" "}
@@ -240,9 +287,8 @@ export function AdaptiveHome({
               .
             </p>
           ) : null}
-          <h2 id="home-signal-heading">{signal.tags.join(" · ")}</h2>
-          <p>{signalBody}</p>
-          <div className="home-evidence-links">
+          <p className="home-signal__excerpt">{signalBody}</p>
+          <footer className="home-signal__footer">
             {signal.sourceRefs.map((ref) => (
               <Link
                 key={ref}
@@ -252,10 +298,11 @@ export function AdaptiveHome({
               </Link>
             ))}
             <Link href={localizePath(`/signals#${signal.slug}`, locale)}>
-              {french ? "Ouvrir le tableau" : "Open the Signal Board"}
+              {french ? "Lire toutes les analyses" : "Read all insights"}
+              <span aria-hidden="true">↗</span>
             </Link>
-          </div>
-        </div>
+          </footer>
+        </article>
       </section>
     ) : null,
     invitation: (
@@ -263,7 +310,9 @@ export function AdaptiveHome({
         <p className="section-number">07</p>
         <div>
           <p className="page-kicker">
-            {french ? "Une prochaine étape" : "One considered next step"}
+            {french
+              ? "Ce que vous pouvez faire ensuite"
+              : "What you can do next"}
           </p>
           <h2 id="invitation-heading">
             {french
@@ -271,15 +320,19 @@ export function AdaptiveHome({
               : "Continue the conversation"}
           </h2>
           <Link href={localizePath(audienceCta(audience), locale)}>
-            <span>
-              {french ? "Choisir la prochaine étape" : "Choose the next step"}
-            </span>
+            <span>{french ? "Voir les possibilités" : "See your options"}</span>
             <span aria-hidden="true">↗</span>
           </Link>
         </div>
       </section>
     ),
   };
+
+  const renderedBlocks = (
+    Object.keys(blockContent) as readonly AdaptiveBlock[]
+  ).filter((block) => Boolean(blockContent[block]));
+  const doorDestinations = audienceDestinations(renderedBlocks);
+  const resetDestination = audienceDestination(null, renderedBlocks);
 
   return (
     <main
@@ -296,26 +349,67 @@ export function AdaptiveHome({
           className="home-proof-strip"
           aria-label={french ? "Neuf preuves" : "Nine proof points"}
         >
-          <ol>
-            {proofs.map((item) => (
-              <li key={item.slug}>
-                <Link
-                  href={`${localizePath("/record/atlas", locale)}?node=${encodeURIComponent(item.slug)}`}
-                >
-                  <span>
-                    {String(item.homepageProof.order).padStart(2, "0")}
-                  </span>
-                  {item.homepageProof.label}
-                </Link>
-              </li>
-            ))}
-          </ol>
+          <header className="home-proof-strip__header">
+            <p>{french ? "Le dossier de preuves" : "The evidence file"}</p>
+            <h2>
+              {french
+                ? "Neuf preuves. Un seul parcours."
+                : "Nine proofs. One record."}
+            </h2>
+            <p>
+              {french
+                ? "Neuf faits vérifiables tirés du même parcours. Ouvrez chaque élément dans l’Atlas pour voir le lieu, la période, le résultat et ses sources."
+                : "Nine verifiable facts from one career. Open any entry in the Atlas to see its place, period, outcome and sources."}
+            </p>
+          </header>
+          <div className="home-proof-strip__register">
+            <Link
+              className="home-proof-strip__feature"
+              href={`${localizePath("/record/atlas", locale)}?node=${encodeURIComponent(proofs[0]!.slug)}`}
+            >
+              <span>
+                {String(proofs[0]!.homepageProof.order).padStart(2, "0")}
+              </span>
+              <strong>{proofs[0]!.homepageProof.label}</strong>
+              <small>
+                {french
+                  ? "Ouvrir la preuve dans l’Atlas"
+                  : "Open the evidence in the Atlas"}{" "}
+                <span aria-hidden="true">↗</span>
+              </small>
+            </Link>
+            <ol>
+              {proofs.slice(1).map((item) => (
+                <li key={item.slug}>
+                  <Link
+                    href={`${localizePath("/record/atlas", locale)}?node=${encodeURIComponent(item.slug)}`}
+                  >
+                    <span>
+                      {String(item.homepageProof.order).padStart(2, "0")}
+                    </span>
+                    <strong>{item.homepageProof.label}</strong>
+                    <small aria-hidden="true">↗</small>
+                  </Link>
+                </li>
+              ))}
+            </ol>
+          </div>
         </section>
       ) : null}
       {lite ? (
-        <AudienceDoorsStatic locale={locale} selected={audience} />
+        <AudienceDoorsStatic
+          locale={locale}
+          selected={audience}
+          destinations={doorDestinations}
+          resetDestination={resetDestination}
+        />
       ) : (
-        <AudienceDoors locale={locale} selected={audience} />
+        <AudienceDoors
+          locale={locale}
+          selected={audience}
+          destinations={doorDestinations}
+          resetDestination={resetDestination}
+        />
       )}
       <div
         className="adaptive-home-blocks"

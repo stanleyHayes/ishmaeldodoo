@@ -2,6 +2,7 @@
 
 import { GovernedMediaPicker } from "../media/governed-media-picker";
 import { AdminEmptyState } from "../ui/admin-state";
+import { AdminSelect } from "../ui/admin-select";
 
 type TranslationStatus = "current" | "stale" | "missing";
 
@@ -257,11 +258,8 @@ function LocalizedEditor({
             readOnly={readOnly}
           />
         )}
-        <label className="status-label" htmlFor={`${id}-status`}>
-          {label} translation status
-        </label>
-        <select
-          id={`${id}-status`}
+        <AdminSelect
+          label={`${label} translation status`}
           value={field.status["fr-FR"]}
           onChange={(event) =>
             onChange({
@@ -277,7 +275,7 @@ function LocalizedEditor({
           <option value="current">Current</option>
           <option value="stale">Stale</option>
           <option value="missing">Missing</option>
-        </select>
+        </AdminSelect>
       </div>
     </fieldset>
   );
@@ -329,8 +327,8 @@ export function PagePayloadEditor({
     return (
       <AdminEmptyState
         kind="content"
-        title="Page fields are not initialised"
-        description="Create the required bilingual field structure without saving a version."
+        title="No saved page content is loaded"
+        description="Select Open and edit above first. If this is a new page, initialise a blank bilingual form; nothing is saved until you select Save as new draft."
         action={
           !readOnly ? (
             <button
@@ -482,11 +480,8 @@ export function PagePayloadEditor({
             </div>
             <div className="page-settings">
               <div className="field">
-                <label htmlFor={`section-${index}-record-act`}>
-                  Record act
-                </label>
-                <select
-                  id={`section-${index}-record-act`}
+                <AdminSelect
+                  label="Record chapter"
                   value={section.recordAct ?? ""}
                   onChange={(event) => {
                     const withoutRecordAct = { ...section };
@@ -510,7 +505,7 @@ export function PagePayloadEditor({
                   <option value="system">The System</option>
                   <option value="lite">The Lite</option>
                   <option value="return">The Return</option>
-                </select>
+                </AdminSelect>
               </div>
               <GovernedMediaPicker
                 id={`section-${index}-field-image`}

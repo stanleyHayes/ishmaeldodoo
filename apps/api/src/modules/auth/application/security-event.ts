@@ -12,6 +12,7 @@ export const securityEventTypes = [
   "user_disabled",
   "user_enabled",
   "user_invited",
+  "user_email_changed",
   "invitation_accepted",
   "privileged_data_read",
   "hardware_key_enrolled",

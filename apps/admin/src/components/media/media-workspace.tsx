@@ -8,7 +8,12 @@ import type {
   MediaSignRequest,
 } from "@amanor/contracts";
 import { AdminSelect } from "../ui/admin-select";
-import { AdminEmptyState, AdminSkeleton, LoadingDots } from "../ui/admin-state";
+import {
+  AdminEmptyState,
+  AdminNotice,
+  AdminSkeleton,
+  BusyLabel,
+} from "../ui/admin-state";
 import { AdminTemporalField } from "../ui/admin-temporal-field";
 import { useEffect, useState } from "react";
 import {
@@ -30,10 +35,17 @@ const folders = [
 ] as const;
 const policies = ["portrait", "editorial", "atlas", "document"] as const;
 
-function errorMessage(error: unknown): string {
-  return error instanceof ApiClientError
-    ? error.message
-    : "The media operation could not be completed.";
+type MediaError = Readonly<{ title: string; description: string }>;
+
+function mediaError(error: unknown, title: string): MediaError {
+  const requestReference =
+    error instanceof ApiClientError && error.requestId
+      ? ` Reference: ${error.requestId}.`
+      : "";
+  return {
+    title,
+    description: `${error instanceof ApiClientError ? error.message : "The service did not respond as expected."}${requestReference} Try again, or contact the technical team if this continues.`,
+  };
 }
 
 function localized(en: string, fr: string) {
@@ -90,9 +102,10 @@ export function MediaWorkspace() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<MediaError | null>(null);
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
   const [inventory, setInventory] = useState<MediaInventoryReport | null>(null);
+  const [view, setView] = useState<"library" | "upload">("library");
 
   async function load(cursor?: string, append = false) {
     setLoading(true);
@@ -104,7 +117,7 @@ export function MediaWorkspace() {
       );
       setNextCursor(page.nextCursor);
     } catch (caught) {
-      setError(errorMessage(caught));
+      setError(mediaError(caught, "We couldn't open the media library"));
     } finally {
       setLoading(false);
     }
@@ -121,7 +134,7 @@ export function MediaWorkspace() {
       },
       (caught: unknown) => {
         if (!subscribed) return;
-        setError(errorMessage(caught));
+        setError(mediaError(caught, "We couldn't open the media library"));
         setLoading(false);
       },
     );
@@ -141,7 +154,11 @@ export function MediaWorkspace() {
     ) as MediaSignRequest["resourceType"];
     const metadata = metadataFrom(form);
     if (metadata.focalPoint && resourceType !== "image") {
-      setError("Focal points may only be applied to images.");
+      setError({
+        title: "Choose an image to use a focal point",
+        description:
+          "Focal points control image crops and cannot be applied to audio, video or documents.",
+      });
       return;
     }
     setBusy(true);
@@ -158,8 +175,9 @@ export function MediaWorkspace() {
       form.reset();
       setMessage("Upload verified and added to the governed library.");
       await load();
+      setView("library");
     } catch (caught) {
-      setError(errorMessage(caught));
+      setError(mediaError(caught, "We couldn't add this file"));
     } finally {
       setBusy(false);
     }
@@ -184,7 +202,7 @@ export function MediaWorkspace() {
       setSelected(updated);
       setMessage("Governance and crop metadata saved.");
     } catch (caught) {
-      setError(errorMessage(caught));
+      setError(mediaError(caught, "We couldn't save the media details"));
     } finally {
       setBusy(false);
     }
@@ -208,7 +226,7 @@ export function MediaWorkspace() {
         "Asset invalidated at Cloudinary and retired from the library.",
       );
     } catch (caught) {
-      setError(errorMessage(caught));
+      setError(mediaError(caught, "We couldn't retire this asset"));
     } finally {
       setBusy(false);
     }
@@ -231,7 +249,7 @@ export function MediaWorkspace() {
       URL.revokeObjectURL(url);
       setMessage("Complete governed asset inventory downloaded.");
     } catch (caught) {
-      setError(errorMessage(caught));
+      setError(mediaError(caught, "We couldn't download the inventory"));
     } finally {
       setBusy(false);
     }
@@ -239,135 +257,208 @@ export function MediaWorkspace() {
 
   return (
     <div className="media-workspace">
-      <section className="media-intake" aria-labelledby="media-upload-title">
-        <header className="media-intake__header">
-          <div>
-            <p className="section-context">Asset intake / 01</p>
-            <h2 id="media-upload-title">Register a governed asset</h2>
-          </div>
+      <aside className="admin-page-guide" aria-label="How to manage media">
+        <div>
+          <span>1</span>
           <p>
-            Files travel directly to the media vault on a short-lived signature.
-            The API verifies provenance, usage and retention before
-            registration.
+            <strong>Choose a file</strong>
+            <small>
+              Start with an approved local image, audio file, video or document.
+            </small>
           </p>
-        </header>
-        <MediaMetadataForm onSubmit={submitUpload} busy={busy} upload />
-      </section>
-
+        </div>
+        <div>
+          <span>2</span>
+          <p>
+            <strong>Add its details</strong>
+            <small>
+              Record the source, permission, description and retention rule.
+            </small>
+          </p>
+        </div>
+        <div>
+          <span>3</span>
+          <p>
+            <strong>Find it below</strong>
+            <small>
+              Edit details or retire the asset from the governed library.
+            </small>
+          </p>
+        </div>
+      </aside>
+      <nav className="admin-task-switcher" aria-label="Media tasks">
+        <button
+          type="button"
+          aria-current={view === "library" ? "page" : undefined}
+          onClick={() => setView("library")}
+        >
+          <strong>Media library</strong>
+          <small>Browse and update approved files</small>
+        </button>
+        <button
+          type="button"
+          aria-current={view === "upload" ? "page" : undefined}
+          onClick={() => setView("upload")}
+        >
+          <strong>Add new media</strong>
+          <small>Register a file and its permissions</small>
+        </button>
+      </nav>
       {error ? (
-        <p role="alert" className="form-error">
-          {error}
-        </p>
+        <AdminNotice
+          tone="error"
+          title={error.title}
+          description={error.description}
+          action={
+            <button
+              type="button"
+              className="text-button"
+              onClick={() => setError(null)}
+            >
+              Dismiss
+            </button>
+          }
+        />
       ) : null}
-      {message ? (
-        <p role="status" className="form-success">
-          {message}
-        </p>
+      {message ? <AdminNotice tone="success" title={message} /> : null}
+
+      {view === "upload" ? (
+        <section className="media-intake" aria-labelledby="media-upload-title">
+          <header className="media-intake__header">
+            <div>
+              <p className="section-context">Asset intake / 01</p>
+              <h2 id="media-upload-title">Register a governed asset</h2>
+            </div>
+            <p>
+              Files travel directly to the media vault on a short-lived
+              signature. The API verifies provenance, usage and retention before
+              registration.
+            </p>
+          </header>
+          <MediaMetadataForm onSubmit={submitUpload} busy={busy} upload />
+        </section>
       ) : null}
 
-      <section
-        className="media-catalogue"
-        aria-labelledby="media-library-title"
-      >
-        <div className="media-catalogue__header">
-          <div>
-            <p className="section-context">Governed library / 02</p>
-            <h2 id="media-library-title">Media library</h2>
+      {view === "library" ? (
+        <section
+          className="media-catalogue"
+          aria-labelledby="media-library-title"
+        >
+          <div className="media-catalogue__header">
+            <div>
+              <p className="section-context">Governed library / 02</p>
+              <h2 id="media-library-title">Media library</h2>
+            </div>
+            <span
+              className="media-catalogue__count"
+              aria-label={`${assets.length} loaded assets`}
+            >
+              {String(assets.length).padStart(2, "0")}
+            </span>
           </div>
-          <span
-            className="media-catalogue__count"
-            aria-label={`${assets.length} loaded assets`}
-          >
-            {String(assets.length).padStart(2, "0")}
-          </span>
-        </div>
-        <div className="media-inventory-actions">
-          <button
-            type="button"
-            className="secondary-button"
-            disabled={busy}
-            onClick={() => void downloadInventory()}
-          >
-            Download asset inventory
-          </button>
-          {inventory ? (
-            <p role="status">
-              {inventory.totals.assets} assets · {inventory.totals.published}{" "}
-              published · {inventory.totals.actionRequired} require action
-            </p>
+          <div className="media-inventory-actions">
+            <button
+              type="button"
+              className="secondary-button"
+              disabled={busy}
+              onClick={() => void downloadInventory()}
+            >
+              Download asset inventory
+            </button>
+            {inventory ? (
+              <p role="status">
+                {inventory.totals.assets} assets · {inventory.totals.published}{" "}
+                published · {inventory.totals.actionRequired} require action
+              </p>
+            ) : null}
+          </div>
+          {loading && assets.length === 0 ? (
+            <AdminSkeleton variant="media" label="Loading governed media" />
           ) : null}
-        </div>
-        {loading && assets.length === 0 ? (
-          <AdminSkeleton variant="media" label="Loading governed media" />
-        ) : null}
-        {!loading && assets.length === 0 ? (
-          <AdminEmptyState
-            kind="media"
-            title="The governed library is ready"
-            description="No active assets are registered yet. Add the first approved file above and its provenance, usage rights and retention rules will appear here."
-          />
-        ) : null}
-        <div className="media-library-grid">
-          {assets.map((asset) => (
-            <article key={asset.assetId} className="media-library-card">
-              {asset.resourceType === "image" ? (
-                // Cloudinary URL was verified server-side before persistence.
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={asset.secureUrl} alt={asset.altText["en-GB"]} />
-              ) : (
-                <div className="media-file-mark" aria-hidden="true">
-                  {asset.resourceType.toUpperCase()}
-                </div>
-              )}
-              <div>
-                <strong>{asset.altText["en-GB"]}</strong>
-                <p>{asset.publicId}</p>
-                <small>
-                  {asset.format.toUpperCase()} ·{" "}
-                  {(asset.bytes / 1024).toFixed(1)} KB ·{" "}
-                  {asset.transformationPolicy} · {asset.retentionPolicy}
-                  {asset.legalHold ? " · legal hold" : ""}
-                </small>
-              </div>
-              <div className="media-card-actions">
+          {!loading && assets.length === 0 ? (
+            <AdminEmptyState
+              kind="media"
+              title="No media has been added yet"
+              description="Use the form above to add an approved image, audio file, video or document. It will appear here after its source, permission and retention details are saved."
+              action={
                 <button
-                  type="button"
                   className="secondary-button"
-                  onClick={() => setSelected(asset)}
-                >
-                  Edit metadata and crop
-                </button>
-                <button
                   type="button"
-                  className="danger-button"
-                  disabled={
-                    busy ||
-                    asset.legalHold ||
-                    asset.retentionPolicy === "permanent"
-                  }
-                  onClick={() => void remove(asset)}
+                  onClick={() => setView("upload")}
                 >
-                  {asset.legalHold || asset.retentionPolicy === "permanent"
-                    ? "Protected from retirement"
-                    : pendingDelete === asset.assetId
-                      ? "Confirm retirement"
-                      : "Retire asset"}
+                  Add the first file
                 </button>
-              </div>
-            </article>
-          ))}
-        </div>
-        {nextCursor ? (
-          <button
-            type="button"
-            className="secondary-button"
-            disabled={loading}
-            onClick={() => void load(nextCursor, true)}
-          >
-            {loading ? <LoadingDots label="Loading more" /> : "Load more"}
-          </button>
-        ) : null}
-      </section>
+              }
+            />
+          ) : null}
+          <div className="media-library-grid">
+            {assets.map((asset) => (
+              <article key={asset.assetId} className="media-library-card">
+                {asset.resourceType === "image" ? (
+                  // Cloudinary URL was verified server-side before persistence.
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={asset.secureUrl} alt={asset.altText["en-GB"]} />
+                ) : (
+                  <div className="media-file-mark" aria-hidden="true">
+                    {asset.resourceType.toUpperCase()}
+                  </div>
+                )}
+                <div>
+                  <strong>{asset.altText["en-GB"]}</strong>
+                  <p>{asset.publicId}</p>
+                  <small>
+                    {asset.format.toUpperCase()} ·{" "}
+                    {(asset.bytes / 1024).toFixed(1)} KB ·{" "}
+                    {asset.transformationPolicy} · {asset.retentionPolicy}
+                    {asset.legalHold ? " · legal hold" : ""}
+                  </small>
+                </div>
+                <div className="media-card-actions">
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    onClick={() => setSelected(asset)}
+                  >
+                    Edit metadata and crop
+                  </button>
+                  <button
+                    type="button"
+                    className="danger-button"
+                    disabled={
+                      busy ||
+                      asset.legalHold ||
+                      asset.retentionPolicy === "permanent"
+                    }
+                    onClick={() => void remove(asset)}
+                  >
+                    {asset.legalHold || asset.retentionPolicy === "permanent"
+                      ? "Protected from retirement"
+                      : pendingDelete === asset.assetId
+                        ? "Confirm retirement"
+                        : "Retire asset"}
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+          {loading && assets.length > 0 ? (
+            <AdminSkeleton
+              variant="media"
+              label="Loading more governed media"
+            />
+          ) : null}
+          {nextCursor ? (
+            <button
+              type="button"
+              className="secondary-button"
+              disabled={loading}
+              onClick={() => void load(nextCursor, true)}
+            >
+              Load more
+            </button>
+          ) : null}
+        </section>
+      ) : null}
 
       {selected ? (
         <section className="work-queue" aria-labelledby="media-edit-title">
@@ -535,9 +626,7 @@ function MediaMetadataForm({
       ) : null}
       <button className="primary-button" type="submit" disabled={busy}>
         {busy ? (
-          <LoadingDots
-            label={upload ? "Registering asset" : "Saving metadata"}
-          />
+          <BusyLabel label={upload ? "Registering asset" : "Saving metadata"} />
         ) : upload ? (
           "Upload and register"
         ) : (

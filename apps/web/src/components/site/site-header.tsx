@@ -39,6 +39,19 @@ const primaryNavigation = [
   label: Record<SupportedLocale, string>;
 }[];
 
+const drawerNavigation = [
+  {
+    href: "/",
+    icon: "home",
+    label: { "en-GB": "Home", "fr-FR": "Accueil" },
+  },
+  ...primaryNavigation,
+] as const satisfies readonly {
+  href: string;
+  icon: NavIconKey;
+  label: Record<SupportedLocale, string>;
+}[];
+
 export function SiteHeader({
   locale = "en-GB",
   pathname = "/",
@@ -192,14 +205,14 @@ export function SiteHeader({
                 className="nav-drawer__grid"
                 aria-label={isFrench ? "Navigation principale" : "Primary"}
               >
-                {primaryNavigation.map((item, index) => (
+                {drawerNavigation.map((item, index) => (
                   <ActiveNavigationLink
                     href={localizePath(item.href, locale)}
                     initialPathname={pathname}
                     drawerToggleId="amanor-nav-toggle"
                     key={item.href}
                   >
-                    <span className="nav-cell__index">
+                    <span className="nav-cell__index" aria-hidden="true">
                       {String(index + 1).padStart(2, "0")}
                     </span>
                     <span className="nav-cell__icon">
@@ -265,8 +278,8 @@ export function SiteHeader({
                   initialPathname={pathname}
                   drawerToggleId="amanor-nav-toggle"
                 >
-                  <span className="nav-cell__index">
-                    {String(primaryNavigation.length + 1).padStart(2, "0")}
+                  <span className="nav-cell__index" aria-hidden="true">
+                    {String(drawerNavigation.length + 1).padStart(2, "0")}
                   </span>
                   <span className="nav-cell__icon">{navIcons.engagement}</span>
                   <span className="nav-cell__label">

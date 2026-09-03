@@ -2,6 +2,7 @@
 
 import {
   contentKinds,
+  workflowStates,
   type AuthSessionResponse,
   type AuditExport,
   type ContentKind,
@@ -12,7 +13,7 @@ import {
   type SourceAuditReport,
   type WorkflowAction,
 } from "@amanor/contracts";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ApiClientError,
   createContentDraft,
@@ -31,7 +32,12 @@ import { PagePayloadEditor } from "./page-payload-editor";
 import { SchemaPayloadEditor } from "./schema-payload-editor";
 import { AdminSelect } from "../ui/admin-select";
 import { AdminTemporalField } from "../ui/admin-temporal-field";
-import { AdminEmptyState, AdminSkeleton, LoadingDots } from "../ui/admin-state";
+import {
+  AdminEmptyState,
+  AdminNotice,
+  AdminSkeleton,
+  BusyLabel,
+} from "../ui/admin-state";
 
 type AdminRole = AuthSessionResponse["user"]["roles"][number];
 
@@ -56,10 +62,29 @@ const labels: Record<ContentKind, string> = {
   selahEntry: "Selah entry",
   riderTemplate: "Rider template",
   emailTemplate: "Email template",
-  page: "Page",
+  page: "Website page",
   blackout: "Blackout",
   counterparty: "Counterparty",
   deskConfiguration: "Desk configuration",
+};
+
+const contentDescriptions: Record<ContentKind, string> = {
+  page: "Website pages and their English and French sections",
+  identity: "Official name, biographies, titles and approved portraits",
+  atlasNode: "Places, roles, outcomes and proof points shown in the Atlas",
+  speakingTheme: "Speaking topics, formats, history and related media",
+  signal: "Short foresight notes and their publication details",
+  archiveItem: "Speeches, interviews, transcripts and citations",
+  source: "Evidence used to support public claims",
+  scholar: "Consent-approved scholar profiles and support records",
+  officeHoursCycle: "Office Hours dates, capacity and ballot settings",
+  officeHoursAnswer: "Published questions and written answers",
+  selahEntry: "Quiet reflections for the Selah page",
+  riderTemplate: "Requirements sent with speaking engagements",
+  emailTemplate: "Approved messages sent by the platform",
+  blackout: "Dates that cannot accept speaking requests",
+  counterparty: "Organisations involved in requests and engagements",
+  deskConfiguration: "Protocol Desk rules and response settings",
 };
 
 const stateActions: Readonly<
@@ -72,6 +97,58 @@ const stateActions: Readonly<
   published: ["supersede"],
   superseded: [],
 };
+
+/** Plain words for the workflow states, used on every library row. */
+const stateLabels: Record<ContentVersion["state"], string> = {
+  draft: "Draft",
+  in_review: "In review",
+  approved: "Approved",
+  scheduled: "Scheduled",
+  published: "Published",
+  superseded: "Superseded",
+};
+
+/**
+ * The one sentence an operator needs when Publish is not available: what has to
+ * happen next, and who has to do it. Naming the role matters more than naming
+ * the state, because the usual reason work stalls is that it is waiting on
+ * somebody else.
+ */
+function publicationBlocker({
+  state,
+  canAuthor,
+  canReview,
+  policyReviewRequired,
+  scheduledFor,
+}: Readonly<{
+  state: ContentVersion["state"];
+  canAuthor: boolean;
+  canReview: boolean;
+  policyReviewRequired: boolean;
+  scheduledFor: string;
+}>): string {
+  if (state === "draft")
+    return canAuthor
+      ? "This is a draft. Submit it for review to start the approval it needs before publishing."
+      : "This is a draft. An editor or translator has to submit it for review before it can be approved.";
+  if (state === "in_review")
+    return canReview
+      ? policyReviewRequired
+        ? "Waiting on you to approve it. Its Signal policy tags mean this approval is an independent review."
+        : "Waiting on you to approve it before it can be published."
+      : "Waiting on a reviewer to approve it. Nobody can publish it until they do.";
+  if (state === "approved")
+    return canReview
+      ? scheduledFor
+        ? "Approved. Schedule it for the time you chose, or publish one language now."
+        : "Approved and ready. Publish English or French now, or set a publication time to schedule it."
+      : "Approved and waiting on a reviewer to publish it.";
+  if (state === "scheduled")
+    return "Scheduled. It publishes on its own at the chosen time; request changes to stop it.";
+  if (state === "published")
+    return "Live on the public website. Supersede it to start the next version, or take a language down.";
+  return "Superseded by a newer version. Open the latest version to make further changes.";
+}
 
 const actionLabels: Record<WorkflowAction, string> = {
   submit: "Submit for review",
@@ -95,9 +172,42 @@ function pruneEmpty(value: unknown): unknown {
   );
 }
 
-function operationMessage(error: unknown) {
-  if (error instanceof ApiClientError) return error.message;
-  return "The CMS operation failed. Reload the document and try again.";
+function operationMessage(error: unknown): string {
+  if (error instanceof ApiClientError) {
+    const reference = error.requestId
+      ? ` Support reference: ${error.requestId}.`
+      : "";
+    if (error.status === 401)
+      return `Your session has expired. Sign in again, then reopen this content.${reference}`;
+    if (error.status === 403)
+      return `Your account does not have permission to complete this action. Ask an administrator to review your role.${reference}`;
+    if (error.status === 404)
+      return `This content could not be found. Browse the available content and open it again.${reference}`;
+    if (error.status === 409)
+      return `Someone else changed this content while you were editing. Reopen the latest version before trying again.${reference}`;
+    if (error.status === 429)
+      return `Too many requests were sent in a short time. Wait a moment, then try again.${reference}`;
+    if (error.status >= 500)
+      return `The content service is temporarily unavailable. Your changes remain in this browser; wait a moment and try again.${reference}`;
+    return `${error.message}${reference}`;
+  }
+
+  if (error instanceof TypeError)
+    return "The editor could not connect to the content service. Your changes remain in this browser. Check your connection, then try again.";
+
+  if (
+    error instanceof Error &&
+    (error.name === "ZodError" || /invalid.*response/iu.test(error.message))
+  )
+    return "The saved content is in a format this editor cannot read. Nothing was changed. Reopen the item; if the problem continues, share the page name with support.";
+
+  if (
+    error instanceof Error &&
+    error.message === "Payload must be a JSON object"
+  )
+    return "The advanced content must be one JSON object. Correct the value, then save the draft again.";
+
+  return "Something unexpected stopped this action. Your changes remain in this browser. Reopen the content and try again.";
 }
 
 function replaceVersion(
@@ -115,6 +225,76 @@ function isTaggedSignal(documentType: ContentKind, payload: unknown): boolean {
     isRecord(payload) &&
     Array.isArray(payload.tags) &&
     payload.tags.length > 0
+  );
+}
+
+function previewText(value: unknown, locale: "en-GB" | "fr-FR"): string {
+  if (typeof value === "string") return value;
+  if (isRecord(value) && typeof value[locale] === "string")
+    return value[locale];
+  return "";
+}
+
+function ContentPreview({
+  payload,
+  locale,
+  label,
+}: Readonly<{
+  payload: unknown;
+  locale: "en-GB" | "fr-FR";
+  label: string;
+}>) {
+  if (!isRecord(payload)) return null;
+  const title = previewText(payload.title, locale) || label;
+  const summary = previewText(payload.summary, locale);
+  const sections = Array.isArray(payload.sections) ? payload.sections : [];
+  return (
+    <section className="content-preview" aria-label={`${label} preview`}>
+      <header>
+        <p className="section-context">
+          Preview · {locale === "en-GB" ? "English" : "French"}
+        </p>
+        <h3>{title}</h3>
+        {summary ? <p>{summary}</p> : null}
+      </header>
+      {sections.length ? (
+        <div className="content-preview__sections">
+          {sections.slice(0, 8).map((section, index) => {
+            const record = isRecord(section) ? section : {};
+            const heading =
+              previewText(record.heading, locale) || `Section ${index + 1}`;
+            const body = previewText(record.body, locale);
+            return (
+              <article key={`${heading}-${index}`}>
+                <strong>{heading}</strong>
+                {body ? (
+                  <p>{body}</p>
+                ) : (
+                  <small>
+                    No {locale === "en-GB" ? "English" : "French"} body text
+                    yet.
+                  </small>
+                )}
+              </article>
+            );
+          })}
+        </div>
+      ) : (
+        <dl className="content-preview__fields">
+          {Object.entries(payload)
+            .slice(0, 12)
+            .map(([key, value]) => (
+              <div key={key}>
+                <dt>{key.replaceAll(/([A-Z])/g, " $1")}</dt>
+                <dd>
+                  {previewText(value, locale) ||
+                    (typeof value === "number" ? value : "Not set")}
+                </dd>
+              </div>
+            ))}
+        </dl>
+      )}
+    </section>
   );
 }
 
@@ -157,6 +337,38 @@ export function ContentWorkspace({
   const [sourceAudit, setSourceAudit] = useState<SourceAuditReport | null>(
     null,
   );
+  const [draftPreviewOpen, setDraftPreviewOpen] = useState(false);
+  const [publishReviewOpen, setPublishReviewOpen] = useState(false);
+  const [libraryQuery, setLibraryQuery] = useState("");
+  // The library loads in the background and must never disable the editor, so
+  // it carries its own pending and failure state rather than the shared `busy`.
+  const [libraryLoading, setLibraryLoading] = useState(true);
+  const [libraryError, setLibraryError] = useState<string | null>(null);
+  const [libraryState, setLibraryState] = useState<
+    "all" | ContentVersion["state"]
+  >("all");
+
+  // The library filters what has been loaded rather than asking the API to
+  // filter, so the count below always says which of the loaded records are on
+  // screen and an operator is never told a page is empty when it is only
+  // filtered.
+  const visibleDocuments = useMemo(() => {
+    const needle = libraryQuery.trim().toLocaleLowerCase();
+    return documents.filter(
+      (document) =>
+        (libraryState === "all" || document.state === libraryState) &&
+        (!needle || document.documentId.toLocaleLowerCase().includes(needle)),
+    );
+  }, [documents, libraryQuery, libraryState]);
+
+  // Nothing is discoverable behind a button an operator has to know to press,
+  // so the library for the chosen type loads on arrival and on every change of
+  // type. It stays quiet: the message line is for actions the operator took.
+  useEffect(() => {
+    void browseDocuments();
+    // browseDocuments closes over documentType, which is the only input.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [documentType]);
 
   const selected =
     versions.find((version) => version.version === selectedVersion) ?? null;
@@ -170,22 +382,20 @@ export function ContentWorkspace({
   }
 
   async function browseDocuments(cursor?: string) {
-    resetFeedback("browse");
+    setLibraryLoading(true);
+    setLibraryError(null);
     try {
       const page = await listContentDocuments(documentType, cursor);
-      setDocuments((current) =>
-        cursor ? [...current, ...page.items] : page.items,
-      );
+      // Read the page here rather than inside the updater: React runs an
+      // updater during a later render, where a throw escapes this catch and
+      // takes the whole workspace down instead of showing the list error.
+      const items = page.items;
+      setDocuments((current) => (cursor ? [...current, ...items] : items));
       setDocumentsCursor(page.nextCursor);
-      setMessage(
-        page.items.length === 0
-          ? "No records exist for this content type yet."
-          : `Loaded ${page.items.length} record${page.items.length === 1 ? "" : "s"}.`,
-      );
     } catch (caught) {
-      setError(operationMessage(caught));
+      setLibraryError(operationMessage(caught));
     } finally {
-      setBusy(null);
+      setLibraryLoading(false);
     }
   }
 
@@ -211,18 +421,19 @@ export function ContentWorkspace({
     }
   }
 
-  async function openDocument() {
-    if (!/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$/u.test(documentId)) {
+  async function openDocument(targetDocumentId = documentId) {
+    if (!/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$/u.test(targetDocumentId)) {
       setError(
         "Document ID must use letters, numbers, hyphens or underscores.",
       );
       return;
     }
     resetFeedback("open");
+    setDocumentId(targetDocumentId);
     setAudit(null);
     setAuditExport(null);
     try {
-      const loaded = await listContentVersions(documentType, documentId);
+      const loaded = await listContentVersions(documentType, targetDocumentId);
       setVersions(loaded);
       const latest = loaded[0] ?? null;
       setSelectedVersion(latest?.version ?? null);
@@ -315,6 +526,7 @@ export function ContentWorkspace({
       setMessage(
         `Version ${publication.version} published for ${publication.locale}. Revalidation is queued.`,
       );
+      setPublishReviewOpen(false);
     } catch (caught) {
       setError(operationMessage(caught));
     } finally {
@@ -412,24 +624,49 @@ export function ContentWorkspace({
 
   return (
     <div className="content-workspace">
+      <header className="cms-welcome">
+        <div>
+          <p className="section-context">Website editor</p>
+          <h2>Update what visitors see</h2>
+          <p>
+            Choose a page or content item, edit its current wording, preview it,
+            then save it for review.
+          </p>
+        </div>
+        <ol aria-label="How publishing works">
+          <li>
+            <span>1</span>
+            <strong>Choose</strong>
+            <small>Open existing content</small>
+          </li>
+          <li>
+            <span>2</span>
+            <strong>Edit</strong>
+            <small>Update and preview</small>
+          </li>
+          <li>
+            <span>3</span>
+            <strong>Review</strong>
+            <small>Approve before publishing</small>
+          </li>
+        </ol>
+      </header>
       <section
         className="document-locator content-command"
         aria-labelledby="document-locator-title"
       >
         <div>
-          <p className="section-context">Content command / 01</p>
-          <h2 id="document-locator-title">
-            Find the record. Shape the release.
-          </h2>
+          <p className="section-context">Step 1 · Choose content</p>
+          <h2 id="document-locator-title">What do you want to update?</h2>
           <p className="content-command__intro">
-            Locate one governed document or browse its collection. Every change
-            remains versioned, reviewable and bilingual.
+            Start with Website page for normal page wording. The other options
+            manage reusable information shown across the website.
           </p>
         </div>
         <div className="document-locator__fields">
           <div className="field">
             <AdminSelect
-              label="Content type"
+              label="What kind of content?"
               value={documentType}
               onChange={(event) => {
                 setDocumentType(event.target.value as ContentKind);
@@ -449,53 +686,56 @@ export function ContentWorkspace({
             </AdminSelect>
           </div>
           <div className="field">
-            <label htmlFor="documentId">Document ID</label>
+            <label htmlFor="library-search">Search by name</label>
             <input
-              id="documentId"
-              value={documentId}
-              onChange={(event) => setDocumentId(event.target.value)}
+              id="library-search"
+              type="search"
+              value={libraryQuery}
+              placeholder={`Filter ${labels[documentType].toLowerCase()}s`}
+              onChange={(event) => setLibraryQuery(event.target.value)}
               maxLength={128}
             />
           </div>
-          <button
-            className="secondary-button"
-            type="button"
-            onClick={() => void openDocument()}
-            disabled={busy !== null}
-          >
-            {busy === "open" ? (
-              <LoadingDots label="Opening document" />
-            ) : (
-              "Open document"
-            )}
-          </button>
-          <button
-            className="text-button"
-            type="button"
-            onClick={() => void browseDocuments()}
-            disabled={busy !== null}
-          >
-            {busy === "browse" ? (
-              <LoadingDots label="Loading records" />
-            ) : (
-              "Browse records"
-            )}
-          </button>
-          {canAuditSources ? (
-            <button
-              className="secondary-button"
-              type="button"
-              onClick={() => void downloadSourceAudit()}
-              disabled={busy !== null}
+          <div className="field">
+            <AdminSelect
+              label="Status"
+              value={libraryState}
+              onChange={(event) =>
+                setLibraryState(
+                  event.target.value as "all" | ContentVersion["state"],
+                )
+              }
             >
-              {busy === "source-audit" ? (
-                <LoadingDots label="Auditing sources" />
-              ) : (
-                "Download source audit"
-              )}
-            </button>
+              <option value="all">Every status</option>
+              {workflowStates.map((state) => (
+                <option value={state} key={state}>
+                  {stateLabels[state]}
+                </option>
+              ))}
+            </AdminSelect>
+          </div>
+          {canAuditSources ? (
+            <div className="document-locator__utility">
+              <span>Evidence and compliance</span>
+              <button
+                className="text-button"
+                type="button"
+                onClick={() => void downloadSourceAudit()}
+                disabled={busy !== null}
+              >
+                {busy === "source-audit" ? (
+                  <BusyLabel label="Auditing sources" />
+                ) : (
+                  "Download source audit"
+                )}
+              </button>
+            </div>
           ) : null}
         </div>
+        <p className="content-type-help">
+          <strong>{labels[documentType]}:</strong>{" "}
+          {contentDescriptions[documentType]}
+        </p>
         {sourceAudit ? (
           <p role="status">
             {sourceAudit.totals.sourceEntries} sources ·{" "}
@@ -506,56 +746,137 @@ export function ContentWorkspace({
         ) : null}
       </section>
 
-      {busy === "browse" && documents.length === 0 ? (
-        <AdminSkeleton variant="content" label="Loading content records" />
-      ) : null}
-
-      {documents.length > 0 ? (
-        <section
-          className="record-browser"
-          aria-labelledby="record-browser-title"
-        >
-          <div className="record-browser__heading">
-            <h2 id="record-browser-title">{labels[documentType]} records</h2>
-            {documentsCursor ? (
-              <button
-                className="text-button"
-                type="button"
-                disabled={busy !== null}
-                onClick={() => void browseDocuments(documentsCursor)}
-              >
-                {busy === "browse" ? (
-                  <LoadingDots label="Loading more records" />
-                ) : (
-                  "Load more"
-                )}
-              </button>
-            ) : null}
+      <section
+        className="record-browser"
+        aria-labelledby="record-browser-title"
+      >
+        <div className="record-browser__heading">
+          <div>
+            <p className="section-context">Available content</p>
+            <h2 id="record-browser-title">
+              Choose a {labels[documentType].toLowerCase()}
+            </h2>
           </div>
+          <p className="record-browser__count">
+            {visibleDocuments.length}{" "}
+            {visibleDocuments.length === 1 ? "item" : "items"}
+            {documents.length === visibleDocuments.length
+              ? ""
+              : ` of ${documents.length}`}
+            {documentsCursor ? " loaded so far" : ""}
+          </p>
+        </div>
+
+        {libraryLoading && documents.length === 0 ? (
+          <AdminSkeleton variant="content" label="Loading content records" />
+        ) : visibleDocuments.length > 0 ? (
           <div className="record-list">
-            {documents.map((document) => (
+            {visibleDocuments.map((document) => (
               <button
                 type="button"
                 key={document.documentId}
+                aria-current={
+                  document.documentId === documentId && versions.length > 0
+                    ? "true"
+                    : undefined
+                }
                 aria-label={`Select ${document.documentId}, version ${document.latestVersion}, ${document.state.replace("_", " ")}`}
                 onClick={() => {
-                  setDocumentId(document.documentId);
-                  setVersions([]);
-                  setSelectedVersion(null);
-                  setMessage(
-                    `Selected ${document.documentId}. Open it to load version history.`,
-                  );
+                  void openDocument(document.documentId);
                 }}
               >
                 <strong>{document.documentId}</strong>
-                <span>
-                  v{document.latestVersion} · {document.state.replace("_", " ")}
+                <span className="record-list__meta">
+                  <span className="record-state" data-state={document.state}>
+                    {stateLabels[document.state]}
+                  </span>
+                  <span>v{document.latestVersion}</span>
+                  <time dateTime={document.updatedAt.toISOString()}>
+                    {document.updatedAt.toLocaleDateString()}
+                  </time>
                 </span>
               </button>
             ))}
           </div>
-        </section>
-      ) : null}
+        ) : (
+          <AdminEmptyState
+            kind="content"
+            title={
+              documents.length
+                ? "Nothing matches these filters"
+                : `No ${labels[documentType].toLowerCase()} records yet`
+            }
+            description={
+              documents.length
+                ? "Clear the search or choose Every status to see the rest of this library."
+                : `Nothing of this type has been created. Name it below and open it to write the first draft.`
+            }
+          />
+        )}
+
+        {libraryLoading && documents.length > 0 ? (
+          <AdminSkeleton variant="rows" label="Loading more records" />
+        ) : null}
+        {libraryError ? (
+          <AdminNotice
+            tone="error"
+            title="This content list could not be loaded"
+            description={libraryError}
+            action={
+              <button
+                className="secondary-button"
+                type="button"
+                onClick={() => void browseDocuments()}
+              >
+                Try again
+              </button>
+            }
+          />
+        ) : null}
+        {documentsCursor ? (
+          <button
+            className="text-button"
+            type="button"
+            disabled={libraryLoading}
+            onClick={() => void browseDocuments(documentsCursor)}
+          >
+            Load more
+          </button>
+        ) : null}
+
+        {/* The library covers everything that exists; this opens something
+            that does not yet, which is how a first draft gets created. It
+            stays visible rather than folding into a disclosure, because the
+            control that creates content should not itself be hidden. */}
+        <div className="record-browser__by-name">
+          <p>Not in the list? Name it here to open or start it.</p>
+          <div className="document-locator__fields">
+            <div className="field">
+              <label htmlFor="documentId">Page or item name</label>
+              <input
+                id="documentId"
+                aria-label="Document ID"
+                value={documentId}
+                onChange={(event) => setDocumentId(event.target.value)}
+                maxLength={128}
+              />
+            </div>
+            <button
+              className="primary-button"
+              type="button"
+              aria-label="Open document"
+              onClick={() => void openDocument()}
+              disabled={busy !== null}
+            >
+              {busy === "open" ? (
+                <BusyLabel label="Opening document" />
+              ) : (
+                "Open and edit"
+              )}
+            </button>
+          </div>
+        </div>
+      </section>
 
       {error ? (
         <div className="cms-feedback cms-feedback--error" role="alert">
@@ -582,23 +903,41 @@ export function ContentWorkspace({
         <section className="payload-editor" aria-labelledby="payload-title">
           <div className="editor-heading">
             <div>
-              <p className="section-context">Validated by NestJS</p>
-              <h2 id="payload-title">Draft payload</h2>
+              <p className="section-context">Step 2 · Edit and preview</p>
+              <h2 id="payload-title">
+                {selected
+                  ? `Edit ${documentId}`
+                  : `Create a ${labels[documentType].toLowerCase()}`}
+              </h2>
+              <p>
+                {selected
+                  ? `You are editing version ${selected.version}, currently ${selected.state.replaceAll("_", " ")}. Saving creates a new version; it does not publish immediately.`
+                  : "Open existing content above. If this item does not exist yet, initialise a blank form and complete the fields."}
+              </p>
             </div>
-            {canAuthor ? (
+            <div className="editor-heading__actions">
               <button
-                className="primary-button"
+                className="secondary-button"
                 type="button"
-                onClick={() => void createDraft()}
-                disabled={busy !== null}
+                onClick={() => setDraftPreviewOpen((open) => !open)}
               >
-                {busy === "draft" ? (
-                  <LoadingDots label="Creating draft" />
-                ) : (
-                  "Create draft"
-                )}
+                {draftPreviewOpen ? "Hide preview" : "Preview changes"}
               </button>
-            ) : null}
+              {canAuthor ? (
+                <button
+                  className="primary-button"
+                  type="button"
+                  onClick={() => void createDraft()}
+                  disabled={busy !== null}
+                >
+                  {busy === "draft" ? (
+                    <BusyLabel label="Creating draft" />
+                  ) : (
+                    "Save as new draft"
+                  )}
+                </button>
+              ) : null}
+            </div>
           </div>
           <div className="editor-mode" aria-label="Editor mode">
             <button
@@ -606,14 +945,14 @@ export function ContentWorkspace({
               aria-pressed={editorMode === "structured"}
               onClick={() => setEditorMode("structured")}
             >
-              Structured fields
+              Editing form
             </button>
             <button
               type="button"
               aria-pressed={editorMode === "json"}
               onClick={() => setEditorMode("json")}
             >
-              JSON
+              Advanced JSON
             </button>
           </div>
           {editorMode === "structured" ? (
@@ -645,16 +984,38 @@ export function ContentWorkspace({
               />
             </>
           )}
+          {draftPreviewOpen
+            ? (() => {
+                try {
+                  return (
+                    <ContentPreview
+                      payload={JSON.parse(editorValue) as unknown}
+                      locale={publishLocale}
+                      label={labels[documentType]}
+                    />
+                  );
+                } catch {
+                  return (
+                    <p className="form-error" role="alert">
+                      The preview cannot open until the JSON is valid.
+                    </p>
+                  );
+                }
+              })()
+            : null}
           <p className="editor-help">
-            Immutable versions are validated against the selected content
-            schema. Internal validation errors never create a partial draft.
+            Your changes are checked before they are saved. Saving creates a new
+            draft and leaves the current public content unchanged.
           </p>
         </section>
       </div>
 
       <section className="version-panel" aria-labelledby="versions-title">
         <div className="version-heading">
-          <h2 id="versions-title">Versions</h2>
+          <div>
+            <p className="section-context">Saved history</p>
+            <h2 id="versions-title">Previous versions</h2>
+          </div>
           <button
             className="text-button"
             type="button"
@@ -670,7 +1031,7 @@ export function ContentWorkspace({
             disabled={busy !== null}
           >
             {busy === "audit-export" ? (
-              <LoadingDots label="Preparing audit" />
+              <BusyLabel label="Preparing audit" />
             ) : (
               "Export audit"
             )}
@@ -710,12 +1071,21 @@ export function ContentWorkspace({
       {selected ? (
         <section className="workflow-panel" aria-labelledby="workflow-title">
           <div>
-            <p className="section-context">
-              Immutable version {selected.version}
-            </p>
-            <h2 id="workflow-title">Workflow</h2>
+            <p className="section-context">Step 3 · Review and publish</p>
+            <h2 id="workflow-title">Review and publishing</h2>
             <p>
-              Current state: <strong>{selected.state.replace("_", " ")}</strong>
+              Version {selected.version} is{" "}
+              <strong>{selected.state.replace("_", " ")}</strong>. Only the
+              actions available at this stage are shown.
+            </p>
+            <p className="workflow-blocker" role="status">
+              {publicationBlocker({
+                state: selected.state,
+                canAuthor,
+                canReview,
+                policyReviewRequired,
+                scheduledFor,
+              })}
             </p>
           </div>
           <div className="workflow-controls">
@@ -759,7 +1129,7 @@ export function ContentWorkspace({
                     onClick={() => void transition(action)}
                   >
                     {busy === action ? (
-                      <LoadingDots label={`Applying ${actionLabels[action]}`} />
+                      <BusyLabel label={`Applying ${actionLabels[action]}`} />
                     ) : (
                       actionLabels[action]
                     )}
@@ -786,15 +1156,43 @@ export function ContentWorkspace({
                 <button
                   className="primary-button"
                   type="button"
-                  onClick={() => void publish()}
+                  onClick={() => setPublishReviewOpen(true)}
                   disabled={busy !== null}
                 >
-                  {busy === "publish" ? (
-                    <LoadingDots label="Publishing" />
-                  ) : (
-                    "Publish"
-                  )}
+                  Review before publishing
                 </button>
+              </div>
+            ) : null}
+            {publishReviewOpen &&
+            (selected.state === "approved" || selected.state === "scheduled") &&
+            canReview ? (
+              <div className="publish-review">
+                <ContentPreview
+                  payload={selected.payload}
+                  locale={publishLocale}
+                  label={labels[documentType]}
+                />
+                <div className="publish-review__actions">
+                  <button
+                    className="secondary-button"
+                    type="button"
+                    onClick={() => setPublishReviewOpen(false)}
+                  >
+                    Back to editing
+                  </button>
+                  <button
+                    className="primary-button"
+                    type="button"
+                    onClick={() => void publish()}
+                    disabled={busy !== null}
+                  >
+                    {busy === "publish" ? (
+                      <BusyLabel label="Publishing" />
+                    ) : (
+                      `Publish ${publishLocale === "en-GB" ? "English" : "French"}`
+                    )}
+                  </button>
+                </div>
               </div>
             ) : null}
             {(selected.state === "superseded" ||
@@ -820,7 +1218,7 @@ export function ContentWorkspace({
                   disabled={busy !== null}
                 >
                   {busy === "rollback" ? (
-                    <LoadingDots label="Restoring version" />
+                    <BusyLabel label="Restoring version" />
                   ) : (
                     "Restore this version"
                   )}
@@ -850,7 +1248,7 @@ export function ContentWorkspace({
                     disabled={busy !== null}
                   >
                     {busy === "unpublish" ? (
-                      <LoadingDots label="Removing publication" />
+                      <BusyLabel label="Removing publication" />
                     ) : (
                       `Confirm ${publishLocale} takedown`
                     )}

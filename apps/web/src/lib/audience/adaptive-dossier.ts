@@ -12,19 +12,18 @@ export const audienceDoorLabels: Readonly<
   Record<"en-GB" | "fr-FR", Record<AudienceKey, string>>
 > = {
   "en-GB": {
-    government: "You need someone who can convene institutions.",
-    investor: "You are looking for structured, de-risked pipeline in Ghana.",
-    media: "You are building a programme and need a speaker.",
-    youth: "You want to know how someone gets from Bukom to global service.",
-    philanthropy: "You want to fund a scholar.",
+    government: "I need to bring institutions together.",
+    investor: "I am looking for investment opportunities in Ghana.",
+    media: "I need a speaker or an informed perspective.",
+    youth: "I want to understand his journey.",
+    philanthropy: "I want to support a scholar.",
   },
   "fr-FR": {
-    government:
-      "Vous cherchez une personne capable de réunir les institutions.",
-    investor: "Vous recherchez des projets structurés et dérisqués au Ghana.",
-    media: "Vous préparez un programme et recherchez un intervenant.",
-    youth: "Vous voulez comprendre le parcours de Bukom au service mondial.",
-    philanthropy: "Vous souhaitez financer un boursier.",
+    government: "Je souhaite réunir plusieurs institutions.",
+    investor: "Je recherche des possibilités d’investissement au Ghana.",
+    media: "Je cherche un intervenant ou un point de vue éclairé.",
+    youth: "Je souhaite comprendre son parcours.",
+    philanthropy: "Je souhaite soutenir un boursier.",
   },
 };
 export type AdaptiveBlock =
@@ -62,6 +61,41 @@ export function adaptiveOrder(
   audience: AudienceKey | null,
 ): readonly AdaptiveBlock[] {
   return audience ? orders[audience] : defaultOrder;
+}
+
+export const audienceDoorsAnchor = "audience-heading";
+
+const blockAnchors: Readonly<Record<AdaptiveBlock, string>> = {
+  record: "home-record-heading",
+  atlas: "atlas-preview-heading",
+  current: "current-position-heading",
+  signal: "home-signal-heading",
+  invitation: "invitation-heading",
+};
+
+// A door is only useful if the click lands the visitor on something. Blocks
+// collapse when their content is unpublished, so the destination is resolved
+// against the blocks this render actually produced rather than the full order.
+export function audienceDestination(
+  audience: AudienceKey | null,
+  rendered: readonly AdaptiveBlock[],
+): string {
+  const promoted = adaptiveOrder(audience).find((block) =>
+    rendered.includes(block),
+  );
+  return promoted ? blockAnchors[promoted] : audienceDoorsAnchor;
+}
+
+export function audienceDestinations(
+  rendered: readonly AdaptiveBlock[],
+): Readonly<Record<AudienceKey, string>> {
+  return {
+    government: audienceDestination("government", rendered),
+    investor: audienceDestination("investor", rendered),
+    media: audienceDestination("media", rendered),
+    youth: audienceDestination("youth", rendered),
+    philanthropy: audienceDestination("philanthropy", rendered),
+  };
 }
 
 export function atlasQuery(audience: AudienceKey | null): string {

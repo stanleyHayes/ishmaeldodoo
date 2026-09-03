@@ -46,12 +46,14 @@ export function AtlasPage({
         <h1>{fr ? "L’Atlas" : "The Atlas"}</h1>
         <p>
           {fr
-            ? "Vingt-cinq années, lisibles dans le temps et l’espace."
-            : "Twenty-five years made legible across time and place."}
+            ? "Explorez vingt-cinq années de fonctions, de lieux et de résultats."
+            : "Explore twenty-five years of roles, places and results."}
         </p>
         {!tableOnly ? (
           <a href={`${base}/table`}>
-            {fr ? "Ouvrir uniquement le tableau" : "Open table-only view"}
+            {fr
+              ? "Voir toutes les entrées dans un tableau"
+              : "View all entries as a table"}
           </a>
         ) : (
           <a href={base}>{fr ? "Ouvrir la carte" : "Open map view"}</a>
@@ -72,7 +74,9 @@ export function AtlasPage({
           <section className="press-section">
             <div>
               <p className="section-number">{tableOnly ? "01" : "02"}</p>
-              <h2>{fr ? "Tableau accessible" : "Accessible table"}</h2>
+              <h2>
+                {fr ? "Toutes les entrées de l’Atlas" : "All Atlas entries"}
+              </h2>
             </div>
             <div>
               {result.translation.stale && fr ? (
@@ -106,8 +110,8 @@ export function AtlasPage({
       ) : (
         <p className="register-state">
           {fr
-            ? "L’Atlas publié n’est pas disponible."
-            : "The published Atlas is unavailable."}
+            ? "L’Atlas est temporairement indisponible."
+            : "The Atlas is temporarily unavailable."}
         </p>
       )}
     </main>

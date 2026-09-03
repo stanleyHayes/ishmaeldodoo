@@ -58,6 +58,7 @@ describe("GovernedMediaPicker", () => {
     const picker = screen.getByLabelText("Field image");
     await within(picker).findByRole("option", {
       name: /Selected older asset/iu,
+      hidden: true,
     });
     expect(picker).toHaveValue(selectedAssetId);
     expect(listMediaAssets).toHaveBeenNthCalledWith(2, {

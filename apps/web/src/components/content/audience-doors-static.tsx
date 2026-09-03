@@ -1,31 +1,35 @@
 import Link from "next/link";
 import {
   audienceDoorLabels,
+  audienceDoorsAnchor,
   audienceKeys,
   type AudienceKey,
 } from "../../lib/audience/adaptive-dossier";
 import type { SupportedLocale } from "../../lib/i18n/locale";
+import { audienceDoorsCopy } from "./audience-doors-copy";
 
 export function AudienceDoorsStatic({
   locale,
   selected,
-}: Readonly<{ locale: SupportedLocale; selected: AudienceKey | null }>) {
-  const french = locale === "fr-FR";
-  const root = french ? "/fr" : "/";
+  destinations,
+  resetDestination = audienceDoorsAnchor,
+}: Readonly<{
+  locale: SupportedLocale;
+  selected: AudienceKey | null;
+  destinations: Readonly<Record<AudienceKey, string>>;
+  resetDestination?: string;
+}>) {
+  const copy = audienceDoorsCopy(locale);
+  const root = locale === "fr-FR" ? "/fr" : "/";
   return (
     <section className="audience-doors" aria-labelledby="audience-heading">
       <header>
         <p className="section-number">02</p>
         <div>
-          <h2 id="audience-heading">
-            {french
-              ? "Pourquoi êtes-vous ici\u00a0?"
-              : "What brought you here?"}
-          </h2>
-          <p>
-            {french
-              ? "Choisissez un angle. Aucun contenu ne sera masqué."
-              : "Choose an emphasis. No content will be hidden."}
+          <h2 id="audience-heading">{copy.heading}</h2>
+          <p>{copy.guidance}</p>
+          <p className="audience-doors__status" role="status">
+            {copy.status(selected)}
           </p>
         </div>
       </header>
@@ -33,22 +37,22 @@ export function AudienceDoorsStatic({
         {audienceKeys.map((audience) => (
           <Link
             key={audience}
-            href={`/api/audience?door=${audience}&return=${encodeURIComponent(`${root}?door=${audience}&lite=1`)}`}
+            href={`/api/audience?door=${audience}&return=${encodeURIComponent(`${root}?door=${audience}&lite=1#${destinations[audience]}`)}`}
             prefetch={false}
             aria-current={selected === audience ? "true" : undefined}
           >
             <span>{audienceDoorLabels[locale][audience]}</span>
-            <small>{french ? "Choisir" : "Choose"}</small>
+            <small>{copy.doorAction(selected === audience)}</small>
           </Link>
         ))}
       </div>
       <Link
         className="audience-reset"
-        href={`/api/audience?return=${encodeURIComponent(`${root}?audience=reset&lite=1`)}`}
+        href={`/api/audience?return=${encodeURIComponent(`${root}?audience=reset&lite=1#${resetDestination}`)}`}
         prefetch={false}
         aria-disabled={selected === null}
       >
-        {french ? "Réinitialiser la vue" : "Reset view"}
+        {copy.reset}
       </Link>
     </section>
   );

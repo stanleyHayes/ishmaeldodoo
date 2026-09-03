@@ -41,9 +41,19 @@ export function RecordFieldImage({
         />
       ) : (
         <div className="record-field-image__unavailable" role="status">
-          {french
-            ? "L’image approuvée est temporairement indisponible."
-            : "The approved image is temporarily unavailable."}
+          <span aria-hidden="true">
+            {french ? "Image à venir" : "Image pending"}
+          </span>
+          <strong>
+            {french
+              ? "Aucun portrait approuvé pour le moment"
+              : "No approved portrait yet"}
+          </strong>
+          <p>
+            {french
+              ? "Le récit complet reste disponible pendant la validation de l’image."
+              : "The complete story remains available while the image is being approved."}
+          </p>
         </div>
       )}
       <figcaption>

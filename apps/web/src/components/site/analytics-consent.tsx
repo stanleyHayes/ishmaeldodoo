@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import type { SupportedLocale } from "../../lib/i18n/locale";
 import {
+  analyticsConsentCookie,
   analyticsRoutes,
   type AnalyticsConsent,
 } from "../../lib/analytics-catalog";
@@ -42,13 +43,20 @@ export function AnalyticsConsentControl({
   }, [consent, locale]);
 
   async function choose(granted: boolean): Promise<void> {
-    const response = await fetch("/api/analytics/consent", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "same-origin",
-      body: JSON.stringify({ granted }),
-    });
-    if (response.ok) setConsent(granted ? "granted" : "denied");
+    const nextConsent = granted ? "granted" : "denied";
+    setConsent(nextConsent);
+    document.cookie = `${analyticsConsentCookie}=${nextConsent}; Max-Age=${60 * 60 * 24 * 180}; Path=/; SameSite=Lax${window.location.protocol === "https:" ? "; Secure" : ""}`;
+    try {
+      await fetch("/api/analytics/consent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ granted }),
+      });
+    } catch {
+      // The non-sensitive preference is already persisted in the browser. The
+      // server route remains a best-effort synchronisation point.
+    }
   }
 
   if (consent) {

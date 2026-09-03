@@ -158,102 +158,213 @@ export function RoomChannel({ locale }: Readonly<{ locale: SupportedLocale }>) {
   }
 
   return (
-    <section className="room" aria-labelledby="room-title">
-      <h1 id="room-title">{text.title}</h1>
-      <p className="room__lede">{text.lede}</p>
-
-      <div className="room__prohibition" role="note">
-        <h2>{text.prohibitionTitle}</h2>
-        <p>{text.prohibition}</p>
-      </div>
-
-      <h2>{text.howTitle}</h2>
-      <ul className="room__how">
-        {text.how.map((line) => (
-          <li key={line}>{line}</li>
-        ))}
-      </ul>
-      <p className="room__note">{text.noAttachments}</p>
-
-      {status.kind === "loading" && (
-        <p role="status" className="room__status">
-          {text.checking}
-        </p>
-      )}
-
-      {status.kind === "unavailable" && (
-        <div className="room__closed" role="alert">
-          <h2>{text.unavailableTitle}</h2>
-          <p>{text.unavailable}</p>
-          <Link href={localizePath("/contact", locale)}>{text.useContact}</Link>
-        </div>
-      )}
-
-      {status.kind === "sent" && (
-        <div className="room__receipt" role="status">
-          <h2>{text.sentTitle}</h2>
-          <p className="room__reference">{status.reference}</p>
-          <p>{text.sentBody}</p>
+    <main
+      id="main-content"
+      tabIndex={-1}
+      className="room"
+      aria-labelledby="room-title"
+    >
+      <header className="room__hero">
+        <div>
           <p>
-            {text.deleteAfter}{" "}
-            <time dateTime={status.deleteAfter}>
-              {status.deleteAfter.slice(0, 10)}
-            </time>
+            {locale === "fr-FR" ? "Canal confidentiel" : "Confidential channel"}
+          </p>
+          <h1 id="room-title">{text.title}</h1>
+        </div>
+        <div>
+          <p className="room__lede">{text.lede}</p>
+          <p className="room__assurance">
+            <span aria-hidden="true">●</span>
+            {locale === "fr-FR"
+              ? "Chiffrement dans votre navigateur"
+              : "Encrypted in your browser"}
           </p>
         </div>
-      )}
+      </header>
 
-      {(status.kind === "ready" ||
-        status.kind === "sending" ||
-        status.kind === "failed") && (
-        <form className="room__form" onSubmit={submit} noValidate>
-          {status.kind === "failed" && (
-            <p role="alert" className="room__error">
-              {text.failed}
+      <div className="room__prohibition" role="note">
+        <span aria-hidden="true">!</span>
+        <div>
+          <h2>{text.prohibitionTitle}</h2>
+          <p>{text.prohibition}</p>
+        </div>
+      </div>
+
+      <section className="room__process" aria-labelledby="room-process-title">
+        <header>
+          <p>01</p>
+          <h2 id="room-process-title">{text.howTitle}</h2>
+        </header>
+        <ol className="room__how">
+          {text.how.map((line, index) => (
+            <li key={line}>
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <p>{line}</p>
+            </li>
+          ))}
+        </ol>
+        <p className="room__note">{text.noAttachments}</p>
+      </section>
+
+      <section className="room__compose" aria-labelledby="room-compose-title">
+        <header>
+          <p>02</p>
+          <div>
+            <h2 id="room-compose-title">
+              {locale === "fr-FR"
+                ? "Écrire un message sécurisé"
+                : "Write a secure message"}
+            </h2>
+            <p>
+              {locale === "fr-FR"
+                ? "Les champs restent fermés tant que la clé du destinataire n’est pas vérifiée."
+                : "The fields stay closed until the recipient key has been verified."}
             </p>
-          )}
-          {invalid && (
-            <p role="alert" className="room__error">
-              {text.invalid}
-            </p>
-          )}
-
-          <label htmlFor="room-name">{text.name}</label>
-          <input id="room-name" name="fromName" required autoComplete="name" />
-
-          <label htmlFor="room-email">{text.email}</label>
-          <input
-            id="room-email"
-            name="fromEmail"
-            type="email"
-            required
-            autoComplete="email"
-          />
-
-          <label htmlFor="room-organisation">{text.organisation}</label>
-          <input id="room-organisation" name="organisation" />
-
-          <label htmlFor="room-subject">{text.subject}</label>
-          <input id="room-subject" name="subject" required />
-
-          <label htmlFor="room-message">{text.message}</label>
-          <textarea id="room-message" name="message" rows={10} required />
-
-          <div className="room__acknowledge">
-            <input
-              id="room-acknowledge"
-              name="procurementAcknowledged"
-              type="checkbox"
-              required
-            />
-            <label htmlFor="room-acknowledge">{text.acknowledge}</label>
           </div>
+        </header>
 
-          <button type="submit" disabled={status.kind === "sending"}>
-            {status.kind === "sending" ? text.sending : text.send}
-          </button>
-        </form>
-      )}
-    </section>
+        {status.kind === "loading" && (
+          // The form only exists once the recipient key verifies, so the wait
+          // shows the shape of that form rather than a sentence about waiting.
+          <div
+            className="room__skeleton"
+            role="status"
+            aria-label={text.checking}
+            aria-busy="true"
+          >
+            {Array.from({ length: 4 }, (_, index) => (
+              <span key={index} aria-hidden="true" />
+            ))}
+            <span className="room__skeleton--block" aria-hidden="true" />
+            <span className="room__skeleton--action" aria-hidden="true" />
+          </div>
+        )}
+
+        {status.kind === "unavailable" && (
+          <div className="room__closed" role="alert">
+            <h2>{text.unavailableTitle}</h2>
+            <p>{text.unavailable}</p>
+            <Link href={localizePath("/contact", locale)}>
+              {text.useContact}
+            </Link>
+          </div>
+        )}
+
+        {status.kind === "sent" && (
+          <div className="room__receipt" role="status">
+            <h2>{text.sentTitle}</h2>
+            <p className="room__reference">{status.reference}</p>
+            <p>{text.sentBody}</p>
+            <p>
+              {text.deleteAfter}{" "}
+              <time dateTime={status.deleteAfter}>
+                {status.deleteAfter.slice(0, 10)}
+              </time>
+            </p>
+          </div>
+        )}
+
+        {(status.kind === "ready" ||
+          status.kind === "sending" ||
+          status.kind === "failed") && (
+          <form className="room__form" onSubmit={submit} noValidate>
+            {status.kind === "failed" && (
+              <p role="alert" className="room__error">
+                {text.failed}
+              </p>
+            )}
+            {invalid && (
+              <p role="alert" className="room__error">
+                {text.invalid}
+              </p>
+            )}
+
+            <label htmlFor="room-name">{text.name}</label>
+            <input
+              id="room-name"
+              name="fromName"
+              required
+              autoComplete="name"
+              placeholder={
+                locale === "fr-FR" ? "Votre nom complet" : "Your full name"
+              }
+            />
+
+            <label htmlFor="room-email">{text.email}</label>
+            <input
+              id="room-email"
+              name="fromEmail"
+              type="email"
+              required
+              autoComplete="email"
+              placeholder="name@example.com"
+            />
+
+            <label htmlFor="room-organisation">{text.organisation}</label>
+            <input
+              id="room-organisation"
+              name="organisation"
+              placeholder={
+                locale === "fr-FR"
+                  ? "Nom de l’organisation"
+                  : "Organisation name"
+              }
+            />
+
+            <label htmlFor="room-subject">{text.subject}</label>
+            <input
+              id="room-subject"
+              name="subject"
+              required
+              placeholder={
+                locale === "fr-FR"
+                  ? "En quoi pouvons-nous vous aider\u00a0?"
+                  : "What would you like to discuss?"
+              }
+            />
+
+            <label htmlFor="room-message">{text.message}</label>
+            <textarea
+              id="room-message"
+              name="message"
+              rows={8}
+              required
+              placeholder={
+                locale === "fr-FR"
+                  ? "Décrivez le contexte, la demande et la prochaine étape souhaitée."
+                  : "Describe the context, your request and the next step you have in mind."
+              }
+            />
+
+            <div className="room__acknowledge">
+              <input
+                id="room-acknowledge"
+                name="procurementAcknowledged"
+                type="checkbox"
+                required
+              />
+              <label htmlFor="room-acknowledge">{text.acknowledge}</label>
+            </div>
+
+            <button type="submit" disabled={status.kind === "sending"}>
+              {status.kind === "sending" ? text.sending : text.send}
+            </button>
+          </form>
+        )}
+      </section>
+      <aside className="room__exit">
+        <p>
+          {locale === "fr-FR"
+            ? "Ce message n’a pas besoin d’être confidentiel\u00a0?"
+            : "Does this message need ordinary handling instead?"}
+        </p>
+        <Link href={localizePath("/contact", locale)}>
+          {locale === "fr-FR"
+            ? "Retour au contact général"
+            : "Return to general contact"}
+          <span aria-hidden="true">↗</span>
+        </Link>
+      </aside>
+    </main>
   );
 }

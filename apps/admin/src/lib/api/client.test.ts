@@ -10,8 +10,10 @@ import {
   listSessions,
   beginLogin,
   completeLogin,
+  hasResumableSession,
   logout,
   publishContentVersion,
+  resumeSession,
   rollbackContentVersion,
   unpublishContent,
   revokeSession,
@@ -50,7 +52,7 @@ describe("admin API client", () => {
   });
   afterEach(() => vi.unstubAllGlobals());
 
-  it("keeps access and CSRF tokens in memory and relies on API-origin cookies", async () => {
+  it("keeps the access token in memory and persists only the CSRF half", async () => {
     const setItem = vi.fn();
     vi.stubGlobal("localStorage", { setItem });
     const fetchMock = vi
@@ -95,7 +97,16 @@ describe("admin API client", () => {
       /^00-[0-9a-f]{32}-[0-9a-f]{16}-01$/u,
     );
     expect(document.cookie).not.toContain("access-token");
-    expect(setItem).not.toHaveBeenCalled();
+    // The access token is a bearer credential and is never persisted. The CSRF
+    // token is, because it is the readable half of a double-submit pair and is
+    // inert without the HttpOnly, SameSite=Strict refresh cookie; keeping it is
+    // what lets a reload resume rather than re-authenticate.
+    expect(setItem).toHaveBeenCalledTimes(1);
+    expect(setItem).toHaveBeenCalledWith(
+      "amanor.admin.csrf",
+      "csrf-token-that-is-at-least-thirty-two-bytes",
+    );
+    expect(setItem).not.toHaveBeenCalledWith(expect.anything(), "access-token");
     expect(JSON.parse(loginInit.body)).toEqual({
       stage: "credentials",
       email: "editor@example.test",
@@ -110,6 +121,96 @@ describe("admin API client", () => {
       challenge: "a".repeat(64),
       mfaCode: "123456",
     });
+  });
+
+  it("resumes a session from the stored CSRF half without a stored credential", async () => {
+    vi.stubGlobal("localStorage", {
+      getItem: vi.fn(() => "csrf-token-that-is-at-least-thirty-two-bytes"),
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+    });
+    const fetchMock = vi.fn().mockResolvedValue(
+      response(200, {
+        accessToken: "restored-access",
+        expiresIn: 300,
+        user: { id: "user-1", roles: ["editor"] },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    expect(hasResumableSession()).toBe(true);
+    await expect(resumeSession()).resolves.toEqual(
+      expect.objectContaining({ accessToken: "restored-access" }),
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://api.example.test/v1/auth/refresh",
+      expect.objectContaining({ method: "POST", credentials: "include" }),
+    );
+    // The refresh cookie does the authenticating; the stored token only proves
+    // the request came from this application.
+    const [, init] = fetchMock.mock.calls[0] as [string, { headers: Headers }];
+    expect(init.headers.get("X-CSRF-Token")).toBe(
+      "csrf-token-that-is-at-least-thirty-two-bytes",
+    );
+    expect(init.headers.get("Authorization")).toBeNull();
+    expect(getAuthState()?.accessToken).toBe("restored-access");
+  });
+
+  it("coalesces concurrent resumes so a rotated token is spent once", async () => {
+    vi.stubGlobal("localStorage", {
+      getItem: vi.fn(() => "csrf-token-that-is-at-least-thirty-two-bytes"),
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+    });
+    const fetchMock = vi.fn().mockResolvedValue(
+      response(200, {
+        accessToken: "restored-access",
+        expiresIn: 300,
+        user: { id: "user-1", roles: ["editor"] },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const [first, second] = await Promise.all([
+      resumeSession(),
+      resumeSession(),
+    ]);
+    expect(first).toEqual(second);
+    // One rotation, not two: the second call would present a spent token.
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("stays signed out when nothing is stored or the refresh is refused", async () => {
+    vi.stubGlobal("localStorage", {
+      getItem: vi.fn(() => null),
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+    });
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    expect(hasResumableSession()).toBe(false);
+    await expect(resumeSession()).resolves.toBeNull();
+    expect(fetchMock).not.toHaveBeenCalled();
+
+    vi.stubGlobal("localStorage", {
+      getItem: vi.fn(() => "csrf-token-that-is-at-least-thirty-two-bytes"),
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        response(401, {
+          statusCode: 401,
+          code: "UNAUTHORIZED",
+          message: "Expired",
+          requestId: "r3",
+          timestamp: new Date().toISOString(),
+        }),
+      ),
+    );
+    await expect(resumeSession()).resolves.toBeNull();
+    expect(getAuthState()).toBeNull();
   });
 
   it("replaces only the in-memory access token after recent MFA step-up", async () => {
@@ -177,7 +278,13 @@ describe("admin API client", () => {
     expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 
-  it("clears memory on logout even when the API rejects the request", async () => {
+  it("clears memory and the stored CSRF half on logout even when the API rejects the request", async () => {
+    const removeItem = vi.fn();
+    vi.stubGlobal("localStorage", {
+      getItem: vi.fn(() => null),
+      setItem: vi.fn(),
+      removeItem,
+    });
     setAuthState({
       accessToken: "access",
       csrfToken: "csrf-token-that-is-at-least-thirty-two-bytes",
@@ -196,6 +303,9 @@ describe("admin API client", () => {
     );
     await expect(logout()).rejects.toBeInstanceOf(ApiClientError);
     expect(getAuthState()).toBeNull();
+    // Signing out must leave nothing behind that a reload could resume from.
+    expect(removeItem).toHaveBeenCalledWith("amanor.admin.csrf");
+    expect(hasResumableSession()).toBe(false);
   });
 
   it("revokes an encoded owned session with bearer and CSRF protection", async () => {

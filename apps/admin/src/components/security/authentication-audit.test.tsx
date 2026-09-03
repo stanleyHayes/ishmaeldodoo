@@ -75,6 +75,13 @@ describe("AuthenticationAudit", () => {
     expect(screen.getByText("CmsController.list")).toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent(/integrity: valid/iu);
     expect(
+      screen.getByRole("list", {
+        name: "Security and data-access event history",
+      }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("table")).not.toBeInTheDocument();
+    expect(screen.getAllByText("security-1")).not.toHaveLength(0);
+    expect(
       screen.queryByText(/token|cookie|session-/iu),
     ).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Load older events" }));

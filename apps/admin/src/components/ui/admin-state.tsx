@@ -1,16 +1,48 @@
 import type { ReactNode } from "react";
 
-type EmptyStateKind = "media" | "history" | "audit" | "content";
+type EmptyStateKind =
+  "media" | "history" | "audit" | "content" | "queue" | "work";
+type NoticeTone = "error" | "success" | "information";
 
-export function LoadingDots({ label }: Readonly<{ label: string }>) {
+export function AdminNotice({
+  tone,
+  title,
+  description,
+  action,
+}: Readonly<{
+  tone: NoticeTone;
+  title: string;
+  description?: string;
+  action?: ReactNode;
+}>) {
   return (
-    <span className="admin-loading-label" role="status" aria-label={label}>
-      <span aria-hidden="true">{label}</span>
-      <span className="admin-loading-dots" aria-hidden="true">
-        <i />
-        <i />
-        <i />
+    <div
+      className="admin-notice"
+      data-tone={tone}
+      role={tone === "error" ? "alert" : "status"}
+    >
+      <span className="admin-notice__icon" aria-hidden="true">
+        {tone === "error" ? "!" : tone === "success" ? "✓" : "i"}
       </span>
+      <div className="admin-notice__copy">
+        <strong>{title}</strong>
+        {description ? <p>{description}</p> : null}
+      </div>
+      {action ? <div className="admin-notice__action">{action}</div> : null}
+    </div>
+  );
+}
+
+/**
+ * A control that is already doing something, not a region waiting for content.
+ * A button must keep a readable label, so this states the action and carries a
+ * thin indeterminate rule rather than a spinner. Regions use `AdminSkeleton`.
+ */
+export function BusyLabel({ label }: Readonly<{ label: string }>) {
+  return (
+    <span className="admin-busy-label" role="status" aria-label={label}>
+      <span aria-hidden="true">{label}</span>
+      <span className="admin-busy-label__progress" aria-hidden="true" />
     </span>
   );
 }
@@ -53,16 +85,35 @@ const emptyMark: Record<EmptyStateKind, string> = {
   history: "M40 23a17 17 0 1 1-15 9 M25 23v9h9 M40 30v11l8 5",
   audit: "M28 24h24v32H28z M34 33h12 M34 40h12 M34 47h8 M46 50l4 4 7-8",
   content: "M27 22h20l7 7v29H27z M47 22v8h7 M33 38h15 M33 45h15 M33 52h9",
+  queue: "M24 28h32v28H24z M30 22h20v6 M31 38h18 M31 46h12",
+  work: "M24 31h32v24H24z M30 31l4-7h12l4 7 M33 43l5 5 10-12",
 };
 
+type SkeletonVariant = "media" | "content" | "rows" | "panel";
+
+const skeletonCounts: Readonly<Record<SkeletonVariant, number>> = {
+  media: 3,
+  content: 4,
+  rows: 3,
+  panel: 1,
+};
+
+/**
+ * A region waiting for content shows the shape of that content, never a word
+ * or a spinner: the layout does not jump when the data lands, and a slow
+ * response reads as "arriving" rather than "broken".
+ */
 export function AdminSkeleton({
   variant,
   label,
+  count,
 }: Readonly<{
-  variant: "media" | "content";
+  variant: SkeletonVariant;
   label: string;
+  /** Match the number of rows the caller expects to append. */
+  count?: number;
 }>) {
-  const count = variant === "media" ? 3 : 4;
+  const items = count ?? skeletonCounts[variant];
   return (
     <div
       className={`admin-skeleton admin-skeleton--${variant}`}
@@ -70,14 +121,22 @@ export function AdminSkeleton({
       aria-label={label}
       aria-busy="true"
     >
-      {Array.from({ length: count }, (_, index) => (
+      {Array.from({ length: items }, (_, index) => (
         <div className="admin-skeleton__item" key={index} aria-hidden="true">
           {variant === "media" ? (
             <span className="admin-skeleton__image" />
           ) : null}
           <span className="admin-skeleton__line admin-skeleton__line--strong" />
           <span className="admin-skeleton__line" />
-          <span className="admin-skeleton__line admin-skeleton__line--short" />
+          {variant === "rows" ? null : (
+            <span className="admin-skeleton__line admin-skeleton__line--short" />
+          )}
+          {variant === "panel" ? (
+            <>
+              <span className="admin-skeleton__line" />
+              <span className="admin-skeleton__line admin-skeleton__line--short" />
+            </>
+          ) : null}
         </div>
       ))}
     </div>
